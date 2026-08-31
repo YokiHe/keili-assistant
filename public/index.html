@@ -829,8 +829,6 @@
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-sm" onclick="markAllPresent()">全部到场</button>
         <button class="btn btn-success" onclick="finishRollCall()">完成点名</button>
-        <button class="btn btn-sm" onclick="warmUpVoice()" title="测试语音" style="border-radius:6px 0 0 6px;padding:4px 8px">🔊</button>
-        <select id="voiceSelect" onchange="changeVoice()" style="font-size:12px;padding:4px 8px;border-radius:0 6px 6px 0;border:1px solid var(--border);border-left:none;max-width:100px"></select>
         <button class="btn btn-sm" onclick="openRandomCall()" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);color:white;border:none">🎲 随机</button>
         <button class="btn btn-sm" onclick="openPerformanceStats()" style="background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:white;border:none">📊 表现</button>
         <button class="btn btn-primary" id="btnAutoCall" onclick="startAutoCall()">🎙 自动点名</button>
@@ -1000,7 +998,12 @@
     <div class="modal" style="max-width:420px">
       <div class="modal-title">🎲 随机点名</div>
       <div class="random-info" id="randomCallInfo">点击开始，从当前班级随机抽取学生</div>
-      <div class="random-name-display" id="randomNameDisplay">?</div>
+      <div class="random-name-display" id="randomNameDisplay">
+        <div style="text-align:center">
+          <div style="font-size:20px;color:var(--text-muted);margin-bottom:10px;font-weight:600" id="randomNumDisplay">No. ?</div>
+          <div id="randomNameText">?</div>
+        </div>
+      </div>
       <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:12px;flex-wrap:wrap">
         <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" id="randomExcludeCalled" checked> 排除已点过的
@@ -2705,7 +2708,8 @@ function openRandomCall() {
   if (!currentCourse) { showToast('请先进入点名页', 'error'); return; }
   randomCallState.called = [];
   randomCallState.rolling = false;
-  document.getElementById('randomNameDisplay').textContent = '?';
+  document.getElementById('randomNumDisplay').textContent = 'No. ?';
+  document.getElementById('randomNameText').textContent = '?';
   document.getElementById('randomNameDisplay').className = 'random-name-display';
   document.getElementById('btnRandomStart').textContent = '🎲 开始抽取';
   updateRandomCallInfo();
@@ -2719,22 +2723,28 @@ function updateRandomCallInfo() {
 
 function startRandomRoll() {
   if (!currentCourse || randomCallState.rolling) return;
-  const students = getCurrentStudents().map(getStudentName);
+  const students = getCurrentStudents();
   const exclude = document.getElementById('randomExcludeCalled').checked;
-  let pool = exclude ? students.filter(n => !randomCallState.called.includes(n)) : students;
+  // pool 改成包含编号和名字的对象数组
+  let pool = students.map((s, i) => ({ num: String(i + 1).padStart(2, '0'), name: getStudentName(s) }));
+  if (exclude) pool = pool.filter(p => !randomCallState.called.includes(p.name));
   if (pool.length === 0) {
     showToast('所有学生都已点过，取消"排除已点过"可重新抽取', 'warning');
     return;
   }
   randomCallState.rolling = true;
   const display = document.getElementById('randomNameDisplay');
+  const numDisplay = document.getElementById('randomNumDisplay');
+  const nameDisplay = document.getElementById('randomNameText');
   display.className = 'random-name-display rolling';
   document.getElementById('btnRandomStart').textContent = '⏹ 停止';
   document.getElementById('btnRandomStart').onclick = stopRandomRoll;
 
   let count = 0;
   randomCallState.rollTimer = setInterval(() => {
-    display.textContent = pool[Math.floor(Math.random() * pool.length)];
+    const picked = pool[Math.floor(Math.random() * pool.length)];
+    numDisplay.textContent = 'No. ' + picked.num;
+    nameDisplay.textContent = picked.name;
     count++;
   }, 60);
   // 3秒后自动停止
@@ -2746,7 +2756,7 @@ function stopRandomRoll() {
   clearInterval(randomCallState.rollTimer);
   randomCallState.rolling = false;
   const display = document.getElementById('randomNameDisplay');
-  const name = display.textContent;
+  const name = document.getElementById('randomNameText').textContent;
   display.className = 'random-name-display stopped';
   document.getElementById('btnRandomStart').textContent = '🎲 再来一次';
   document.getElementById('btnRandomStart').onclick = startRandomRoll;
@@ -2865,7 +2875,6 @@ if ('serviceWorker' in navigator) {
   document.getElementById('todayDate').textContent = formatDate(new Date()) + ' · 第' + weekNum + '周';
   refreshToday();
   checkSyncStatus();
-  initVoices();
 })();
 </script>
 </body>
