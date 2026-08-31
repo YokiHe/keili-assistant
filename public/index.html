@@ -535,21 +535,11 @@
 
   .auto-call-status { font-size: 16px; font-weight: 600; color: var(--gold); }
 
-  /* 悬浮标记工具栏 */
+  /* 标记工具栏 */
   .mark-toolbar {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     gap: 4px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 6px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    z-index: 200;
-    backdrop-filter: blur(12px);
+    flex-wrap: wrap;
   }
   .mark-btn {
     padding: 8px 16px;
@@ -832,38 +822,35 @@
         <div class="rollcall-sub" id="rc-courseSub"></div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-sm" onclick="markAllPresent()">全部到场</button>
-        <button class="btn btn-success" onclick="finishRollCall()">完成点名</button>
+        <button class="btn btn-success" onclick="finishRollCall()">完成记录</button>
         <button class="btn btn-sm" onclick="openRandomCall()" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);color:white;border:none">🎲 随机</button>
         <button class="btn btn-primary" id="btnAutoCall" onclick="startAutoCall()">🎙 自动点名</button>
       </div>
     </div>
     <div>
         <div class="stats-row" id="rcStats"></div>
-        <div id="absentList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"><span style="font-size:13px;color:var(--text-muted)">暂无异常</span></div>
         <div class="card">
           <div class="card-header">
             <span class="card-title">学生名单</span>
-            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="autoCallStatus" hidden>
-              <span style="font-size:12px;color:var(--warning);white-space:nowrap">🎙 自动点名中</span>
-              <span style="font-size:18px;font-weight:700" id="autoCallCounter"></span>
-              <button class="btn btn-sm" id="btnPause" onclick="pauseAutoCall()">⏸ 暂停</button>
-              <button class="btn btn-sm" id="btnResume" onclick="resumeAutoCall()" style="display:none">▶ 继续</button>
-              <button class="btn btn-sm" style="color:var(--rose)" onclick="stopAutoCall()">■ 停止</button>
+            <div class="mark-toolbar" id="markToolbar" style="display:flex">
+              <button class="mark-btn speak-btn active" onclick="setMarkMode('speak')">💬 发言</button>
+              <button class="mark-btn praise-btn" onclick="setMarkMode('praise')">⭐ 加分</button>
+              <button class="mark-btn discipline-btn" onclick="setMarkMode('discipline')">⚠️ 扣分</button>
+              <button class="mark-btn nophone-btn" onclick="setMarkMode('nophone')">📱 未交手机</button>
             </div>
-            <span style="font-size:12px;color:var(--text-muted)">点击卡片标记学生状态</span>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="autoCallStatus" hidden>
+              <span style="font-size:12px;color:var(--warning);white-space:nowrap">🎙 点名中</span>
+              <span style="font-size:18px;font-weight:700" id="autoCallCounter"></span>
+              <button class="btn btn-sm" id="btnPause" onclick="pauseAutoCall()">⏸</button>
+              <button class="btn btn-sm" id="btnResume" onclick="resumeAutoCall()" style="display:none">▶</button>
+              <button class="btn btn-sm" style="color:var(--rose)" onclick="stopAutoCall()">■</button>
+            </div>
           </div>
           <div class="card-body"><div class="student-grid" id="studentGrid"></div></div>
         </div>
       </div>
     </div>
     <div id="reportBox" style="display:none"></div>
-    <div class="mark-toolbar" id="markToolbar" style="display:none">
-      <button class="mark-btn speak-btn active" onclick="setMarkMode('speak')">💬 发言</button>
-      <button class="mark-btn praise-btn" onclick="setMarkMode('praise')">⭐ 加分</button>
-      <button class="mark-btn discipline-btn" onclick="setMarkMode('discipline')">⚠️ 扣分</button>
-      <button class="mark-btn nophone-btn" onclick="setMarkMode('nophone')">📱 未交手机</button>
-    </div>
   </div>
 
   <!-- ====== 完整课表 ====== -->
@@ -1476,8 +1463,6 @@ function switchPage(name) {
   if (name === 'schedule') renderFullSchedule();
   if (name === 'classes') renderClasses();
   if (name === 'history') renderHistory();
-  // 悬浮框只在点名页显示
-  document.getElementById('markToolbar').style.display = (name === 'rollcall') ? 'flex' : 'none';
 }
 
 // ==================== 今日课程（核心：自动检测） ====================
@@ -1738,11 +1723,9 @@ function startRollCallInternal(tc) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-rollcall').classList.add('active');
-  document.getElementById('markToolbar').style.display = 'flex';
 }
 
 function backToToday() {
-  document.getElementById('markToolbar').style.display = 'none';
   switchPage('today');
 }
 
@@ -2202,36 +2185,23 @@ function resetAllStatus() {
 }
 
 function updateRcStats() {
-  const counts = { present:0, absent:0, late:0, leave:0 };
-  Object.values(studentStatuses).forEach(s => { counts[s]=(counts[s]||0)+1; });
-  const total = Object.keys(studentStatuses).length;
-  const arrived = counts.present + counts.late;
+  const clsName = currentCourse ? currentCourse.className : '';
+  const students = getCurrentStudents();
+  const perfStats = { speak: 0, praise: 0, discipline: 0, nophone: 0 };
+  students.forEach(s => {
+    const perf = getPerf(clsName, getStudentName(s));
+    perfStats.speak += perf.speak || 0;
+    perfStats.praise += perf.praise || 0;
+    perfStats.discipline += perf.discipline || 0;
+    perfStats.nophone += perf.nophone || 0;
+  });
   document.getElementById('rcStats').innerHTML = [
-    { label:'应到人数', num:total, color:'#94a3b8' },
-    { label:'实到人数', num:arrived, color:'#10b981' },
-    { label:'缺勤人数', num:counts.absent, color:'#ef4444' },
-    { label:'请假人数', num:counts.leave, color:'#3b82f6' }
+    { label:'总人数', num:students.length, color:'#94a3b8' },
+    { label:'💬 发言', num:perfStats.speak, color:'#6366f1' },
+    { label:'⭐ 加分', num:perfStats.praise, color:'#10b981' },
+    { label:'⚠️ 扣分', num:perfStats.discipline, color:'#ef4444' },
+    { label:'📱 未交手机', num:perfStats.nophone, color:'#f59e0b' }
   ].map(s => `<div class="stat-card"><div class="stat-num" style="color:${s.color}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
-  const setCnt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v||0; };
-  setCnt('cnt-absent', counts.absent);
-  setCnt('cnt-late', counts.late);
-  setCnt('cnt-leave', counts.leave);
-  setCnt('cnt-present', counts.present);
-  const abnormals = Object.entries(studentStatuses).filter(([n,s]) => n && s!=='present' && s!=='unknown');
-  const alEl = document.getElementById('absentList');
-  if (abnormals.length===0) {
-    alEl.innerHTML = '<span style="font-size:13px;color:var(--text-muted)">✓ 全场到齐</span>';
-  } else {
-    alEl.innerHTML = abnormals.map(([name,status]) => {
-      const styles = {
-        absent: { dot:'#ef4444', bg:'var(--rose-bg)', color:'#fca5a5', label:'缺勤' },
-        late:   { dot:'#f59e0b', bg:'rgba(245,158,11,0.10)', color:'#fbbf24', label:'迟到' },
-        leave:  { dot:'#3b82f6', bg:'var(--azure-bg)',  color:'#93c5fd', label:'请假' }
-      };
-      const s = styles[status] || styles.absent;
-      return `<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:8px;font-size:13px;background:${s.bg};color:${s.color};font-weight:500"><span style="width:8px;height:8px;border-radius:50%;background:${s.dot};flex-shrink:0"></span>${name} ${s.label}</span>`;
-    }).join('');
-  }
 }
 
 function generateReport() {
@@ -2633,7 +2603,6 @@ function editRecord(recordId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-rollcall').classList.add('active');
-  document.getElementById('markToolbar').style.display = 'flex';
 }
 
 // ==================== U盘导入导出 ====================
