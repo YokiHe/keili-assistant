@@ -1812,6 +1812,27 @@ function nextStudent() {
   }
 }
 
+function prevStudent() {
+  // 回退到上一个学生，重新点名
+  if (autoCallState.index <= 0) return;
+  window.speechSynthesis.cancel();
+  autoCallState.index--;
+  autoCallState.callCount = 0;
+  // 重置上一个学生的状态为 unknown
+  const sname = getStudentName(autoCallState.students[autoCallState.index]);
+  studentStatuses[sname] = 'unknown';
+  renderStudentGrid(autoCallState.students);
+  updateRcStats(); updateReport();
+  autoCallTick();
+}
+
+function skipStudent() {
+  // 跳过当前学生（不标记状态，直接下一个）
+  if (autoCallState.index >= autoCallState.students.length) return;
+  window.speechSynthesis.cancel();
+  nextStudent();
+}
+
 function speakCurStudent() {
   const sname = getStudentName(autoCallState.students[autoCallState.index]);
   speakName(sname);
@@ -1833,11 +1854,31 @@ function updateCallingCard(idx) {
 }
 
 async function speakName(name) {
-  // 浏览器原生 SpeechSynthesis（纯前端，无需后端，Vercel/本地均可用）
+  // 优先使用后端 TTS（微软晓晓声音），失败时回退到浏览器原生
+  try {
+    const res = await fetch('/tts?text=' + encodeURIComponent(name));
+    if (res.ok) {
+      const blob = await res.blob();
+      if (blob.size > 200) {
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.playbackRate = 0.9;
+        await new Promise((resolve) => {
+          audio.onended = resolve;
+          audio.onerror = resolve;
+          setTimeout(resolve, 4000);
+          audio.play().catch(() => resolve());
+        });
+        URL.revokeObjectURL(url);
+        return;
+      }
+    }
+  } catch (e) {}
+
+  // 回退：浏览器原生 SpeechSynthesis
   const ss = window.speechSynthesis;
   if (!ss) return;
 
-  // 等待语音列表加载（轮询方式，比 onvoiceschanged 更可靠）
   let voices = ss.getVoices();
   for (let i = 0; voices.length === 0 && i < 20; i++) {
     await new Promise(r => setTimeout(r, 250));
@@ -1851,7 +1892,6 @@ async function speakName(name) {
     u.pitch = 1.2;
     u.volume = 1;
 
-    // 尝试选中文语音（不设 voice 也能靠 lang 匹配默认）
     if (voices.length > 0) {
       const savedVoice = localStorage.getItem('courseStackVoice');
       let picked = null;
@@ -1863,18 +1903,14 @@ async function speakName(name) {
     }
 
     ss.speak(u);
-    // 等待播放完成或超时
     await new Promise(r => {
       let done = false;
       const finish = () => { if (!done) { done = true; r(); } };
       u.onend = finish;
       u.onerror = finish;
-      u.onstart = () => {}; // 确保 start 事件触发过
       setTimeout(finish, 4000);
     });
   } catch(e) {}
-
-  // 无声模式：卡片高亮已足够醒目
 }
 
 // 语音预热
@@ -2099,29 +2135,27 @@ document.addEventListener('DOMContentLoaded', function() {
   // 键盘快捷键
   document.addEventListener('keydown', function(e) {
     if (!autoCallState) return;
-    if (e.key === 'ArrowDown') {
-      // 确认当前学生到场，跳到下一个
+    // 空格：暂停/继续
+    if (e.key === ' ' || e.code === 'Space') {
       e.preventDefault();
-      const sname = getStudentName(autoCallState.students[autoCallState.index]);
-      studentStatuses[sname] = 'present';
-      nextStudent();
-    }
-    if (e.key === 'ArrowUp') {
-      // 将上一个已确认的学生标记为迟到（不回退）
-      e.preventDefault();
-      if (autoCallState.index > 0) {
-        const prevIdx = autoCallState.index - 1;
-        const sname = getStudentName(autoCallState.students[prevIdx]);
-        studentStatuses[sname] = 'late';
-        // 只更新那一张卡片，不动全图
-        const prevCard = document.querySelector(`.student-card[data-idx="${prevIdx}"]`);
-        if (prevCard) {
-          prevCard.className = 'student-card late';
-          const iconEl = prevCard.querySelector('.student-status-icon');
-          if (iconEl) iconEl.textContent = '▲';
-        }
-        updateRcStats(); updateReport();
+      if (autoCallState.interval) {
+        pauseAutoCall();
+      } else {
+        resumeAutoCall();
       }
+      return;
+    }
+    // 上箭头：重新点上一个人
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      prevStudent();
+      return;
+    }
+    // 下箭头：跳过点名
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      skipStudent();
+      return;
     }
     if (e.key === 'Escape') { e.preventDefault(); stopAutoCall(); }
   });
