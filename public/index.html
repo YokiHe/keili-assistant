@@ -832,11 +832,20 @@
         <div class="card">
           <div class="card-header">
             <span class="card-title">学生名单</span>
-            <div class="mark-toolbar" id="markToolbar" style="display:flex">
-              <button class="mark-btn speak-btn active" onclick="setMarkMode('speak')">💬 发言</button>
-              <button class="mark-btn praise-btn" onclick="setMarkMode('praise')">⭐ 加分</button>
-              <button class="mark-btn discipline-btn" onclick="setMarkMode('discipline')">⚠️ 扣分</button>
-              <button class="mark-btn nophone-btn" onclick="setMarkMode('nophone')">📱 未交手机</button>
+            <div class="mark-toolbar" id="markToolbar" style="display:flex;align-items:center;gap:12px">
+              <div style="display:flex;gap:4px">
+                <button class="mark-btn present-btn active" onclick="setMarkMode('present')">✓ 到场</button>
+                <button class="mark-btn late-btn" onclick="setMarkMode('late')">▲ 迟到</button>
+                <button class="mark-btn absent-btn" onclick="setMarkMode('absent')">❌ 缺勤</button>
+                <button class="mark-btn leave-btn" onclick="setMarkMode('leave')">〇 请假</button>
+              </div>
+              <div style="width:1px;height:24px;background:var(--border)"></div>
+              <div style="display:flex;gap:4px">
+                <button class="mark-btn speak-btn" onclick="setMarkMode('speak')">💬 发言</button>
+                <button class="mark-btn praise-btn" onclick="setMarkMode('praise')">⭐ 加分</button>
+                <button class="mark-btn discipline-btn" onclick="setMarkMode('discipline')">⚠️ 扣分</button>
+                <button class="mark-btn nophone-btn" onclick="setMarkMode('nophone')">📱 未交手机</button>
+              </div>
             </div>
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="autoCallStatus" hidden>
               <span style="font-size:12px;color:var(--warning);white-space:nowrap">🎙 点名中</span>
@@ -2041,7 +2050,10 @@ function setMarkMode(mode) { markMode = mode; updateMarkModeUI(); }
 function updateMarkModeUI() {
   document.querySelectorAll('.legend-item').forEach(item => item.classList.toggle('active-mode', item.dataset.mode === markMode));
   document.querySelectorAll('.mark-btn').forEach(btn => {
-    const modeMap = { 'speak-btn':'speak', 'praise-btn':'praise', 'discipline-btn':'discipline', 'nophone-btn':'nophone' };
+    const modeMap = { 
+      'present-btn':'present', 'late-btn':'late', 'absent-btn':'absent', 'leave-btn':'leave',
+      'speak-btn':'speak', 'praise-btn':'praise', 'discipline-btn':'discipline', 'nophone-btn':'nophone' 
+    };
     for (const [cls, mode] of Object.entries(modeMap)) {
       btn.classList.toggle('active', cls === mode+'-btn' && markMode === mode);
     }
@@ -2088,7 +2100,19 @@ function renderStudentGrid(students) {
 function handleCardClick(name, idx, cardEl) {
   if (!currentCourse) return;
   const className = currentCourse.className;
-  // 根据当前标记模式记录表现
+  // 出勤状态模式
+  if (['present', 'absent', 'late', 'leave'].includes(markMode)) {
+    studentStatuses[name] = markMode;
+    updateCard(name, idx);
+    updateRcStats();
+    updateReport();
+    // 自动点名中：如果点击的是当前学生，跳到下一个
+    if (autoCallState && idx === autoCallState.index) {
+      nextStudent();
+    }
+    return;
+  }
+  // 表现记录模式
   if (markMode === 'speak') {
     markPerformance(className, name, 'speak', 1);
     showToast(name + ' 发言 +1', 'success');
@@ -2245,6 +2269,8 @@ function copyReport() {
 
 function finishRollCall() {
   const report = generateReport();
+  // 点名完成，自动切换到表现记录模式
+  setMarkMode('speak');
   // 统计表现记录
   const clsName = currentCourse ? currentCourse.className : '';
   const perfStats = { speak: 0, praise: 0, discipline: 0, nophone: 0 };
