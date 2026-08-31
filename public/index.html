@@ -570,6 +570,10 @@
   .mark-btn.late-btn, .mark-btn.late-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
   .mark-btn.leave-btn, .mark-btn.leave-btn.active { border-color: var(--azure); color: var(--azure); background: var(--azure-bg); }
   .mark-btn.present-btn, .mark-btn.present-btn.active { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-bg); }
+  .mark-btn.speak-btn, .mark-btn.speak-btn.active { border-color: var(--indigo); color: var(--indigo); background: var(--indigo-bg); }
+  .mark-btn.praise-btn, .mark-btn.praise-btn.active { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-bg); }
+  .mark-btn.discipline-btn, .mark-btn.discipline-btn.active { border-color: var(--rose); color: var(--rose); background: var(--rose-bg); }
+  .mark-btn.nophone-btn, .mark-btn.nophone-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
 
   /* 点名完成庆祝 */
   .celebration-flash {
@@ -718,6 +722,7 @@
   .perf-badge.speak { background: #dbeafe; color: #1d4ed8; }
   .perf-badge.discipline { background: #fee2e2; color: #b91c1c; }
   .perf-badge.praise { background: #d1fae5; color: #047857; }
+  .perf-badge.nophone { background: #fef3c7; color: #b45309; }
 
   /* ===== 表现统计模态框 ===== */
   .perf-stats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -830,7 +835,6 @@
         <button class="btn btn-sm" onclick="markAllPresent()">全部到场</button>
         <button class="btn btn-success" onclick="finishRollCall()">完成点名</button>
         <button class="btn btn-sm" onclick="openRandomCall()" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);color:white;border:none">🎲 随机</button>
-        <button class="btn btn-sm" onclick="openPerformanceStats()" style="background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:white;border:none">📊 表现</button>
         <button class="btn btn-primary" id="btnAutoCall" onclick="startAutoCall()">🎙 自动点名</button>
       </div>
     </div>
@@ -855,10 +859,10 @@
     </div>
     <div id="reportBox" style="display:none"></div>
     <div class="mark-toolbar" id="markToolbar" style="display:none">
-      <button class="mark-btn absent-btn" onclick="setMarkMode('absent')">❌ 缺勤</button>
-      <button class="mark-btn late-btn" onclick="setMarkMode('late')">▲ 迟到</button>
-      <button class="mark-btn leave-btn" onclick="setMarkMode('leave')">〇 请假</button>
-      <button class="mark-btn present-btn active" onclick="setMarkMode('present')">✓ 到场</button>
+      <button class="mark-btn speak-btn active" onclick="setMarkMode('speak')">💬 发言</button>
+      <button class="mark-btn praise-btn" onclick="setMarkMode('praise')">⭐ 加分</button>
+      <button class="mark-btn discipline-btn" onclick="setMarkMode('discipline')">⚠️ 扣分</button>
+      <button class="mark-btn nophone-btn" onclick="setMarkMode('nophone')">📱 未交手机</button>
     </div>
   </div>
 
@@ -1003,6 +1007,10 @@
           <div style="font-size:20px;color:var(--text-muted);margin-bottom:10px;font-weight:600" id="randomNumDisplay">No. ?</div>
           <div id="randomNameText">?</div>
         </div>
+      </div>
+      <div id="randomQuickActions" style="display:none;gap:8px;align-items:center;justify-content:center;margin-bottom:12px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="randomQuickMark('speak')" style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none">✓ 发言有效</button>
+        <button class="btn btn-sm" onclick="randomQuickMark('discipline')" style="background:linear-gradient(135deg,#f43f5e,#e11d48);color:white;border:none">− 减分</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:12px;flex-wrap:wrap">
         <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
@@ -2050,7 +2058,7 @@ function setMarkMode(mode) { markMode = mode; updateMarkModeUI(); }
 function updateMarkModeUI() {
   document.querySelectorAll('.legend-item').forEach(item => item.classList.toggle('active-mode', item.dataset.mode === markMode));
   document.querySelectorAll('.mark-btn').forEach(btn => {
-    const modeMap = { 'absent-btn':'absent', 'late-btn':'late', 'leave-btn':'leave', 'present-btn':'present' };
+    const modeMap = { 'speak-btn':'speak', 'praise-btn':'praise', 'discipline-btn':'discipline', 'nophone-btn':'nophone' };
     for (const [cls, mode] of Object.entries(modeMap)) {
       btn.classList.toggle('active', cls === mode+'-btn' && markMode === mode);
     }
@@ -2058,17 +2066,18 @@ function updateMarkModeUI() {
 }
 
 function renderStudentGrid(students) {
-  const icons = { present:'✓', absent:'❌', late:'▲', leave:'〇', unknown:'?' };
+  const icons = { present:'✓', absent:'❌', late:'▲', leave:'〇', unknown:'' };
   const clsName = currentCourse ? currentCourse.className : '';
   document.getElementById('studentGrid').innerHTML = students.map((s,i) => {
     const sname = getStudentName(s);
-    const status = studentStatuses[sname] || (autoCallState ? 'unknown' : 'present');
+    const status = studentStatuses[sname] || 'unknown';
     const esc = sname.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     const perf = getPerf(clsName, sname);
     const badges = [];
     if (perf.speak > 0) badges.push('<span class="perf-badge speak">💬'+perf.speak+'</span>');
     if (perf.discipline > 0) badges.push('<span class="perf-badge discipline">⚠️'+perf.discipline+'</span>');
     if (perf.praise > 0) badges.push('<span class="perf-badge praise">⭐'+perf.praise+'</span>');
+    if (perf.nophone > 0) badges.push('<span class="perf-badge nophone">📱'+perf.nophone+'</span>');
     return `<div class="student-card ${status}" data-name="${esc}" data-idx="${i}" oncontextmenu="showStudentCtx(event,'${esc}');return false;">
       <div class="student-num">${String(i+1).padStart(2,'0')}</div>
       <div class="student-name">${sname}</div>
@@ -2094,23 +2103,28 @@ function renderStudentGrid(students) {
 
 // 统一卡片点击处理
 function handleCardClick(name, idx, cardEl) {
-  if (autoCallState && idx === autoCallState.index) {
-    // 点击标记为迟到
-    studentStatuses[name] = 'late';
-    updateCard(name, idx);
-    autoCallState.index++;
-    autoCallState.callCount = 0;
-    renderStudentGrid(autoCallState.students);
-    updateRcStats();
-    updateReport();
-    // 若当前学生已标迟到，跳到下一个
-    if (autoCallState.index < autoCallState.students.length) {
-      speakCurStudent();
-      highlightCurStudent();
-    }
-    return;
+  if (!currentCourse) return;
+  const className = currentCourse.className;
+  // 根据当前标记模式记录表现
+  if (markMode === 'speak') {
+    markPerformance(className, name, 'speak', 1);
+    showToast(name + ' 发言 +1', 'success');
+  } else if (markMode === 'praise') {
+    markPerformance(className, name, 'praise', 1);
+    showToast(name + ' 加分 +1', 'success');
+  } else if (markMode === 'discipline') {
+    markPerformance(className, name, 'discipline', 1);
+    showToast(name + ' 扣分 +1', 'warning');
+  } else if (markMode === 'nophone') {
+    markPerformance(className, name, 'nophone', 1);
+    showToast(name + ' 未交手机 +1', 'warning');
   }
-  toggleStudent(name, idx, cardEl);
+  // 自动点名中：如果点击的是当前学生，跳到下一个
+  if (autoCallState && idx === autoCallState.index) {
+    nextStudent();
+  } else {
+    renderStudentGrid(getCurrentStudents());
+  }
 }
 
 // 事件委托：学生卡片点击（唯一入口）
@@ -2120,20 +2134,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!card) return;
     handleCardClick(card.dataset.name, parseInt(card.dataset.idx), card);
   });
-  // 右键标记缺勤
+  // 右键菜单（由 showStudentCtx 处理）
   document.getElementById('studentGrid').addEventListener('contextmenu', function(e) {
     const card = e.target.closest('.student-card');
     if (!card) return;
     e.preventDefault();
-    const name = card.dataset.name;
-    const idx = parseInt(card.dataset.idx);
-    studentStatuses[name] = 'absent';
-    updateCard(name, idx);
-    updateRcStats(); updateReport();
-    // 自动点名中：如果右键的是当前学生，跳到下一个
-    if (autoCallState && idx === autoCallState.index) {
-      nextStudent();
-    }
+    showStudentCtx(e, card.dataset.name);
   });
   // 键盘快捷键
   document.addEventListener('keydown', function(e) {
@@ -2230,20 +2236,30 @@ function updateRcStats() {
 
 function generateReport() {
   const today = new Date();
-  const counts = { present:0, absent:0, late:0, leave:0 };
-  Object.values(studentStatuses).forEach(s => { counts[s]=(counts[s]||0)+1; });
-  const total = Object.keys(studentStatuses).length;
-  const arrived = counts.present + counts.late;
-  const absentNames = Object.entries(studentStatuses).filter(([n,s])=>s==='absent').map(([n])=>n);
-  const lateNames = Object.entries(studentStatuses).filter(([n,s])=>s==='late').map(([n])=>n);
-  const leaveNames = Object.entries(studentStatuses).filter(([n,s])=>s==='leave').map(([n])=>n);
+  const clsName = currentCourse ? currentCourse.className : '';
+  const students = getCurrentStudents();
+  // 统计表现记录
+  const perfStats = { speak: 0, praise: 0, discipline: 0, nophone: 0 };
+  const speakNames = [], praiseNames = [], disciplineNames = [], nophoneNames = [];
+  students.forEach(s => {
+    const name = getStudentName(s);
+    const perf = getPerf(clsName, name);
+    perfStats.speak += perf.speak || 0;
+    perfStats.praise += perf.praise || 0;
+    perfStats.discipline += perf.discipline || 0;
+    perfStats.nophone += perf.nophone || 0;
+    if (perf.speak > 0) speakNames.push(name);
+    if (perf.praise > 0) praiseNames.push(name);
+    if (perf.discipline > 0) disciplineNames.push(name);
+    if (perf.nophone > 0) nophoneNames.push(name);
+  });
   const weekNames = ['日','一','二','三','四','五','六'];
   const dateStr = `${today.getMonth()+1}月${today.getDate()}日星期${weekNames[today.getDay()]} ${SESSION_DEFS[currentCourse.session].name}`;
-  let r = `时间：${dateStr}\n教室：${currentCourse.room}\n班级：${currentCourse.className}\n教师：${currentCourse.teacher || appData.teacherName}\n课程名称：《${currentCourse.name}》\n应到人数：${total}\n实到人数：${arrived}`;
-  if (absentNames.length>0) r += `\n缺勤：${absentNames.join('、')}`;
-  if (lateNames.length>0) r += `\n迟到：${lateNames.join('、')}`;
-  if (leaveNames.length>0) r += `\n请假：${leaveNames.join('、')}`;
-  if (absentNames.length===0 && lateNames.length===0 && leaveNames.length===0) r += `\n出勤情况：全员到场`;
+  let r = `时间：${dateStr}\n教室：${currentCourse.room}\n班级：${currentCourse.className}\n教师：${currentCourse.teacher || appData.teacherName}\n课程名称：《${currentCourse.name}》\n应到人数：${students.length}\n💬 发言：${perfStats.speak}人次\n⭐ 加分：${perfStats.praise}人次\n⚠️ 扣分：${perfStats.discipline}人次\n📱 未交手机：${perfStats.nophone}人次`;
+  if (speakNames.length>0) r += `\n发言学生：${speakNames.join('、')}`;
+  if (praiseNames.length>0) r += `\n加分学生：${praiseNames.join('、')}`;
+  if (disciplineNames.length>0) r += `\n扣分学生：${disciplineNames.join('、')}`;
+  if (nophoneNames.length>0) r += `\n未交手机：${nophoneNames.join('、')}`;
   return r;
 }
 
@@ -2259,15 +2275,22 @@ function copyReport() {
 
 function finishRollCall() {
   const report = generateReport();
-  const counts = { present:0, absent:0, late:0, leave:0 };
-  Object.values(studentStatuses).forEach(s => { counts[s]=(counts[s]||0)+1; });
-  const total = Object.keys(studentStatuses).length;
-  const arrived = counts.present + counts.late;
+  // 统计表现记录
+  const clsName = currentCourse ? currentCourse.className : '';
+  const perfStats = { speak: 0, praise: 0, discipline: 0, nophone: 0 };
+  const students = getCurrentStudents();
+  students.forEach(s => {
+    const perf = getPerf(clsName, getStudentName(s));
+    perfStats.speak += perf.speak || 0;
+    perfStats.praise += perf.praise || 0;
+    perfStats.discipline += perf.discipline || 0;
+    perfStats.nophone += perf.nophone || 0;
+  });
   document.getElementById('finishStats').innerHTML = [
-    { label:'应到', num:total, color:'#94a3b8' },
-    { label:'实到', num:arrived, color:'#10b981' },
-    { label:'缺勤', num:counts.absent, color:'#ef4444' },
-    { label:'请假', num:counts.leave, color:'#3b82f6' }
+    { label:'💬 发言', num:perfStats.speak, color:'#6366f1' },
+    { label:'⭐ 加分', num:perfStats.praise, color:'#10b981' },
+    { label:'⚠️ 扣分', num:perfStats.discipline, color:'#ef4444' },
+    { label:'📱 未交手机', num:perfStats.nophone, color:'#f59e0b' }
   ].map(s => `<div class="stat-card"><div class="stat-num" style="color:${s.color}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
   document.getElementById('finalReport').value = report;
   openModal('finishModal');
@@ -2282,12 +2305,25 @@ function copyFinalReport() {
 }
 
 function saveRecord() {
+  const students = getCurrentStudents();
+  // 默认全部到场
+  students.forEach(s => {
+    const name = getStudentName(s);
+    if (!studentStatuses[name]) studentStatuses[name] = 'present';
+  });
   const counts = { present:0, absent:0, late:0, leave:0 };
   Object.values(studentStatuses).forEach(s => { counts[s]=(counts[s]||0)+1; });
   const arrived = counts.present + counts.late;
   const absentNames = Object.entries(studentStatuses).filter(([n,s])=>s==='absent').map(([n])=>n);
   const lateNames = Object.entries(studentStatuses).filter(([n,s])=>s==='late').map(([n])=>n);
   const leaveNames = Object.entries(studentStatuses).filter(([n,s])=>s==='leave').map(([n])=>n);
+  // 保存表现记录快照
+  const clsName = currentCourse.className;
+  const perfSnapshot = {};
+  students.forEach(s => {
+    const name = getStudentName(s);
+    perfSnapshot[name] = { ...getPerf(clsName, name) };
+  });
   const record = {
     id: genId(),
     courseId: currentCourse.scheduleId || currentCourse.id,
@@ -2301,7 +2337,8 @@ function saveRecord() {
     weekday: new Date().getDay()||7,
     weekNum: getCurrentWeek(),
     statuses: { ...studentStatuses },
-    totalCount: Object.keys(studentStatuses).length,
+    performances: perfSnapshot,
+    totalCount: students.length,
     presentCount: arrived, absentCount: counts.absent, lateCount: counts.late, leaveCount: counts.leave,
     absentNames: absentNames.join('、'), lateNames: lateNames.join('、'), leaveNames: leaveNames.join('、'),
     report: document.getElementById('finalReport').value
@@ -2711,6 +2748,7 @@ function openRandomCall() {
   document.getElementById('randomNumDisplay').textContent = 'No. ?';
   document.getElementById('randomNameText').textContent = '?';
   document.getElementById('randomNameDisplay').className = 'random-name-display';
+  document.getElementById('randomQuickActions').style.display = 'none';
   document.getElementById('btnRandomStart').textContent = '🎲 开始抽取';
   updateRandomCallInfo();
   openModal('randomCallModal');
@@ -2737,6 +2775,7 @@ function startRandomRoll() {
   const numDisplay = document.getElementById('randomNumDisplay');
   const nameDisplay = document.getElementById('randomNameText');
   display.className = 'random-name-display rolling';
+  document.getElementById('randomQuickActions').style.display = 'none';
   document.getElementById('btnRandomStart').textContent = '⏹ 停止';
   document.getElementById('btnRandomStart').onclick = stopRandomRoll;
 
@@ -2766,16 +2805,31 @@ function stopRandomRoll() {
     randomCallState.called.push(name);
     updateRandomCallInfo();
     if (typeof renderStudentGrid === 'function') { const ss = getCurrentStudents(); if (ss.length) renderStudentGrid(ss); }
+    // 显示快捷操作按钮
+    document.getElementById('randomQuickActions').style.display = 'flex';
     // 语音播报
     if (typeof speakName === 'function') speakName(name);
   }
+}
+
+function randomQuickMark(type) {
+  const name = document.getElementById('randomNameText').textContent;
+  if (!currentCourse || !name || name === '?') return;
+  if (type === 'speak') {
+    markPerformance(currentCourse.className, name, 'speak', 1);
+    showToast(name + ' 发言有效 +1', 'success');
+  } else if (type === 'discipline') {
+    markPerformance(currentCourse.className, name, 'discipline', 1);
+    showToast(name + ' 减分 +1', 'warning');
+  }
+  if (typeof renderStudentGrid === 'function') { const ss = getCurrentStudents(); if (ss.length) renderStudentGrid(ss); }
 }
 
 // ==================== 课堂表现记录 ====================
 function getPerf(className, name) {
   if (!appData.performances) appData.performances = {};
   if (!appData.performances[className]) appData.performances[className] = {};
-  if (!appData.performances[className][name]) appData.performances[className][name] = { speak: 0, discipline: 0, praise: 0 };
+  if (!appData.performances[className][name]) appData.performances[className][name] = { speak: 0, discipline: 0, praise: 0, nophone: 0 };
   return appData.performances[className][name];
 }
 
