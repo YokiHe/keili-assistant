@@ -1,0 +1,24 @@
+{
+  "name": "课栈助手",
+  "short_name": "课栈",
+  "description": "教师课堂管理工具：点名 / 随机提问 / 课堂表现 / 出勤飞书同步",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

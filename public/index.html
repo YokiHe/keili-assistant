@@ -1,0 +1,2838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>课粒</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0b1120;
+    --surface: #121d33;
+    --surface-hover: #1a2744;
+    --border: #1e3050;
+    --border-light: #121d33;
+    --text: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    --brand: #a5b4fc;
+    --brand-light: #c7d2fe;
+    --brand-bg: rgba(165,180,252,0.12);
+    --gold: #f59e0b;
+    --gold-bg: rgba(245,158,11,0.10);
+    --indigo: #818cf8;
+    --indigo-light: #c7d2fe;
+    --indigo-bg: rgba(129,140,248,0.12);
+    --indigo-glow: rgba(129,140,248,0.25);
+    --emerald: #34d399;
+    --emerald-bg: rgba(52,211,153,0.12);
+    --rose: #f87171;
+    --rose-bg: rgba(248,113,113,0.12);
+    --azure: #60a5fa;
+    --azure-bg: rgba(96,165,250,0.12);
+    --muted-bg: rgba(71,85,105,0.25);
+    --muted-border: #475569;
+
+    --radius: 10px;
+    --radius-lg: 16px;
+    --radius-sm: 6px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.35);
+    --shadow-glow: 0 0 32px rgba(129,140,248,0.35), 0 0 64px rgba(129,140,248,0.12);
+    --shadow-emerald: 0 0 20px rgba(52,211,153,0.25);
+    --font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  }
+  html { background: var(--bg); scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Topbar */
+  .topbar {
+    background: rgba(15,23,42,0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--brand);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.3px;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .logo-icon img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  .nav-tabs { display: flex; gap: 2px; margin-left: 28px; }
+  .nav-tab {
+    padding: 7px 18px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-weight: 500;
+  }
+  .nav-tab:hover { background: var(--surface); color: var(--text); }
+  .nav-tab.active { background: var(--indigo-bg); color: var(--indigo); font-weight: 600; }
+  .spacer { flex: 1; }
+  .teacher-badge {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 14px;
+    background: var(--surface);
+    border-radius: 24px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+  .teacher-avatar {
+    width: 26px; height: 26px;
+    background: linear-gradient(135deg, var(--indigo), #d97706);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #0f172a; font-size: 13px; font-weight: 600;
+  }
+  .settings-dropdown {
+    position: absolute;
+    top: 100%; right: 0;
+    margin-top: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px;
+    min-width: 140px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    z-index: 300;
+  }
+  .settings-item {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .settings-item:hover { background: var(--surface-hover); }
+  .week-badge {
+    padding: 7px 16px;
+    background: var(--surface);
+    color: var(--text-secondary);
+    border-radius: 24px;
+    font-size: 13px; font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border);
+  }
+  .main { padding: 28px; max-width: 1500px; margin: 0 auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .card-body { padding: 24px; }
+
+  /* Buttons */
+  .btn {
+    padding: 8px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    background: var(--surface);
+    color: var(--text-secondary);
+  }
+  .btn:hover { background: var(--surface-hover); border-color: var(--text-muted); color: var(--text); }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--indigo); color: #0f172a; border-color: var(--indigo); font-weight: 600; }
+  .btn-primary:hover { background: #d97706; border-color: #d97706; }
+  .btn-success { background: var(--emerald); color: white; border-color: var(--emerald); font-weight: 600; }
+  .btn-success:hover { background: #059669; }
+  .btn-outline { background: transparent; color: var(--text-secondary); }
+  .btn-outline:hover { background: var(--surface); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+  .form-group { margin-bottom: 18px; }
+  .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
+  .form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    transition: border-color 0.2s;
+    outline: none;
+    background: var(--bg);
+  }
+  .form-control:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px var(--indigo-bg); }
+  textarea.form-control { resize: vertical; min-height: 80px; }
+
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 14px;
+    font-size: 12px; font-weight: 500;
+  }
+  .badge-blue { background: var(--azure-bg); color: var(--azure); }
+  .badge-green { background: var(--emerald-bg); color: var(--emerald); }
+  .badge-red { background: var(--rose-bg); color: var(--rose); }
+  .badge-yellow { background: var(--gold-bg); color: var(--gold); }
+  .badge-gray { background: var(--muted-bg); color: var(--text-secondary); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+  .stat-card { background: var(--bg); border-radius: var(--radius); padding: 18px 14px; text-align: center; border: 1px solid var(--border); }
+  .stat-num { font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 6px; color: var(--text); }
+  .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .today-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .today-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+  .today-date { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+  .course-list { display: flex; flex-direction: column; gap: 14px; }
+  #todayCourseList:empty::after {
+    content: '📭 今天没有课程安排';
+    display: block;
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+  .course-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    transition: all 0.2s;
+  }
+  .course-card:hover { border-color: var(--indigo); }
+  .course-card.current { border-color: var(--indigo); background: var(--indigo-bg); animation: courseBreath 3s ease-in-out infinite; }
+  .course-card.current .course-time-block { animation: timePulse 3s ease-in-out infinite; }
+  @keyframes courseBreath {
+    0%, 100% { box-shadow: 0 0 16px rgba(245,158,11,0.1); }
+    50% { box-shadow: 0 0 24px rgba(245,158,11,0.25); }
+  }
+  @keyframes timePulse {
+    0%, 100% { background: var(--indigo); }
+    50% { background: #d97706; }
+  }
+  .course-card.multi { border-left: 4px solid var(--indigo); }
+  .course-time-block {
+    background: var(--indigo);
+    color: #0f172a;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    text-align: center;
+    min-width: 85px;
+    flex-shrink: 0;
+  }
+  .course-time-block.done { background: var(--muted-border); color: var(--text-secondary); }
+  .course-session { font-size: 20px; font-weight: 800; line-height: 1; }
+  .course-time-text { font-size: 11px; margin-top: 3px; opacity: 0.85; }
+  .course-info { flex: 1; }
+  .course-name { font-size: 16px; font-weight: 600; color: var(--text); }
+  .course-meta { display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap; }
+  .course-meta-item { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+  .course-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+  .section-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 12px 0 6px;
+  }
+
+  /* Roll Call — the core experience */
+  .rollcall-layout { display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start; }
+  .rollcall-header {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 18px 24px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .rollcall-info { flex: 1; }
+  .rollcall-course { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .rollcall-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+
+  /* Student Grid */
+  .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+  .student-card {
+    border-radius: var(--radius);
+    border: 2px solid var(--border);
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+    background: var(--surface);
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .student-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .student-card:hover {
+    border-color: var(--text-muted);
+    transform: translateY(-2px) scale(1.03);
+    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .student-card:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+  }
+  .student-card.present { border-color: var(--emerald); background: var(--emerald-bg); }
+  .student-card.present::after { background: radial-gradient(circle at center, rgba(16,185,129,0.15), transparent 70%); opacity: 1; }
+  .student-card.absent { border-color: var(--rose); background: var(--rose-bg); }
+  .student-card.absent::after { background: radial-gradient(circle at center, rgba(239,68,68,0.15), transparent 70%); opacity: 1; }
+  .student-card.late { border-color: var(--gold); background: var(--gold-bg); }
+  .student-card.late::after { background: radial-gradient(circle at center, rgba(245,158,11,0.18), transparent 70%); opacity: 1; }
+  .student-card.leave { border-color: var(--azure); background: var(--azure-bg); }
+  .student-card.leave::after { background: radial-gradient(circle at center, rgba(59,130,246,0.15), transparent 70%); opacity: 1; }
+  .student-card.unknown { border-color: var(--muted-border); background: var(--muted-bg); }
+
+  /* Calling — the dramatic moment */
+  .student-card.calling {
+    border-color: var(--gold) !important;
+    background: #1e293b !important;
+    animation: callGlow 1s ease-in-out infinite alternate;
+    transform: scale(1.15);
+    box-shadow: 0 0 32px rgba(245,158,11,0.4), 0 0 64px rgba(245,158,11,0.15);
+    z-index: 10;
+    position: relative;
+  }
+  .student-card.calling .student-status-icon {
+    color: var(--gold);
+    font-weight: 800;
+  }
+  .student-card.calling::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 3px solid var(--gold);
+    border-radius: 14px;
+    animation: ringGlow 1s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes ringGlow {
+    0% { border-color: rgba(245,158,11,0.4); }
+    100% { border-color: rgba(245,158,11,1); }
+  }
+  @keyframes callGlow {
+    0% { box-shadow: 0 0 28px rgba(245,158,11,0.5), 0 0 56px rgba(245,158,11,0.2); }
+    100% { box-shadow: 0 0 40px rgba(245,158,11,0.7), 0 0 80px rgba(245,158,11,0.35); }
+  }
+  .student-num { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; letter-spacing: 0.05em; }
+  .student-name { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: 0.5px; }
+  .student-status-icon { font-size: 18px; margin-top: 6px; height: 22px; display: flex; align-items: center; justify-content: center; }
+
+  .side-panel { display: flex; flex-direction: column; gap: 18px; }
+  .legend-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .legend-item:hover { background: var(--surface-hover); }
+  .legend-item.active-mode { border-color: var(--gold); background: var(--gold-bg); }
+  .legend-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+  .legend-text { font-size: 14px; color: var(--text); flex: 1; font-weight: 500; }
+  .legend-count { font-size: 13px; font-weight: 700; color: var(--text-secondary); }
+
+  .absent-list { display: flex; flex-direction: column; gap: 6px; }
+  .absent-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    background: var(--bg);
+  }
+  .absent-name { font-weight: 500; color: var(--text); }
+
+  /* 侧栏折叠 */
+  .side-panel .card-header { cursor: pointer; user-select: none; }
+  .side-panel .card-header::after {
+    content: '▼';
+    font-size: 10px;
+    margin-left: 8px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+  }
+  .side-panel .card.collapsed .card-header::after { transform: rotate(-90deg); }
+  .side-panel .card.collapsed .card-body { display: none; }
+
+  .report-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    min-height: 160px;
+    font-family: var(--font);
+  }
+
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: 110px repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .schedule-cell {
+    background: var(--surface);
+    padding: 10px 8px;
+    min-height: 105px;
+    font-size: 11px;
+    position: relative;
+  }
+  .schedule-cell.header {
+    background: var(--bg);
+    font-weight: 600; font-size: 12px;
+    color: var(--text-secondary); text-align: center;
+    min-height: auto; padding: 10px 4px;
+  }
+  .schedule-cell.time-header {
+    background: var(--bg);
+    text-align: right; padding: 8px 10px;
+    font-size: 11px; color: var(--text-muted);
+    min-height: auto;
+  }
+  .schedule-lesson {
+    background: var(--indigo-bg);
+    border-left: 3px solid var(--indigo);
+    border-radius: 4px;
+    padding: 5px 8px; margin-bottom: 4px;
+    cursor: pointer; font-size: 11px;
+    color: var(--text);
+  }
+  .schedule-lesson:hover { background: rgba(245,158,11,0.2); }
+  .schedule-lesson.active { background: var(--rose-bg); border-left-color: var(--rose); }
+  .schedule-lesson.inactive { opacity: 0.3; }
+  .lesson-name { font-weight: 600; color: var(--indigo); font-size: 11px; }
+  .lesson-class { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .lesson-weeks { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+
+  .class-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; }
+  .class-card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .class-name { font-weight: 600; font-size: 15px; color: var(--text); }
+  .student-table { width: 100%; border-collapse: collapse; }
+  .student-table th { padding: 12px 14px; background: var(--bg); font-size: 12px; font-weight: 600; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.04em; }
+  .student-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text); }
+  .student-table tr:last-child td { border-bottom: none; }
+  .student-table tr:hover td { background: var(--surface-hover); }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 28px; width: 540px; max-width: 92vw; max-height: 82vh; overflow-y: auto; box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 22px; color: var(--text); }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+
+  .toast-container { position: fixed; top: 76px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast { background: var(--surface); color: var(--text); padding: 12px 18px; border-radius: var(--radius); font-size: 13px; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.3); animation: slideIn 0.25s ease; max-width: 320px; }
+  .toast.success { background: #065f46; border-color: var(--emerald); color: #d1fae5; }
+  .toast.error { background: #7f1d1d; border-color: var(--rose); color: #fecaca; }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  .empty-state { text-align: center; padding: 56px 24px; color: var(--text-muted); }
+  .empty-icon { font-size: 44px; margin-bottom: 14px; }
+  .empty-text { font-size: 15px; color: var(--text-secondary); }
+  .empty-sub { font-size: 13px; margin-top: 8px; }
+
+  .manual-course { padding: 12px 16px; margin-bottom: 8px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; }
+  .manual-course:hover { border-color: var(--indigo); background: var(--indigo-bg); }
+  .manual-course-main { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+  .manual-course-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .manual-course-class { font-size: 13px; color: var(--text-muted); }
+  .manual-course-meta { font-size: 12px; color: var(--text-muted); }
+
+  .history-item { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 18px 24px; margin-bottom: 14px; display: flex; align-items: center; gap: 18px; }
+  .history-icon { width: 42px; height: 42px; border-radius: var(--radius); background: var(--indigo-bg); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .history-info { flex: 1; }
+  .history-course { font-weight: 600; font-size: 14px; color: var(--text); }
+  .history-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  .inner-tabs { display: flex; gap: 4px; margin-bottom: 18px; }
+  .inner-tab { padding: 7px 16px; border-radius: var(--radius); cursor: pointer; font-size: 13px; color: var(--text-secondary); transition: all 0.15s; border: none; background: none; font-family: inherit; }
+  .inner-tab:hover { background: var(--surface-hover); }
+  .inner-tab.active { background: var(--indigo-bg); color: var(--indigo); font-weight: 500; }
+
+  .semester-info { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--text-secondary); }
+  .semester-dot { width: 8px; height: 8px; background: var(--emerald); border-radius: 50%; }
+
+  .auto-call-status { font-size: 16px; font-weight: 600; color: var(--gold); }
+
+  /* 悬浮标记工具栏 */
+  .mark-toolbar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 6px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    z-index: 200;
+    backdrop-filter: blur(12px);
+  }
+  .mark-btn {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all 0.2s;
+    background: var(--bg);
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .mark-btn:hover { border-color: var(--text-muted); color: var(--text); }
+  .mark-btn.active { border-color: var(--indigo); color: var(--indigo); background: var(--indigo-bg); }
+  .mark-btn.absent-btn, .mark-btn.absent-btn.active { border-color: var(--rose); color: var(--rose); background: var(--rose-bg); }
+  .mark-btn.late-btn, .mark-btn.late-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
+  .mark-btn.leave-btn, .mark-btn.leave-btn.active { border-color: var(--azure); color: var(--azure); background: var(--azure-bg); }
+  .mark-btn.present-btn, .mark-btn.present-btn.active { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-bg); }
+
+  /* 点名完成庆祝 */
+  .celebration-flash {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle, rgba(16,185,129,0.3), transparent 70%);
+    pointer-events: none;
+    z-index: 9999;
+    animation: flashOut 1.2s ease-out forwards;
+  }
+  @keyframes flashOut {
+    0% { opacity: 1; transform: scale(0.8); }
+    50% { opacity: 0.6; transform: scale(1.05); }
+    100% { opacity: 0; transform: scale(1); }
+  }
+
+  /* ========== 平板/手机（教师操作端）========== */
+  @media (max-width: 900px) {
+    .main { padding: 14px; }
+    .topbar { padding: 0 12px; height: 48px; }
+    .logo { font-size: 15px; }
+    .logo-icon { width: 28px; height: 28px; }
+    .nav-tabs { margin-left: 4px; gap: 1px; }
+    .nav-tab { padding: 4px 10px; font-size: 11px; }
+    .teacher-badge { display: none; }
+    .week-badge { font-size: 10px; padding: 4px 8px; }
+    .rollcall-layout { grid-template-columns: 1fr; }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stat-num { font-size: 24px; }
+    .stat-label { font-size: 11px; }
+    .today-title { font-size: 18px; }
+    .course-card { padding: 12px; flex-wrap: wrap; gap: 10px; }
+    .course-name { font-size: 14px; }
+    .course-actions { width: 100%; justify-content: flex-start; }
+    .student-grid { grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 8px; }
+    .student-card { padding: 10px 6px; }
+    .student-name { font-size: 12px; }
+    .student-num { font-size: 10px; }
+    .student-status-icon { font-size: 15px; }
+    .schedule-grid { grid-template-columns: 60px repeat(5,1fr); font-size: 10px; overflow-x: auto; }
+    .schedule-cell { min-height: 55px; padding: 4px 2px; }
+    .schedule-lesson { padding: 2px 4px; font-size: 9px; }
+    .rollcall-header { flex-wrap: wrap; gap: 8px; }
+    .rollcall-header button { font-size: 11px; padding: 5px 10px; }
+    .modal { width: 95vw; padding: 16px; }
+    .btn { padding: 6px 12px; font-size: 12px; }
+    .report-box { font-size: 12px; padding: 10px; }
+    .side-panel { position: static; }
+  }
+
+  @media (max-width: 480px) {
+    .main { padding: 10px; }
+    .topbar { height: 42px; padding: 0 8px; gap: 4px; }
+    .logo { font-size: 13px; }
+    .logo-icon { width: 24px; height: 24px; }
+    .nav-tab { padding: 3px 8px; font-size: 10px; }
+    .card { border-radius: 10px; }
+    .card-header { padding: 10px 12px; }
+    .card-body { padding: 10px; }
+    .card-title { font-size: 13px; }
+    .today-title { font-size: 16px; }
+    .course-card { padding: 10px; gap: 8px; }
+    .course-name { font-size: 13px; }
+    .stats-row { gap: 6px; }
+    .stat-card { padding: 10px 6px; }
+    .stat-num { font-size: 22px; }
+    .student-grid { grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: 5px; }
+    .student-card { padding: 7px 4px; border-radius: 8px; }
+    .student-name { font-size: 11px; }
+    .student-num { font-size: 9px; }
+    .student-status-icon { font-size: 14px; }
+    .schedule-grid { font-size: 8px; }
+    .schedule-cell { min-height: 48px; padding: 2px 1px; }
+    .rollcall-header button { font-size: 10px; padding: 4px 8px; }
+    .modal { width: 98vw; padding: 14px; border-radius: 12px; max-height: 88vh; overflow-y: auto; }
+    .form-row { flex-direction: column; }
+    .form-control { font-size: 14px; }
+    textarea.form-control { font-size: 14px; }
+    .history-item { padding: 10px; }
+    .semester-info { padding: 10px 14px; font-size: 11px; flex-wrap: wrap; }
+    .manual-course { padding: 10px 12px; }
+    .manual-course-name { font-size: 13px; }
+    .manual-course-class { font-size: 11px; }
+    .manual-course-meta { font-size: 10px; }
+    .inner-tab { padding: 5px 10px; font-size: 11px; }
+    #btnAutoCall, #btnPause, #btnResume { font-size: 11px; padding: 5px 10px; }
+    .mark-toolbar { bottom: 12px; padding: 4px; gap: 2px; border-radius: 10px; }
+    .mark-btn { padding: 6px 10px; font-size: 11px; border-radius: 8px; }
+  }
+
+  /* ===== 大屏展示（教室屏幕广播 / 智慧黑板）===== */
+  @media (min-width: 1024px) {
+    .rollcall-layout { grid-template-columns: 1fr 280px; gap: 24px; }
+    .rollcall-header { padding: 22px 32px; }
+    .rollcall-course { font-size: 24px; }
+    .rollcall-sub { font-size: 15px; }
+    .student-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+    .student-card { padding: 22px 14px; border-radius: 14px; border-width: 3px; }
+    .student-num { font-size: 14px; font-weight: 600; }
+    .student-name { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+    .student-status-icon { font-size: 32px; margin-top: 8px; }
+    .student-card.calling { transform: scale(1.3); }
+    .student-card.calling .student-name { font-size: 28px; }
+    .student-card.calling .student-status-icon { font-size: 40px; }
+    .stats-row { gap: 18px; }
+    .stat-card { padding: 20px 16px; }
+    .stat-num { font-size: 40px; }
+    .stat-label { font-size: 14px; }
+    .auto-call-status { font-size: 20px; }
+    .rollcall-header button { font-size: 14px; padding: 10px 18px; }
+    .rollcall-header select { font-size: 14px; padding: 8px 14px; }
+  }
+
+  /* ===== 随机点名动画 ===== */
+  .random-name-display {
+    font-size: 48px; font-weight: 800; text-align: center;
+    padding: 40px 20px; min-height: 120px; display: flex;
+    align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--indigo-bg), var(--surface));
+    border-radius: 16px; margin: 16px 0;
+    transition: transform 0.1s;
+  }
+  .random-name-display.rolling { animation: shake 0.1s infinite; color: var(--indigo); }
+  .random-name-display.stopped { color: var(--emerald); transform: scale(1.1); }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)} }
+  .random-info { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+
+  /* ===== 学生卡片右键菜单 ===== */
+  .ctx-menu {
+    position: fixed; z-index: 9999; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 6px; min-width: 160px;
+    display: none;
+  }
+  .ctx-menu.show { display: block; }
+  .ctx-menu-item {
+    padding: 8px 14px; font-size: 13px; border-radius: 6px; cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .ctx-menu-item:hover { background: var(--indigo-bg); color: var(--indigo); }
+  .ctx-menu-sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+  /* ===== 课堂表现徽章 ===== */
+  .perf-badges { display: flex; gap: 3px; justify-content: center; margin-top: 4px; flex-wrap: wrap; }
+  .perf-badge { font-size: 9px; padding: 1px 5px; border-radius: 8px; font-weight: 600; }
+  .perf-badge.speak { background: #dbeafe; color: #1d4ed8; }
+  .perf-badge.discipline { background: #fee2e2; color: #b91c1c; }
+  .perf-badge.praise { background: #d1fae5; color: #047857; }
+
+  /* ===== 表现统计模态框 ===== */
+  .perf-stats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-stats-table th { background: var(--indigo-bg); color: var(--indigo); padding: 8px; text-align: center; font-weight: 600; }
+  .perf-stats-table td { padding: 6px 8px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-stats-table td:first-child { text-align: left; font-weight: 500; }
+  .perf-summary-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .perf-summary-card { flex: 1; min-width: 80px; text-align: center; padding: 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+  .perf-summary-num { font-size: 24px; font-weight: 700; }
+  .perf-summary-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ===== 移动端底部导航 ===== */
+  .mobile-nav {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 6px 0 env(safe-area-inset-bottom, 8px); z-index: 100;
+    justify-content: space-around;
+  }
+  .mobile-nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 4px 12px; font-size: 10px; color: var(--text-muted); cursor: pointer;
+    border-radius: 8px; transition: all 0.2s;
+  }
+  .mobile-nav-item.active { color: var(--indigo); }
+  .mobile-nav-item .nav-icon { font-size: 20px; }
+  @media (max-width: 768px) {
+    .mobile-nav { display: flex; }
+    .main { padding-bottom: 70px; }
+    .topbar .nav-tabs { display: none; }
+  }
+  @media (max-width: 480px) {
+    .random-name-display { font-size: 32px; padding: 24px 12px; min-height: 80px; }
+    .student-card { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .perf-badge { font-size: 8px; padding: 1px 4px; }
+  }
+</style>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon"><img src="logo.png" alt="课粒"></div>
+    课粒
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchPage('today')">今日课程</button>
+    <button class="nav-tab" onclick="switchPage('schedule')">完整课表</button>
+    <button class="nav-tab" onclick="switchPage('history')">点名历史</button>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn btn-sm" onclick="toggleFullscreen()" title="全屏">⛶</button>
+  <div class="teacher-badge" style="gap:8px;padding:5px 12px;cursor:pointer;position:relative" onclick="toggleSettingsMenu(event)">
+    <span id="weekBadge" style="font-size:12px;color:var(--text-muted)">第?周</span>
+    <span style="color:var(--border)">|</span>
+    <span id="syncPending" onclick="retryPendingSync()" style="font-size:12px;color:#fcd34d;cursor:pointer" title="云同步状态（点击重试未同步记录）">☁</span>
+    <span style="color:var(--border)">|</span>
+    <div class="teacher-avatar" style="width:22px;height:22px;font-size:11px">贺</div>
+    <span id="teacherNameBadge" style="font-size:13px">贺洋子</span>
+    <span style="font-size:10px;color:var(--text-muted)">▾</span>
+    <div id="settingsMenu" class="settings-dropdown" style="display:none">
+      <div class="settings-item" onclick="event.stopPropagation();switchPage('classes')">👥 班级管理</div>
+      <div class="settings-item" onclick="event.stopPropagation();openSemesterConfig()">⚙ 学期设置</div>
+      <div class="settings-item" onclick="event.stopPropagation();openNewSemesterDialog()" style="color:var(--rose)">🔄 新学期</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="main">
+
+  <!-- ====== 今日课程 ====== -->
+  <div id="page-today" class="page active">
+    <div class="today-header">
+      <div>
+        <div class="today-title">今日课程</div>
+        <div class="today-date" id="todayDate"></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="refreshToday()">🔄 刷新</button>
+      </div>
+    </div>
+    <div id="todayCourseList"></div>
+    <div class="card" style="margin-top:20px" id="manualRollCallCard">
+      <div class="card-header" onclick="document.getElementById('manualBody').classList.toggle('hidden')" style="cursor:pointer">
+        <span class="card-title">🔧 手动点名（调课/调休备用）</span>
+        <span style="font-size:12px;color:var(--text-muted)">点击展开</span>
+      </div>
+      <div class="card-body hidden" id="manualBody" style="padding:12px 20px">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">选择本学期任意课程进行点名，不受周数/星期限制</div>
+        <div id="manualCourseList" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+    </div>
+    <style>.hidden{display:none!important}</style>
+  </div>
+
+  <!-- ====== 点名页面 ====== -->
+  <div id="page-rollcall" class="page">
+    <div class="rollcall-header">
+      <div class="rollcall-info">
+        <div class="rollcall-course" id="rc-courseName"></div>
+        <div class="rollcall-sub" id="rc-courseSub"></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="markAllPresent()">全部到场</button>
+        <button class="btn btn-success" onclick="finishRollCall()">完成点名</button>
+        <button class="btn btn-sm" onclick="warmUpVoice()" title="测试语音" style="border-radius:6px 0 0 6px;padding:4px 8px">🔊</button>
+        <select id="voiceSelect" onchange="changeVoice()" style="font-size:12px;padding:4px 8px;border-radius:0 6px 6px 0;border:1px solid var(--border);border-left:none;max-width:100px"></select>
+        <button class="btn btn-sm" onclick="openRandomCall()" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);color:white;border:none">🎲 随机</button>
+        <button class="btn btn-sm" onclick="openPerformanceStats()" style="background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:white;border:none">📊 表现</button>
+        <button class="btn btn-primary" id="btnAutoCall" onclick="startAutoCall()">🎙 自动点名</button>
+      </div>
+    </div>
+    <div>
+        <div class="stats-row" id="rcStats"></div>
+        <div id="absentList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"><span style="font-size:13px;color:var(--text-muted)">暂无异常</span></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">学生名单</span>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="autoCallStatus" hidden>
+              <span style="font-size:12px;color:var(--warning);white-space:nowrap">🎙 自动点名中</span>
+              <span style="font-size:18px;font-weight:700" id="autoCallCounter"></span>
+              <button class="btn btn-sm" id="btnPause" onclick="pauseAutoCall()">⏸ 暂停</button>
+              <button class="btn btn-sm" id="btnResume" onclick="resumeAutoCall()" style="display:none">▶ 继续</button>
+              <button class="btn btn-sm" style="color:var(--rose)" onclick="stopAutoCall()">■ 停止</button>
+            </div>
+            <span style="font-size:12px;color:var(--text-muted)">点击卡片标记学生状态</span>
+          </div>
+          <div class="card-body"><div class="student-grid" id="studentGrid"></div></div>
+        </div>
+      </div>
+    </div>
+    <div id="reportBox" style="display:none"></div>
+    <div class="mark-toolbar" id="markToolbar" style="display:none">
+      <button class="mark-btn absent-btn" onclick="setMarkMode('absent')">❌ 缺勤</button>
+      <button class="mark-btn late-btn" onclick="setMarkMode('late')">▲ 迟到</button>
+      <button class="mark-btn leave-btn" onclick="setMarkMode('leave')">〇 请假</button>
+      <button class="mark-btn present-btn active" onclick="setMarkMode('present')">✓ 到场</button>
+    </div>
+  </div>
+
+  <!-- ====== 完整课表 ====== -->
+  <div id="page-schedule" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div>
+        <h2 style="font-size:20px;font-weight:700;color:var(--text)">完整课表</h2>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">2025-2026-2 学期 · 贺洋子 · 信创学院</div>
+      </div>
+    </div>
+    <div class="semester-info" id="semesterInfoBar">
+      <div class="semester-dot"></div>
+      <span id="semesterInfoText"></span>
+    </div>
+    <div class="card">
+      <div class="card-body" id="scheduleViewBody"></div>
+    </div>
+  </div>
+
+  <!-- ====== 班级管理 ====== -->
+  <div id="page-classes" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div>
+        <h2 style="font-size:20px;font-weight:700;color:var(--text)">班级管理</h2>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">管理学生名单和班级信息</div>
+      </div>
+      <button class="btn btn-primary" onclick="openAddClassModal()">＋ 添加班级</button>
+    </div>
+    <div id="classesList"></div>
+  </div>
+
+  <!-- ====== 历史 ====== -->
+  <div id="page-history" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div>
+        <h2 style="font-size:20px;font-weight:700;color:var(--text)">点名历史</h2>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">历次课堂点名记录</div>
+      </div>
+      <a class="btn btn-primary" href="https://my.feishu.cn/sheets/ID0ssj0Lrh2xvmtdqtpcOGQnnnh" target="_blank" style="text-decoration:none">☁ 打开飞书文档</a>
+    </div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="semesterModal">
+  <div class="modal">
+    <div class="modal-title">学期设置</div>
+    <div class="form-group">
+      <label class="form-label">学期第一周周一日期</label>
+      <input class="form-control" type="date" id="sem-start">
+    </div>
+    <div class="form-group">
+      <label class="form-label">教师姓名</label>
+      <input class="form-control" id="sem-teacher" placeholder="如：贺洋子">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('semesterModal')">取消</button>
+      <button class="btn btn-primary" onclick="saveSemester()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="classModal">
+  <div class="modal">
+    <div class="modal-title" id="classModalTitle">添加班级</div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">班级名称 *</label>
+        <input class="form-control" id="class-name" placeholder="如：软件2531班">
+      </div>
+      <div class="form-group">
+        <label class="form-label">学委姓名</label>
+        <input class="form-control" id="class-monitor" placeholder="班级学委">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">学生名单（支持：每行一个姓名 / 逗号分隔 / Tab分隔花名册粘贴）</label>
+      <textarea class="form-control" id="class-students" rows="10" placeholder="方式1 — 每行一个：&#10;张三&#10;李四&#10;&#10;方式2 — 粘贴花名册（Tab分隔）：&#10;1	信创学院	软件技术	2024	软件2431班	2024124013101	侯元金	女&#10;2	信创学院	软件技术	2024	软件2431班	2024124013102	彭国梁	男&#10;&#10;会自动提取第6列姓名"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('classModal')">取消</button>
+      <button class="btn btn-primary" onclick="saveClass()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="finishModal">
+  <div class="modal">
+    <div class="modal-title">点名完成 — 汇报信息</div>
+    <div id="finishStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
+    <div class="form-group">
+      <label class="form-label">报备信息（可编辑后复制）</label>
+      <textarea class="form-control" id="finalReport" rows="12" style="font-family:'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.8"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('finishModal')">关闭</button>
+      <button class="btn btn-success" onclick="copyFinalReport()">复制报备信息</button>
+      <button class="btn btn-primary" onclick="saveRecord()">保存记录</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="newSemesterModal">
+  <div class="modal">
+    <div class="modal-title">🔄 新学期设置</div>
+    <div style="font-size:13px;color:var(--warning);background:var(--warning-light);padding:10px;border-radius:6px;margin-bottom:16px">
+      ⚠️ 旧数据会保留在飞书文档中，仅清空本地课程和点名记录。班级和学生名单可选择性保留。
+    </div>
+    <div class="form-group">
+      <label class="form-label">学期起始日期（第一周周一）</label>
+      <input class="form-control" type="date" id="ns-start">
+    </div>
+    <div class="form-group">
+      <label class="form-label">
+        <input type="checkbox" id="ns-keepClasses" checked style="margin-right:6px">
+        保留班级和学生名单
+      </label>
+    </div>
+    <div class="form-group">
+      <label class="form-label">
+        <input type="checkbox" id="ns-keepSchedule" style="margin-right:6px">
+        保留课表数据
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('newSemesterModal')">取消</button>
+      <button class="btn btn-danger" onclick="newSemester()">确认开始新学期</button>
+    </div>
+  </div>
+</div>
+
+
+  <!-- ====== 随机点名 ====== -->
+  <div class="modal-overlay" id="randomCallModal">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-title">🎲 随机点名</div>
+      <div class="random-info" id="randomCallInfo">点击开始，从当前班级随机抽取学生</div>
+      <div class="random-name-display" id="randomNameDisplay">?</div>
+      <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:12px;flex-wrap:wrap">
+        <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="randomExcludeCalled" checked> 排除已点过的
+        </label>
+        <span style="font-size:12px;color:var(--text-muted)" id="randomCalledCount"></span>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('randomCallModal')">关闭</button>
+        <button class="btn btn-primary" id="btnRandomStart" onclick="startRandomRoll()">🎲 开始抽取</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 课堂表现统计 ====== -->
+  <div class="modal-overlay" id="performanceModal">
+    <div class="modal" style="max-width:560px;max-height:85vh;overflow-y:auto">
+      <div class="modal-title">📊 课堂表现统计</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px" id="perfModalClass"></div>
+      <div class="perf-summary-row" id="perfSummaryRow"></div>
+      <div style="max-height:40vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+        <table class="perf-stats-table" id="perfStatsTable">
+          <thead><tr><th>姓名</th><th>💬 发言</th><th>⚠️ 违纪</th><th>⭐ 表扬</th><th>操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('performanceModal')">关闭</button>
+        <button class="btn" style="color:var(--rose)" onclick="resetCurrentClassPerf()">清空本班记录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 学生卡片右键菜单 ====== -->
+  <div class="ctx-menu" id="studentCtxMenu">
+    <div class="ctx-menu-item" onclick="ctxMarkPerf('speak')">💬 发言 +1</div>
+    <div class="ctx-menu-item" onclick="ctxMarkPerf('discipline')">⚠️ 违纪 +1</div>
+    <div class="ctx-menu-item" onclick="ctxMarkPerf('praise')">⭐ 表扬 +1</div>
+    <div class="ctx-menu-sep"></div>
+    <div class="ctx-menu-item" onclick="ctxMarkPerf('speak',-1)">↩️ 撤销发言</div>
+  </div>
+
+  <!-- ====== 移动端底部导航 ====== -->
+  <div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-item active" data-page="today" onclick="switchPage('today')"><span class="nav-icon">📅</span>今日</div>
+    <div class="mobile-nav-item" data-page="schedule" onclick="switchPage('schedule')"><span class="nav-icon">📋</span>课表</div>
+    <div class="mobile-nav-item" data-page="history" onclick="switchPage('history')"><span class="nav-icon">📝</span>历史</div>
+    <div class="mobile-nav-item" data-page="classes" onclick="switchPage('classes')"><span class="nav-icon">👥</span>班级</div>
+  </div>
+
+<script>
+// ==================== 数据模型 ====================
+const STORAGE_KEY = 'courseStackDataV2';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      // 兼容旧格式：students 从 string[] 迁移到 {name,studentId}[]
+      if (data.classes) data.classes.forEach(cls => {
+        if (cls.students.length > 0 && typeof cls.students[0] === 'string') {
+          cls.students = cls.students.map(s => ({ name: s, studentId: '' }));
+        }
+      });
+      return data;
+    }
+  } catch(e) {}
+  return getDefaultData();
+}
+
+function getStudentName(s) { return typeof s === 'string' ? s : (s?.name || ''); }
+function getStudentList(cls) { return (cls?.students || []).map(getStudentName); }
+function getStudentObj(s) { return typeof s === 'string' ? { name: s, studentId: '' } : s; }
+
+function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+function getDefaultData() {
+  return {
+    semesterStart: '2026-08-31', // 2026-2027-1 第一周周一（8月31日）
+    teacherName: '贺洋子',
+    classes: [
+      {
+        id: "c2538", name: "软件2538班", monitor: "",
+        students: [
+        {"name": "蔡朝", "studentId": "2025124023801"},
+        {"name": "曾若玲", "studentId": "2025124023802"},
+        {"name": "曾洲婷", "studentId": "2025124023803"},
+        {"name": "陈曼嘉", "studentId": "2025124023804"},
+        {"name": "陈显", "studentId": "2025124023805"},
+        {"name": "程俊", "studentId": "2025124023806"},
+        {"name": "杜鹏", "studentId": "2025124023807"},
+        {"name": "龚宇煊", "studentId": "2025124023808"},
+        {"name": "何佳鑫", "studentId": "2025124023809"},
+        {"name": "何雅诗", "studentId": "2025124023810"},
+        {"name": "胡锦民", "studentId": "2025124023811"},
+        {"name": "黄子华", "studentId": "2025124023813"},
+        {"name": "李凤娟", "studentId": "2025124023814"},
+        {"name": "李杰", "studentId": "2025124023815"},
+        {"name": "李益帆", "studentId": "2025124023816"},
+        {"name": "刘佳星", "studentId": "2025124023817"},
+        {"name": "刘孝凤", "studentId": "2025124023818"},
+        {"name": "刘馨怡", "studentId": "2025124023819"},
+        {"name": "刘鑫", "studentId": "2025124023820"},
+        {"name": "龙俊安", "studentId": "2025124023821"},
+        {"name": "龙可馨", "studentId": "2025124023822"},
+        {"name": "马琬婷", "studentId": "2025124023823"},
+        {"name": "莫茜", "studentId": "2025124023824"},
+        {"name": "彭颖", "studentId": "2025124023825"},
+        {"name": "秦涵", "studentId": "2025124023826"},
+        {"name": "全斌", "studentId": "2025124023827"},
+        {"name": "谭宇婷", "studentId": "2025124023828"},
+        {"name": "唐明哲", "studentId": "2025124023829"},
+        {"name": "王芳欢", "studentId": "2025124023830"},
+        {"name": "王佳林", "studentId": "2025124023831"},
+        {"name": "王天义", "studentId": "2025124023832"},
+        {"name": "谢世娴", "studentId": "2025124023835"},
+        {"name": "熊宇", "studentId": "2025124023836"},
+        {"name": "徐玉璇", "studentId": "2025124023837"},
+        {"name": "杨亮", "studentId": "2025124023838"},
+        {"name": "姚思怡", "studentId": "2025124023839"},
+        {"name": "张知扬", "studentId": "2025124023840"},
+        {"name": "周双", "studentId": "2025124023841"},
+        {"name": "周心怡", "studentId": "2025124023842"}
+      ]
+      },
+      {
+        id: "c2531", name: "软件2531班", monitor: "李晨",
+        students: [
+        {"name": "曹金凤", "studentId": "2025124023101"},
+        {"name": "曾红果", "studentId": "2025124023102"},
+        {"name": "曾锐新", "studentId": "2025124023103"},
+        {"name": "崔浩", "studentId": "2025124023104"},
+        {"name": "丁悦", "studentId": "2025124023106"},
+        {"name": "李晨", "studentId": "2025124023108"},
+        {"name": "李俏妮", "studentId": "2025124023109"},
+        {"name": "刘斌", "studentId": "2025124023110"},
+        {"name": "刘惠", "studentId": "2025124023111"},
+        {"name": "刘丽群", "studentId": "2025124023113"},
+        {"name": "刘梦佳", "studentId": "2025124023114"},
+        {"name": "刘薇", "studentId": "2025124023115"},
+        {"name": "鲁婷", "studentId": "2025124023116"},
+        {"name": "陆涛", "studentId": "2025124023117"},
+        {"name": "罗皓霆", "studentId": "2025124023118"},
+        {"name": "彭紫妍", "studentId": "2025124023119"},
+        {"name": "舒伟", "studentId": "2025124023120"},
+        {"name": "唐福秀", "studentId": "2025124023122"},
+        {"name": "万亚", "studentId": "2025124023123"},
+        {"name": "王丹丹", "studentId": "2025124023124"},
+        {"name": "王慧", "studentId": "2025124023125"},
+        {"name": "王淑婷", "studentId": "2025124023126"},
+        {"name": "魏佳", "studentId": "2025124023127"},
+        {"name": "魏子星", "studentId": "2025124023128"},
+        {"name": "吴星琪", "studentId": "2025124023129"},
+        {"name": "谢星豪", "studentId": "2025124023130"},
+        {"name": "许洪炅", "studentId": "2025124023131"},
+        {"name": "杨杰琼", "studentId": "2025124023132"},
+        {"name": "杨雪晴", "studentId": "2025124023133"},
+        {"name": "张翼", "studentId": "2025124023134"},
+        {"name": "钟豪康", "studentId": "2025124023135"},
+        {"name": "周捷", "studentId": "2025124023136"}
+      ]
+      },
+      {
+        id: "c2534", name: "软件2534班", monitor: "谭毅",
+        students: [
+        {"name": "蔡济宇", "studentId": "2025124023401"},
+        {"name": "曾环宇", "studentId": "2025124023402"},
+        {"name": "曾丽", "studentId": "2025124023403"},
+        {"name": "杜若茜", "studentId": "2025124023404"},
+        {"name": "何兴科", "studentId": "2025124023405"},
+        {"name": "何璇", "studentId": "2025124023406"},
+        {"name": "黄茂涛", "studentId": "2025124023407"},
+        {"name": "黄熠钧", "studentId": "2025124023408"},
+        {"name": "黄熠婷", "studentId": "2025124023409"},
+        {"name": "黄云洋", "studentId": "2025124023410"},
+        {"name": "李樊", "studentId": "2025124023411"},
+        {"name": "李寒烟", "studentId": "2025124023412"},
+        {"name": "李思莹", "studentId": "2025124023413"},
+        {"name": "李雅娟", "studentId": "2025124023414"},
+        {"name": "林奕颖", "studentId": "2025124023417"},
+        {"name": "刘思勤", "studentId": "2025124023419"},
+        {"name": "刘耀", "studentId": "2025124023420"},
+        {"name": "卢义奇", "studentId": "2025124023421"},
+        {"name": "罗新怡", "studentId": "2025124023422"},
+        {"name": "马淑婷", "studentId": "2025124023423"},
+        {"name": "欧坤辉", "studentId": "2025124023424"},
+        {"name": "欧阳俊腾", "studentId": "2025124023425"},
+        {"name": "孙华中", "studentId": "2025124023426"},
+        {"name": "谭杰", "studentId": "2025124023427"},
+        {"name": "谭毅", "studentId": "2025124023428"},
+        {"name": "唐珂清", "studentId": "2025124023429"},
+        {"name": "王贝", "studentId": "2025124023430"},
+        {"name": "王洁", "studentId": "2025124023431"},
+        {"name": "王燕姿", "studentId": "2025124023432"},
+        {"name": "温涛", "studentId": "2025124023433"},
+        {"name": "萧晴", "studentId": "2025124023434"},
+        {"name": "谢佳怡", "studentId": "2025124023435"},
+        {"name": "许毅鑫", "studentId": "2025124023437"},
+        {"name": "薛钧浩", "studentId": "2025124023438"},
+        {"name": "杨诗怡", "studentId": "2025124023439"},
+        {"name": "易子慧", "studentId": "2025124023440"},
+        {"name": "周喜贤", "studentId": "2025124023441"},
+        {"name": "朱思怡", "studentId": "2025124023442"},
+        {"name": "邹岚萱", "studentId": "2025124023443"}
+      ]
+      },
+      {
+        id: "c2434", name: "软件2434班", monitor: "",
+        students: [
+        {"name": "黄妍", "studentId": "2024124013401"},
+        {"name": "覃巾格", "studentId": "2024124013402"},
+        {"name": "王尧悦", "studentId": "2024124013403"},
+        {"name": "蔡湘香", "studentId": "2024124013404"},
+        {"name": "冷茜", "studentId": "2024124013405"},
+        {"name": "黄雅琦", "studentId": "2024124013406"},
+        {"name": "尹美莹", "studentId": "2024124013407"},
+        {"name": "文瑞哲", "studentId": "2024124013408"},
+        {"name": "张琰森", "studentId": "2024124013409"},
+        {"name": "卢琴", "studentId": "2024124013410"},
+        {"name": "廖玉凤", "studentId": "2024124013411"},
+        {"name": "贺怡琳", "studentId": "2024124013412"},
+        {"name": "张富星", "studentId": "2024124013414"},
+        {"name": "刘伍洋", "studentId": "2024124013415"},
+        {"name": "阎昊轩", "studentId": "2024124013416"},
+        {"name": "吴文雁", "studentId": "2024124013417"},
+        {"name": "戴昊", "studentId": "2024124013418"},
+        {"name": "王雅晴", "studentId": "2024124013419"},
+        {"name": "杨俊杰", "studentId": "2024124013420"},
+        {"name": "胡聪", "studentId": "2024124013421"},
+        {"name": "邓治强", "studentId": "2024124013422"},
+        {"name": "黎玉欢", "studentId": "2024124013423"},
+        {"name": "范文琴", "studentId": "2024124013424"},
+        {"name": "徐正欣", "studentId": "2024124013425"},
+        {"name": "张洪", "studentId": "2024124013426"},
+        {"name": "钟沛", "studentId": "2024124013427"},
+        {"name": "岳靖康", "studentId": "2024124013428"},
+        {"name": "李宇杰", "studentId": "2024124013429"},
+        {"name": "董涞", "studentId": "2024124013430"},
+        {"name": "司羽", "studentId": "2024124013431"},
+        {"name": "李闯", "studentId": "2024124013432"},
+        {"name": "余冬云", "studentId": "2024124013433"},
+        {"name": "沈芊", "studentId": "2024124013434"},
+        {"name": "唐小雪", "studentId": "2024124013435"},
+        {"name": "陈洁", "studentId": "2024124013436"},
+        {"name": "匡雅婷", "studentId": "2024124013437"},
+        {"name": "黄依萍", "studentId": "2024124013438"},
+        {"name": "欧阳智", "studentId": "2024124013439"},
+        {"name": "刘艳梅", "studentId": "2024124013440"},
+        {"name": "郑伟", "studentId": "2024124013441"},
+        {"name": "朱占君", "studentId": "2024124013442"},
+        {"name": "杨松霖", "studentId": "2024124013443"},
+        {"name": "钟颖琪", "studentId": "2024124013444"},
+        {"name": "秦梓骞", "studentId": "2024124013445"}
+      ]
+      },
+      {
+        id: "c2536", name: "软件2536班", monitor: "",
+        students: [
+        {"name": "彭俊晖", "studentId": "2024124013632"},
+        {"name": "彭合", "studentId": "2025123043127"},
+        {"name": "蔡佳豪", "studentId": "2025124023601"},
+        {"name": "曾维国", "studentId": "2025124023602"},
+        {"name": "陈艺豪", "studentId": "2025124023603"},
+        {"name": "邓盼", "studentId": "2025124023604"},
+        {"name": "甘佳灵", "studentId": "2025124023605"},
+        {"name": "高满江", "studentId": "2025124023606"},
+        {"name": "郭传耀", "studentId": "2025124023607"},
+        {"name": "何璇", "studentId": "2025124023609"},
+        {"name": "何亦可", "studentId": "2025124023610"},
+        {"name": "何盈盈", "studentId": "2025124023611"},
+        {"name": "胡霖", "studentId": "2025124023612"},
+        {"name": "黄佳乐", "studentId": "2025124023613"},
+        {"name": "蒋延", "studentId": "2025124023616"},
+        {"name": "兰一笑", "studentId": "2025124023617"},
+        {"name": "李思诚", "studentId": "2025124023618"},
+        {"name": "李苏", "studentId": "2025124023619"},
+        {"name": "李宇轩", "studentId": "2025124023620"},
+        {"name": "龙漫洁", "studentId": "2025124023622"},
+        {"name": "卢琪", "studentId": "2025124023623"},
+        {"name": "罗青萍", "studentId": "2025124023624"},
+        {"name": "潘杰", "studentId": "2025124023625"},
+        {"name": "潘勇宏", "studentId": "2025124023626"},
+        {"name": "宋秀艳", "studentId": "2025124023628"},
+        {"name": "滕国峰", "studentId": "2025124023629"},
+        {"name": "童宇", "studentId": "2025124023630"},
+        {"name": "王丹", "studentId": "2025124023631"},
+        {"name": "王湘瑜", "studentId": "2025124023632"},
+        {"name": "王旭彬", "studentId": "2025124023633"},
+        {"name": "吴梓琪", "studentId": "2025124023634"},
+        {"name": "肖涵月", "studentId": "2025124023635"},
+        {"name": "徐雅慧", "studentId": "2025124023636"},
+        {"name": "严佳", "studentId": "2025124023637"},
+        {"name": "杨山梅", "studentId": "2025124023638"},
+        {"name": "于筱筱", "studentId": "2025124023640"},
+        {"name": "袁君豪", "studentId": "2025124023641"},
+        {"name": "袁梓杰", "studentId": "2025124023642"},
+        {"name": "邹伟傑", "studentId": "2025124023644"}
+      ]
+      },
+      {
+        id: "c2435", name: "软件2435班", monitor: "",
+        students: [
+        {"name": "胡阳", "studentId": "2024124013501"},
+        {"name": "曾雅莉", "studentId": "2024124013502"},
+        {"name": "彭熙", "studentId": "2024124013503"},
+        {"name": "周雅豪", "studentId": "2024124013504"},
+        {"name": "肖楚轩", "studentId": "2024124013505"},
+        {"name": "麦毅湘", "studentId": "2024124013506"},
+        {"name": "刘致辰", "studentId": "2024124013507"},
+        {"name": "甄仪", "studentId": "2024124013508"},
+        {"name": "何静如", "studentId": "2024124013509"},
+        {"name": "龚伟明", "studentId": "2024124013511"},
+        {"name": "李潇", "studentId": "2024124013512"},
+        {"name": "陈乐", "studentId": "2024124013513"},
+        {"name": "李昕颖", "studentId": "2024124013514"},
+        {"name": "周淑娟", "studentId": "2024124013515"},
+        {"name": "杨想一", "studentId": "2024124013516"},
+        {"name": "李丽贞", "studentId": "2024124013517"},
+        {"name": "朱雅凤", "studentId": "2024124013518"},
+        {"name": "罗乐萌", "studentId": "2024124013519"},
+        {"name": "陈泽昊", "studentId": "2024124013520"},
+        {"name": "赖杨清", "studentId": "2024124013522"},
+        {"name": "杨婷婷", "studentId": "2024124013523"},
+        {"name": "谭欣怡", "studentId": "2024124013524"},
+        {"name": "赵云锡", "studentId": "2024124013525"},
+        {"name": "万辰希", "studentId": "2024124013526"},
+        {"name": "戴宏嘉", "studentId": "2024124013527"},
+        {"name": "陈子豪", "studentId": "2024124013529"},
+        {"name": "李馨怡", "studentId": "2024124013530"},
+        {"name": "谢凤轩", "studentId": "2024124013531"},
+        {"name": "肖风肖", "studentId": "2024124013532"},
+        {"name": "管金芝", "studentId": "2024124013533"},
+        {"name": "肖绍华", "studentId": "2024124013535"},
+        {"name": "韦江璐", "studentId": "2024124013536"},
+        {"name": "李瑛姿", "studentId": "2024124013537"},
+        {"name": "向楠", "studentId": "2024124013538"},
+        {"name": "蒋乐燕", "studentId": "2024124013539"},
+        {"name": "姜乐曦", "studentId": "2024124013540"},
+        {"name": "刘胤", "studentId": "2024124013541"},
+        {"name": "肖鹏宇", "studentId": "2024124013542"},
+        {"name": "资妤敏", "studentId": "2024124013543"},
+        {"name": "周文洁", "studentId": "2024124013544"},
+        {"name": "林艳燕", "studentId": "2024124013545"}
+      ]
+      }
+    ],
+    // 2026-2027-1 真实课表（教务系统个人课表信息）
+    scheduleItems: [
+      {"id": "s1", "name": "麒麟操作系统适配迁移", "classId": "c2435", "className": "软件2435班", "room": "ZYL-308通识公共实训室(二)", "weekday": 1, "session": 0, "weekRanges": "1-8", "multi": true},
+      {"id": "s2", "name": "麒麟操作系统适配迁移", "classId": "c2435", "className": "软件2435班", "room": "ZYL-308通识公共实训室(二)", "weekday": 1, "session": 1, "weekRanges": "1-8", "multi": true},
+      {"id": "s3", "name": "麒麟操作系统", "classId": "c2531", "className": "软件2531班", "room": "ZYL-203信创实训室(一)", "weekday": 1, "session": 3, "weekRanges": "1-16", "multi": false},
+      {"id": "s4", "name": "网站开发技术", "classId": "c2536", "className": "软件2536班", "room": "砺能楼机房B303", "weekday": 2, "session": 0, "weekRanges": "1-16", "multi": true},
+      {"id": "s5", "name": "网站开发技术", "classId": "c2536", "className": "软件2536班", "room": "砺能楼机房B303", "weekday": 2, "session": 1, "weekRanges": "1-16", "multi": true},
+      {"id": "s6", "name": "麒麟操作系统", "classId": "c2534", "className": "软件2534班", "room": "ZYL-305通识公共实训室(一)", "weekday": 4, "session": 0, "weekRanges": "1-16", "multi": false},
+      {"id": "s7", "name": "麒麟操作系统适配迁移", "classId": "c2434", "className": "软件2434班", "room": "砺能楼机房B304", "weekday": 5, "session": 2, "weekRanges": "1-8", "multi": true},
+      {"id": "s8", "name": "麒麟操作系统适配迁移", "classId": "c2434", "className": "软件2434班", "room": "砺能楼机房B304", "weekday": 5, "session": 3, "weekRanges": "1-8", "multi": true},
+      {"id": "s9", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 1, "session": 0, "weekRanges": "17-18", "multi": true},
+      {"id": "s10", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 1, "session": 1, "weekRanges": "17-18", "multi": true},
+      {"id": "s11", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 2, "session": 0, "weekRanges": "17-18", "multi": true},
+      {"id": "s12", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 2, "session": 1, "weekRanges": "17-18", "multi": true},
+      {"id": "s13", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 3, "session": 0, "weekRanges": "17-18", "multi": true},
+      {"id": "s14", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 3, "session": 1, "weekRanges": "17-18", "multi": true},
+      {"id": "s15", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 4, "session": 0, "weekRanges": "17-18", "multi": true},
+      {"id": "s16", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 4, "session": 1, "weekRanges": "17-18", "multi": true},
+      {"id": "s17", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 5, "session": 0, "weekRanges": "17-18", "multi": true},
+      {"id": "s18", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 5, "session": 1, "weekRanges": "17-18", "multi": true}
+    ],
+    todayCourses: [],
+    rollCallRecords: [],
+    performances: {}
+  };
+}
+
+let appData = loadData();
+
+// ==================== 全局状态 ====================
+let currentCourse = null, studentStatuses = {}, markMode = 'present';
+
+// 节次定义（匹配实际课表）
+const SESSION_DEFS = [
+  { name:'0102节', time:'08:20-10:00' },
+  { name:'0304节', time:'10:20-12:00' },
+  { name:'0506节', time:'14:00-15:40' },
+  { name:'0708节', time:'16:00-17:40' }
+];
+const WEEKDAY_NAMES = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+// ==================== 学期的周计算 ====================
+function getSemesterStart() {
+  return new Date(appData.semesterStart + 'T00:00:00+08:00');
+}
+
+function getTodayDate() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function getCurrentWeek() {
+  const today = getTodayDate();
+  const start = getSemesterStart();
+  // 周一为第一周第一天
+  const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+  return Math.max(1, Math.floor(diffDays / 7) + 1);
+}
+
+function getTodayWeekday() {
+  const d = new Date().getDay();
+  return d === 0 ? 7 : d;
+}
+
+function parseWeekRanges(rangesStr) {
+  // 解析 "1-5,7-9,11-16" 或 "1,3-8,10-12,14-15"
+  if (!rangesStr) return [];
+  const weeks = new Set();
+  rangesStr.split(',').forEach(part => {
+    part = part.trim();
+    if (part.includes('-')) {
+      const [a, b] = part.split('-').map(Number);
+      for (let i = a; i <= b; i++) weeks.add(i);
+    } else {
+      weeks.add(Number(part));
+    }
+  });
+  return [...weeks].sort((a,b) => a-b);
+}
+
+function isWeekActive(weekRanges, weekNum) {
+  const weeks = parseWeekRanges(weekRanges);
+  return weeks.includes(weekNum);
+}
+
+// ==================== 工具函数 ====================
+function showToast(msg, type='') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function genId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+function formatDate(d) {
+  const weeks = ['日','一','二','三','四','五','六'];
+  return `${d.getMonth()+1}月${d.getDate()}日 星期${weeks[d.getDay()]}`;
+}
+
+// ==================== 页面切换 ====================
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const names = ['today','schedule','history'];
+  const idx = names.indexOf(name);
+  if (idx >= 0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  // 移动端底部导航
+  document.querySelectorAll('.mobile-nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.page === name);
+  });
+  if (name === 'today') { renderTodayCourses(); renderManualCourseList(); }
+  if (name === 'schedule') renderFullSchedule();
+  if (name === 'classes') renderClasses();
+  if (name === 'history') renderHistory();
+  // 悬浮框只在点名页显示
+  document.getElementById('markToolbar').style.display = (name === 'rollcall') ? 'flex' : 'none';
+}
+
+// ==================== 今日课程（核心：自动检测） ====================
+function renderTodayCourses() {
+  const today = new Date();
+  const weekNum = getCurrentWeek();
+  const weekday = getTodayWeekday();
+  const todayStr = formatDate(today);
+
+  document.getElementById('todayDate').textContent = todayStr + ' · 第' + weekNum + '周 · 共 ' + appData.todayCourses.length + ' 节课';
+  document.getElementById('weekBadge').textContent = '第 ' + weekNum + ' 周';
+
+  const container = document.getElementById('todayCourseList');
+
+  // 从完整课表中筛选今天的课
+  const todayScheduled = appData.scheduleItems.filter(s => s.weekday === weekday && isWeekActive(s.weekRanges, weekNum));
+
+  // 合并已手动添加的课程
+  const manualCourses = appData.todayCourses.filter(c => c._manual);
+
+  // 把已完成的也展示出来
+  const doneCourses = appData.todayCourses.filter(c => c.recordId);
+  const doneSchIds = new Set(doneCourses.map(c => c.scheduleId));
+
+  const allCards = [];
+
+  // 课表自动检测的课程
+  todayScheduled.forEach(s => {
+    const done = doneSchIds.has(s.id);
+    const existing = appData.todayCourses.find(c => c.scheduleId === s.id);
+    allCards.push({
+      scheduleId: s.id,
+      name: s.name,
+      classId: s.classId,
+      className: s.className,
+      room: s.room,
+      session: s.session,
+      weekRanges: s.weekRanges,
+      recordId: existing ? existing.recordId : null,
+      id: existing ? existing.id : genId(),
+      source: done ? 'done' : 'auto'
+    });
+  });
+
+  // 手动添加的不在课表里的课程
+  manualCourses.forEach(c => {
+    allCards.push({ ...c, source: 'manual' });
+  });
+
+  if (allCards.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🌟</div>
+      <div class="empty-text">今天没有课程安排</div>
+      <div class="empty-sub">第${weekNum}周 · ${WEEKDAY_NAMES[weekday]} · 课表无匹配课程</div>
+    </div>`;
+    return;
+  }
+
+  // 按节次分组
+  allCards.sort((a,b) => a.session - b.session);
+
+  let html = '';
+  let lastSession = -1;
+  allCards.forEach(c => {
+    if (c.session !== lastSession) {
+      lastSession = c.session;
+      const def = SESSION_DEFS[c.session];
+      html += `<div class="section-header">${def.name} (${def.time})</div>`;
+    }
+    const cls = appData.classes.find(cl => cl.id === c.classId) || { students: [] };
+    const isDone = !!c.recordId;
+    const record = isDone ? appData.rollCallRecords.find(r => r.id === c.recordId) : null;
+    const weeksDisplay = c.weekRanges ? `第${c.weekRanges}周` : '';
+
+    html += `<div class="course-card ${c.source==='auto' ? '' : ''}">
+      <div class="course-time-block ${isDone ? 'done' : ''}">
+        <div class="course-session">${SESSION_DEFS[c.session].name.replace('节','')}</div>
+        <div class="course-time-text">${SESSION_DEFS[c.session].time.split('-')[0]}</div>
+      </div>
+      <div class="course-info">
+        <div class="course-name">《${c.name}》</div>
+        <div class="course-meta">
+          <span class="course-meta-item">👥 ${c.className}</span>
+          <span class="course-meta-item">🏫 ${c.room}</span>
+          <span class="course-meta-item">👨‍🏫 ${appData.teacherName}</span>
+          ${weeksDisplay ? `<span class="badge badge-blue">${weeksDisplay}</span>` : ''}
+          ${isDone ? `<span class="badge badge-green">已点名 · 实到${record ? record.presentCount : 0}人</span>` : `<span class="badge badge-gray">应到 ${cls.students.length} 人</span>`}
+        </div>
+      </div>
+      <div class="course-actions">
+        ${isDone
+          ? `<button class="btn btn-sm" onclick="viewRecord('${c.recordId}')">查看记录</button>`
+          : `<button class="btn btn-primary btn-sm" onclick="startRollCallFromSchedule('${c.scheduleId}')">开始点名</button>`
+        }
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function refreshToday() {
+  const weekNum = getCurrentWeek();
+  const weekday = getTodayWeekday();
+  // 把当前周+星期匹配的课表课程写入 todayCourses
+  const autoCourses = appData.scheduleItems.filter(s => s.weekday === weekday && isWeekActive(s.weekRanges, weekNum));
+  // 保留手动添加的
+  const manual = appData.todayCourses.filter(c => c._manual);
+  // 保留已完成的
+  const doneIdSet = new Set(appData.todayCourses.filter(c => c.recordId).map(c => c.scheduleId));
+
+  const newToday = [];
+  const seenSchIds = new Set();
+
+  autoCourses.forEach(s => {
+    const existingDone = appData.todayCourses.find(c => c.scheduleId === s.id && c.recordId);
+    newToday.push({
+      id: existingDone ? existingDone.id : genId(),
+      scheduleId: s.id,
+      name: s.name,
+      classId: s.classId,
+      className: s.className,
+      room: s.room,
+      session: s.session,
+      teacher: appData.teacherName,
+      recordId: existingDone ? existingDone.recordId : null,
+      _manual: false
+    });
+    seenSchIds.add(s.id);
+  });
+
+  manual.forEach(c => { newToday.push(c); });
+
+  appData.todayCourses = newToday;
+  saveData(appData);
+  renderTodayCourses();
+  renderManualCourseList();
+  showToast('已刷新今日课程', 'success');
+}
+
+// 手动点名列表：显示本学期所有课程（去重），不受周数/星期限制
+function renderManualCourseList() {
+  const seen = new Set();
+  const courses = [];
+  appData.scheduleItems.forEach(s => {
+    const key = s.className + '|' + s.name;
+    if (!seen.has(key)) {
+      seen.add(key);
+      courses.push(s);
+    }
+  });
+  // 按班级排序
+  courses.sort((a, b) => a.className.localeCompare(b.className) || a.name.localeCompare(b.name));
+  const container = document.getElementById('manualCourseList');
+  if (courses.length === 0) {
+    container.innerHTML = '<span style="font-size:13px;color:var(--text-muted)">暂无课表数据</span>';
+    return;
+  }
+  container.innerHTML = courses.map(s => {
+    const cls = appData.classes.find(c => c.id === s.classId);
+    const count = cls ? cls.students.length : '?';
+    const W = ['日','一','二','三','四','五','六'];
+    return `<div class="manual-course" onclick="startManualRollCall('${s.id}')">
+      <div class="manual-course-main">
+        <span class="manual-course-name">《${s.name}》</span>
+        <span class="manual-course-class">${s.className} · ${count}人</span>
+      </div>
+      <div class="manual-course-meta">周${W[s.weekday]||''} ${s.session === 0 ? '上午' : s.session === 1 ? '下午' : s.session === 2 ? '下午' : '下午'} · ${s.room || '未指定教室'}</div>
+    </div>`;
+  }).join('');
+}
+
+// 手动点名：选中课表课程，允许改教室/节次后开始点名
+function startManualRollCall(scheduleId) {
+  const s = appData.scheduleItems.find(i => i.id === scheduleId);
+  if (!s) return;
+  const cls = appData.classes.find(c => c.id === s.classId);
+  if (!cls || cls.students.length === 0) {
+    showToast('该班级暂无学生名单', 'error');
+    return;
+  }
+
+  // 弹出确认：教室和节次可改
+  const sessionOpts = SESSION_DEFS.map((d,i) => `<option value="${i}" ${i===s.session?'selected':''}>${d.name} (${d.time})</option>`).join('');
+  const dialog = document.createElement('div');
+  dialog.className = 'modal-overlay open';
+  dialog.innerHTML = `<div class="modal">
+    <div class="modal-title">手动点名确认</div>
+    <div style="margin-bottom:12px;font-size:14px;color:var(--text-secondary)">
+      课程：《<b>${s.name}</b>》<br>
+      班级：<b>${s.className}</b>（${cls.students.length}人）
+    </div>
+    <div class="form-group">
+      <label class="form-label">教室</label>
+      <input class="form-control" id="manual-room" value="${s.room}" placeholder="如：励能楼C304">
+    </div>
+    <div class="form-group">
+      <label class="form-label">节次</label>
+      <select class="form-control" id="manual-session">${sessionOpts}</select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="this.closest('.modal-overlay').remove()">取消</button>
+      <button class="btn btn-primary" onclick="confirmManualRollCall('${s.id}', this)">确认开始点名</button>
+    </div>
+  </div>`;
+  document.body.appendChild(dialog);
+  dialog.addEventListener('click', e => { if (e.target === dialog) dialog.remove(); });
+}
+
+function confirmManualRollCall(scheduleId, btn) {
+  const s = appData.scheduleItems.find(i => i.id === scheduleId);
+  if (!s) return;
+  const room = document.getElementById('manual-room').value.trim();
+  const session = parseInt(document.getElementById('manual-session').value);
+  const tc = {
+    id: genId(), scheduleId: s.id, name: s.name, classId: s.classId,
+    className: s.className, room: room || s.room, session: session,
+    teacher: appData.teacherName, recordId: null, _manual: true
+  };
+  btn.closest('.modal-overlay').remove();
+  startRollCallInternal(tc);
+}
+
+function startRollCallFromSchedule(scheduleId) {
+  const s = appData.scheduleItems.find(i => i.id === scheduleId);
+  if (!s) { showToast('找不到课程', 'error'); return; }
+
+  // 确保 todayCourses 有这条记录
+  let tc = appData.todayCourses.find(c => c.scheduleId === scheduleId);
+  if (!tc) {
+    tc = {
+      id: genId(), scheduleId: s.id, name: s.name, classId: s.classId,
+      className: s.className, room: s.room, session: s.session,
+      teacher: appData.teacherName, recordId: null, _manual: false
+    };
+    appData.todayCourses.push(tc);
+    saveData(appData);
+  }
+  startRollCallInternal(tc);
+}
+
+function startRollCallInternal(tc) {
+  currentCourse = tc;
+  const cls = appData.classes.find(c => c.id === tc.classId);
+  if (!cls || cls.students.length === 0) {
+    showToast('该班级暂无学生名单，请先在班级管理中添加', 'error');
+    return;
+  }
+  studentStatuses = {};
+  cls.students.forEach(s => { studentStatuses[getStudentName(s)] = 'present'; });
+  document.getElementById('rc-courseName').textContent = `《${tc.name}》`;
+  document.getElementById('rc-courseSub').textContent = `${tc.className} · ${tc.room} · ${SESSION_DEFS[tc.session].name} ${SESSION_DEFS[tc.session].time}`;
+  markMode = 'present';
+  updateMarkModeUI();
+  renderStudentGrid(cls.students);
+  updateRcStats();
+  updateReport();
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-rollcall').classList.add('active');
+  document.getElementById('markToolbar').style.display = 'flex';
+}
+
+function backToToday() {
+  document.getElementById('markToolbar').style.display = 'none';
+  switchPage('today');
+}
+
+// ==================== 自动点名 ====================
+let autoCallState = null; // { students, index, callCount, interval, startTime }
+
+function startAutoCall() {
+  if (autoCallState) { clearInterval(autoCallState.interval); autoCallState = null; }
+  const cls = appData.classes.find(c => c.id === currentCourse.classId);
+  if (!cls || cls.students.length === 0) return;
+
+  // 初始全部标记为未知（灰色）
+  cls.students.forEach(s => { studentStatuses[getStudentName(s)] = 'unknown'; });
+  renderStudentGrid(cls.students);
+  updateRcStats();
+
+  autoCallState = {
+    students: cls.students, index: 0, callCount: 0,
+    interval: null, startTime: Date.now()
+  };
+  document.getElementById('autoCallStatus').hidden = false;
+  document.getElementById('btnAutoCall').disabled = true;
+  document.getElementById('btnAutoCall').textContent = '🎙 点名中...';
+  document.getElementById('btnPause').style.display = '';
+  document.getElementById('btnResume').style.display = 'none';
+
+  // 启动轮询，每 500ms 检查一次状态
+  autoCallState.interval = setInterval(autoCallTick, 500);
+  autoCallTick();
+}
+
+function autoCallTick() {
+  if (!autoCallState || autoCallState.index >= autoCallState.students.length) {
+    finishAutoCall();
+    return;
+  }
+  if (autoCallState.callCount === 0) {
+    const sname = getStudentName(autoCallState.students[autoCallState.index]);
+    if (studentStatuses[sname] === 'absent' || studentStatuses[sname] === 'leave' || studentStatuses[sname] === 'present') {
+      nextStudent();
+      return;
+    }
+    autoCallState.callCount = 1;
+    autoCallState.startTime = Date.now();
+    speakCurStudent();
+    highlightCurStudent();
+  } else {
+    // 等待 3 秒响应 → 更新倒计时
+    const elapsed = Date.now() - autoCallState.startTime;
+    const remaining = Math.max(0, Math.ceil((2000 - elapsed) / 1000));
+    const card = document.querySelector(`.student-card[data-idx="${autoCallState.index}"]`);
+    if (card && card.classList.contains('calling')) {
+      const iconEl = card.querySelector('.student-status-icon');
+      if (iconEl) iconEl.textContent = remaining;
+    }
+    const sname = getStudentName(autoCallState.students[autoCallState.index]);
+    const status = studentStatuses[sname];
+
+    if (status === 'absent' || status === 'leave' || status === 'present') {
+      nextStudent();
+    } else if (elapsed > 2000) {
+      studentStatuses[sname] = 'present';
+      nextStudent();
+    }
+  }
+}
+
+function nextStudent() {
+  // 清除倒计时
+  const prev = document.querySelector(`.student-card[data-idx="${autoCallState.index}"]`);
+  if (prev) prev.style.removeProperty('--countdown');
+  autoCallState.index++;
+  autoCallState.callCount = 0;
+  renderStudentGrid(autoCallState.students);
+  updateRcStats(); updateReport();
+  if (autoCallState.index < autoCallState.students.length) {
+    autoCallTick();
+  }
+}
+
+function speakCurStudent() {
+  const sname = getStudentName(autoCallState.students[autoCallState.index]);
+  speakName(sname);
+}
+
+function highlightCurStudent() {
+  updateCallingCard(autoCallState.index);
+  document.getElementById('autoCallCounter').textContent =
+    `${autoCallState.index + 1}/${autoCallState.students.length}`;
+}
+
+function updateCallingCard(idx) {
+  document.querySelectorAll('.student-card.calling').forEach(c => c.classList.remove('calling'));
+  const card = document.querySelector(`.student-card[data-idx="${idx}"]`);
+  if (card) {
+    card.classList.add('calling');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+  }
+}
+
+async function speakName(name) {
+  // 浏览器原生 SpeechSynthesis（纯前端，无需后端，Vercel/本地均可用）
+  const ss = window.speechSynthesis;
+  if (!ss) return;
+
+  // 等待语音列表加载（轮询方式，比 onvoiceschanged 更可靠）
+  let voices = ss.getVoices();
+  for (let i = 0; voices.length === 0 && i < 20; i++) {
+    await new Promise(r => setTimeout(r, 250));
+    voices = ss.getVoices();
+  }
+
+  try {
+    const u = new SpeechSynthesisUtterance(name);
+    u.lang = 'zh-CN';
+    u.rate = 0.85;
+    u.pitch = 1.2;
+    u.volume = 1;
+
+    // 尝试选中文语音（不设 voice 也能靠 lang 匹配默认）
+    if (voices.length > 0) {
+      const savedVoice = localStorage.getItem('courseStackVoice');
+      let picked = null;
+      if (savedVoice) picked = voices.find(v => v.name === savedVoice || v.voiceURI === savedVoice);
+      if (!picked) picked = voices.find(v => v.lang.includes('zh-CN'))
+        || voices.find(v => v.lang.includes('zh'))
+        || voices.find(v => v.lang.includes('cmn'));
+      if (picked) u.voice = picked;
+    }
+
+    ss.speak(u);
+    // 等待播放完成或超时
+    await new Promise(r => {
+      let done = false;
+      const finish = () => { if (!done) { done = true; r(); } };
+      u.onend = finish;
+      u.onerror = finish;
+      u.onstart = () => {}; // 确保 start 事件触发过
+      setTimeout(finish, 4000);
+    });
+  } catch(e) {}
+
+  // 无声模式：卡片高亮已足够醒目
+}
+
+// 语音预热
+async function warmUpVoice() {
+  const btn = document.querySelector('[onclick="warmUpVoice()"]');
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  try {
+    await speakName('叮');
+    showToast('语音就绪 ✓', 'success');
+  } catch(e) {
+    showToast('语音未就绪', 'warning');
+  }
+  btn.textContent = '🔊';
+  btn.disabled = false;
+}
+
+// 初始化语音选择（轮询加载，兼容所有浏览器）
+function initVoices() {
+  if (!window.speechSynthesis) return;
+  const sel = document.getElementById('voiceSelect');
+  if (!sel) return;
+
+  async function populate() {
+    // 轮询等待语音列表就绪
+    let voices = window.speechSynthesis.getVoices();
+    for (let i = 0; voices.length === 0 && i < 20; i++) {
+      await new Promise(r => setTimeout(r, 250));
+      voices = window.speechSynthesis.getVoices();
+    }
+    const zhVoices = voices.filter(v => v.lang.includes('zh'));
+    if (zhVoices.length === 0) { sel.innerHTML = '<option value="">System Default</option>'; return; }
+    const saved = localStorage.getItem('courseStackVoice');
+    sel.innerHTML = zhVoices.map(v =>
+      `<option value="${v.name}" ${saved===v.name||saved===v.voiceURI?'selected':''}>${v.name} (${v.lang})</option>`
+    ).join('');
+    if (!saved && zhVoices.length > 0) {
+      localStorage.setItem('courseStackVoice', zhVoices[0].name);
+    }
+  }
+
+  // Warm up speech engine on first page click (browser policy requires user gesture)
+  document.addEventListener('click', function warmup() {
+    const u = new SpeechSynthesisUtterance('');
+    u.volume = 0;
+    speechSynthesis.speak(u);
+  }, { once: true });
+
+  populate();
+  // 每次点击页面时再检查一次（移动端）
+  document.addEventListener('click', populate, { once: true });
+}
+function changeVoice() {
+  const sel = document.getElementById('voiceSelect');
+  if (sel) localStorage.setItem('courseStackVoice', sel.value);
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+function toggleSettingsMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('settingsMenu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.teacher-badge')) {
+    document.getElementById('settingsMenu').style.display = 'none';
+  }
+});
+
+function stopAutoCall() {
+  window.speechSynthesis.cancel();
+  if (autoCallState?.interval) clearInterval(autoCallState.interval);
+  autoCallState = null;
+  document.getElementById('autoCallStatus').hidden = true;
+  document.getElementById('btnAutoCall').disabled = false;
+  document.getElementById('btnAutoCall').textContent = '🎙 自动点名';
+  document.getElementById('btnPause').style.display = 'none';
+  document.getElementById('btnResume').style.display = 'none';
+  document.querySelectorAll('.student-card.calling').forEach(c => c.classList.remove('calling'));
+}
+
+function pauseAutoCall() {
+  if (!autoCallState) return;
+  window.speechSynthesis.cancel();
+  if (autoCallState.interval) { clearInterval(autoCallState.interval); autoCallState.interval = null; }
+  document.getElementById('btnPause').style.display = 'none';
+  document.getElementById('btnResume').style.display = '';
+  document.getElementById('btnAutoCall').textContent = '⏸ 已暂停';
+  document.querySelectorAll('.student-card.calling').forEach(c => c.classList.remove('calling'));
+}
+
+function resumeAutoCall() {
+  if (!autoCallState) return;
+  autoCallState.interval = setInterval(autoCallTick, 500);
+  autoCallState.callCount = 0;
+  document.getElementById('btnResume').style.display = 'none';
+  document.getElementById('btnPause').style.display = '';
+  document.getElementById('btnAutoCall').textContent = '🎙 点名中...';
+}
+
+function finishAutoCall() {
+  window.speechSynthesis.cancel();
+  if (autoCallState?.interval) clearInterval(autoCallState.interval);
+  const students = autoCallState?.students;
+  autoCallState = null;
+  // 刷新 DOM，确保手动点击可用
+  if (students) renderStudentGrid(students);
+  document.getElementById('autoCallStatus').hidden = true;
+  document.getElementById('btnAutoCall').disabled = false;
+  document.getElementById('btnAutoCall').textContent = '🎙 自动点名';
+  document.getElementById('btnPause').style.display = 'none';
+  document.getElementById('btnResume').style.display = 'none';
+  document.querySelectorAll('.student-card.calling').forEach(c => c.classList.remove('calling'));
+  updateRcStats();
+  updateReport();
+  showToast('自动点名完成，可手动调整后再保存', 'success');
+  // 完成庆祝动画
+  const flash = document.createElement('div');
+  flash.className = 'celebration-flash';
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 1300);
+}
+
+// 重写点击事件：自动点名模式下点击=到场并跳到下一个
+function setMarkMode(mode) { markMode = mode; updateMarkModeUI(); }
+
+function updateMarkModeUI() {
+  document.querySelectorAll('.legend-item').forEach(item => item.classList.toggle('active-mode', item.dataset.mode === markMode));
+  document.querySelectorAll('.mark-btn').forEach(btn => {
+    const modeMap = { 'absent-btn':'absent', 'late-btn':'late', 'leave-btn':'leave', 'present-btn':'present' };
+    for (const [cls, mode] of Object.entries(modeMap)) {
+      btn.classList.toggle('active', cls === mode+'-btn' && markMode === mode);
+    }
+  });
+}
+
+function renderStudentGrid(students) {
+  const icons = { present:'✓', absent:'❌', late:'▲', leave:'〇', unknown:'?' };
+  const clsName = currentCourse ? currentCourse.className : '';
+  document.getElementById('studentGrid').innerHTML = students.map((s,i) => {
+    const sname = getStudentName(s);
+    const status = studentStatuses[sname] || (autoCallState ? 'unknown' : 'present');
+    const esc = sname.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    const perf = getPerf(clsName, sname);
+    const badges = [];
+    if (perf.speak > 0) badges.push('<span class="perf-badge speak">💬'+perf.speak+'</span>');
+    if (perf.discipline > 0) badges.push('<span class="perf-badge discipline">⚠️'+perf.discipline+'</span>');
+    if (perf.praise > 0) badges.push('<span class="perf-badge praise">⭐'+perf.praise+'</span>');
+    return `<div class="student-card ${status}" data-name="${esc}" data-idx="${i}" oncontextmenu="showStudentCtx(event,'${esc}');return false;">
+      <div class="student-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="student-name">${sname}</div>
+      <div class="student-status-icon">${icons[status]||''}</div>
+      ${badges.length ? '<div class="perf-badges">'+badges.join('')+'</div>' : ''}
+    </div>`;
+  }).join('');
+  // 移动端长按支持
+  if ('ontouchstart' in window) {
+    document.querySelectorAll('.student-card').forEach(card => {
+      let timer;
+      card.addEventListener('touchstart', e => {
+        timer = setTimeout(() => {
+          const name = card.dataset.name;
+          showStudentCtx(e.touches[0] ? {clientX:e.touches[0].clientX, clientY:e.touches[0].clientY} : e, name);
+        }, 500);
+      });
+      card.addEventListener('touchend', () => clearTimeout(timer));
+      card.addEventListener('touchmove', () => clearTimeout(timer));
+    });
+  }
+}
+
+// 统一卡片点击处理
+function handleCardClick(name, idx, cardEl) {
+  if (autoCallState && idx === autoCallState.index) {
+    // 点击标记为迟到
+    studentStatuses[name] = 'late';
+    updateCard(name, idx);
+    autoCallState.index++;
+    autoCallState.callCount = 0;
+    renderStudentGrid(autoCallState.students);
+    updateRcStats();
+    updateReport();
+    // 若当前学生已标迟到，跳到下一个
+    if (autoCallState.index < autoCallState.students.length) {
+      speakCurStudent();
+      highlightCurStudent();
+    }
+    return;
+  }
+  toggleStudent(name, idx, cardEl);
+}
+
+// 事件委托：学生卡片点击（唯一入口）
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('studentGrid').addEventListener('click', function(e) {
+    const card = e.target.closest('.student-card');
+    if (!card) return;
+    handleCardClick(card.dataset.name, parseInt(card.dataset.idx), card);
+  });
+  // 右键标记缺勤
+  document.getElementById('studentGrid').addEventListener('contextmenu', function(e) {
+    const card = e.target.closest('.student-card');
+    if (!card) return;
+    e.preventDefault();
+    const name = card.dataset.name;
+    const idx = parseInt(card.dataset.idx);
+    studentStatuses[name] = 'absent';
+    updateCard(name, idx);
+    updateRcStats(); updateReport();
+    // 自动点名中：如果右键的是当前学生，跳到下一个
+    if (autoCallState && idx === autoCallState.index) {
+      nextStudent();
+    }
+  });
+  // 键盘快捷键
+  document.addEventListener('keydown', function(e) {
+    if (!autoCallState) return;
+    if (e.key === 'ArrowDown') {
+      // 确认当前学生到场，跳到下一个
+      e.preventDefault();
+      const sname = getStudentName(autoCallState.students[autoCallState.index]);
+      studentStatuses[sname] = 'present';
+      nextStudent();
+    }
+    if (e.key === 'ArrowUp') {
+      // 将上一个已确认的学生标记为迟到（不回退）
+      e.preventDefault();
+      if (autoCallState.index > 0) {
+        const prevIdx = autoCallState.index - 1;
+        const sname = getStudentName(autoCallState.students[prevIdx]);
+        studentStatuses[sname] = 'late';
+        // 只更新那一张卡片，不动全图
+        const prevCard = document.querySelector(`.student-card[data-idx="${prevIdx}"]`);
+        if (prevCard) {
+          prevCard.className = 'student-card late';
+          const iconEl = prevCard.querySelector('.student-status-icon');
+          if (iconEl) iconEl.textContent = '▲';
+        }
+        updateRcStats(); updateReport();
+      }
+    }
+    if (e.key === 'Escape') { e.preventDefault(); stopAutoCall(); }
+  });
+});
+
+function toggleStudent(name, idx, cardEl) {
+  const prev = studentStatuses[name];
+  const next = (prev === markMode && markMode !== 'present') ? 'present' : markMode;
+  studentStatuses[name] = next;
+  const icons = { present:'✓', absent:'❌', late:'▲', leave:'〇', unknown:'?' };
+  if (!cardEl) cardEl = document.querySelector(`.student-card[data-idx="${idx}"]`);
+  if (cardEl) {
+    cardEl.className = 'student-card ' + next;
+    const iconEl = cardEl.querySelector('.student-status-icon');
+    if (iconEl) iconEl.textContent = icons[next] || '';
+  }
+  updateRcStats();
+  updateReport();
+}
+
+function markAllPresent() {
+  const cls = appData.classes.find(c => c.id === currentCourse.classId);
+  cls.students.forEach(s => { const n=getStudentName(s); studentStatuses[n]='present'; });
+  renderStudentGrid(cls.students);
+  updateRcStats();
+  updateReport();
+}
+
+function resetAllStatus() {
+  const cls = appData.classes.find(c => c.id === currentCourse.classId);
+  cls.students.forEach(s => { const n=getStudentName(s); studentStatuses[n]='unknown'; });
+  renderStudentGrid(cls.students);
+  updateRcStats();
+  updateReport();
+}
+
+function updateRcStats() {
+  const counts = { present:0, absent:0, late:0, leave:0 };
+  Object.values(studentStatuses).forEach(s => { counts[s]=(counts[s]||0)+1; });
+  const total = Object.keys(studentStatuses).length;
+  const arrived = counts.present + counts.late;
+  document.getElementById('rcStats').innerHTML = [
+    { label:'应到人数', num:total, color:'#94a3b8' },
+    { label:'实到人数', num:arrived, color:'#10b981' },
+    { label:'缺勤人数', num:counts.absent, color:'#ef4444' },
+    { label:'请假人数', num:counts.leave, color:'#3b82f6' }
+  ].map(s => `<div class="stat-card"><div class="stat-num" style="color:${s.color}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
+  const setCnt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v||0; };
+  setCnt('cnt-absent', counts.absent);
+  setCnt('cnt-late', counts.late);
+  setCnt('cnt-leave', counts.leave);
+  setCnt('cnt-present', counts.present);
+  const abnormals = Object.entries(studentStatuses).filter(([n,s]) => n && s!=='present' && s!=='unknown');
+  const alEl = document.getElementById('absentList');
+  if (abnormals.length===0) {
+    alEl.innerHTML = '<span style="font-size:13px;color:var(--text-muted)">✓ 全场到齐</span>';
+  } else {
+    alEl.innerHTML = abnormals.map(([name,status]) => {
+      const styles = {
+        absent: { dot:'#ef4444', bg:'var(--rose-bg)', color:'#fca5a5', label:'缺勤' },
+        late:   { dot:'#f59e0b', bg:'rgba(245,158,11,0.10)', color:'#fbbf24', label:'迟到' },
+        leave:  { dot:'#3b82f6', bg:'var(--azure-bg)',  color:'#93c5fd', label:'请假' }
+      };
+      const s = styles[status] || styles.absent;
+      return `<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:8px;font-size:13px;background:${s.bg};color:${s.color};font-weight:500"><span style="width:8px;height:8px;border-radius:50%;background:${s.dot};flex-shrink:0"></span>${name} ${s.label}</span>`;
+    }).join('');
+  }
+}
+
+function generateReport() {
+  const today = new Date();
+  const counts = { present:0, absent:0, late:0, leave:0 };
+  Object.values(studentStatuses).forEach(s => { counts[s]=(counts[s]||0)+1; });
+  const total = Object.keys(studentStatuses).length;
+  const arrived = counts.present + counts.late;
+  const absentNames = Object.entries(studentStatuses).filter(([n,s])=>s==='absent').map(([n])=>n);
+  const lateNames = Object.entries(studentStatuses).filter(([n,s])=>s==='late').map(([n])=>n);
+  const leaveNames = Object.entries(studentStatuses).filter(([n,s])=>s==='leave').map(([n])=>n);
+  const weekNames = ['日','一','二','三','四','五','六'];
+  const dateStr = `${today.getMonth()+1}月${today.getDate()}日星期${weekNames[today.getDay()]} ${SESSION_DEFS[currentCourse.session].name}`;
+  let r = `时间：${dateStr}\n教室：${currentCourse.room}\n班级：${currentCourse.className}\n教师：${currentCourse.teacher || appData.teacherName}\n课程名称：《${currentCourse.name}》\n应到人数：${total}\n实到人数：${arrived}`;
+  if (absentNames.length>0) r += `\n缺勤：${absentNames.join('、')}`;
+  if (lateNames.length>0) r += `\n迟到：${lateNames.join('、')}`;
+  if (leaveNames.length>0) r += `\n请假：${leaveNames.join('、')}`;
+  if (absentNames.length===0 && lateNames.length===0 && leaveNames.length===0) r += `\n出勤情况：全员到场`;
+  return r;
+}
+
+function updateReport() { document.getElementById('reportBox').textContent = generateReport(); }
+
+function copyReport() {
+  const text = document.getElementById('reportBox').textContent;
+  navigator.clipboard.writeText(text).then(()=>showToast('已复制','success')).catch(()=>{
+    const ta = document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    showToast('已复制','success');
+  });
+}
+
+function finishRollCall() {
+  const report = generateReport();
+  const counts = { present:0, absent:0, late:0, leave:0 };
+  Object.values(studentStatuses).forEach(s => { counts[s]=(counts[s]||0)+1; });
+  const total = Object.keys(studentStatuses).length;
+  const arrived = counts.present + counts.late;
+  document.getElementById('finishStats').innerHTML = [
+    { label:'应到', num:total, color:'#94a3b8' },
+    { label:'实到', num:arrived, color:'#10b981' },
+    { label:'缺勤', num:counts.absent, color:'#ef4444' },
+    { label:'请假', num:counts.leave, color:'#3b82f6' }
+  ].map(s => `<div class="stat-card"><div class="stat-num" style="color:${s.color}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
+  document.getElementById('finalReport').value = report;
+  openModal('finishModal');
+}
+
+function copyFinalReport() {
+  const text = document.getElementById('finalReport').value;
+  navigator.clipboard.writeText(text).then(()=>showToast('已复制报备信息！','success')).catch(()=>{
+    const ta = document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    showToast('已复制','success');
+  });
+}
+
+function saveRecord() {
+  const counts = { present:0, absent:0, late:0, leave:0 };
+  Object.values(studentStatuses).forEach(s => { counts[s]=(counts[s]||0)+1; });
+  const arrived = counts.present + counts.late;
+  const absentNames = Object.entries(studentStatuses).filter(([n,s])=>s==='absent').map(([n])=>n);
+  const lateNames = Object.entries(studentStatuses).filter(([n,s])=>s==='late').map(([n])=>n);
+  const leaveNames = Object.entries(studentStatuses).filter(([n,s])=>s==='leave').map(([n])=>n);
+  const record = {
+    id: genId(),
+    courseId: currentCourse.scheduleId || currentCourse.id,
+    courseName: currentCourse.name,
+    className: currentCourse.className,
+    classId: currentCourse.classId,
+    room: currentCourse.room,
+    session: currentCourse.session,
+    teacher: currentCourse.teacher || appData.teacherName,
+    date: new Date().toISOString().split('T')[0],
+    weekday: new Date().getDay()||7,
+    weekNum: getCurrentWeek(),
+    statuses: { ...studentStatuses },
+    totalCount: Object.keys(studentStatuses).length,
+    presentCount: arrived, absentCount: counts.absent, lateCount: counts.late, leaveCount: counts.leave,
+    absentNames: absentNames.join('、'), lateNames: lateNames.join('、'), leaveNames: leaveNames.join('、'),
+    report: document.getElementById('finalReport').value
+  };
+  if (currentCourse._editing && currentCourse.recordId) {
+    // 编辑模式：覆盖原记录
+    const idx = appData.rollCallRecords.findIndex(r => r.id === currentCourse.recordId);
+    if (idx >= 0) {
+      record.id = currentCourse.recordId;
+      record.courseId = appData.rollCallRecords[idx].courseId;
+      appData.rollCallRecords[idx] = record;
+    }
+  } else {
+    appData.rollCallRecords.unshift(record);
+  }
+  const tc = appData.todayCourses.find(c => c.scheduleId === currentCourse.scheduleId);
+  if (tc) tc.recordId = record.id;
+  saveData(appData);
+  closeModal('finishModal');
+  showToast(currentCourse._editing ? '记录已更新' : '点名记录已保存','success');
+  // 同步到飞书文档
+  syncToCloud(record);
+  // 5 分钟后提醒标记缺勤
+  scheduleAbsentReminder(lateNames);
+  switchPage('history');
+}
+
+// 同步记录到本地队列（供自动化推送到飞书文档）
+async function syncToCloud(record) {
+  try {
+    const r = await fetch('/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record)
+    });
+    const data = await r.json();
+    if (data.ok) {
+      if (data.synced) {
+        updateSyncStatus(0);
+        showToast('已同步到飞书文档 ✓', 'success');
+      } else {
+        updateSyncStatus(1);
+        const errMsg = data.error ? '（' + String(data.error).slice(0, 50) + '）' : '';
+        showToast('保存成功，飞书同步失败' + errMsg + ' 点击右上角☁重试', 'warning');
+        pollSyncResult(0);
+      }
+    }
+  } catch(e) {
+    updateSyncStatus(1);
+    showToast('已保存本地（飞书同步失败，点击右上角☁重试）', 'warning');
+  }
+}
+
+function pollSyncResult(attempt) {
+  if (attempt > 6) return; // 最多等 30 秒
+  setTimeout(async () => {
+    try {
+      const r = await fetch('/sync-status');
+      const d = await r.json();
+      if (d.pending === 0) {
+        updateSyncStatus(0);
+        showToast('已同步到飞书文档 ✓', 'success');
+        return;
+      }
+      pollSyncResult(attempt + 1);
+    } catch(e) { pollSyncResult(attempt + 1); }
+  }, 5000);
+}
+function updateSyncStatus(pending) {
+  const el = document.getElementById('syncPending');
+  if (!el) return;
+  if (pending > 0) {
+    el.textContent = '☁';
+    el.style.color = '#f59e0b';
+    el.title = `待同步 ${pending} 条`;
+  } else {
+    el.textContent = '☁';
+    el.style.color = '#10b981';
+    el.title = '已同步';
+  }
+}
+
+// 页面加载时检查同步状态
+async function checkSyncStatus() {
+  try {
+    const r = await fetch('/sync-status');
+    const data = await r.json();
+    updateSyncStatus(data.pending);
+  } catch(e) {}
+}
+
+// 点击右上角☁图标：手动重试所有未同步记录
+async function retryPendingSync() {
+  const el = document.getElementById('syncPending');
+  if (el) { el.style.color = '#3b82f6'; el.title = '重试中...'; }
+  try {
+    const r = await fetch('/retry-pending', { method: 'POST' });
+    const data = await r.json();
+    if (data.ok) {
+      if (data.failed > 0) {
+        showToast('重试完成：成功 ' + data.success + ' 条，失败 ' + data.failed + ' 条（可能 token 过期，检查 feishu.config.json）', 'error');
+      } else if (data.success > 0) {
+        showToast('重试成功：已同步 ' + data.success + ' 条', 'success');
+      } else {
+        showToast('没有待同步的记录', 'info');
+      }
+    }
+  } catch(e) {
+    showToast('重试失败：' + e.message, 'error');
+  } finally {
+    checkSyncStatus();
+  }
+}
+
+function viewRecord(recordId) {
+  const r = appData.rollCallRecords.find(rec => rec.id === recordId);
+  if (!r) return;
+  const counts = { present:0, absent:0, late:0, leave:0 };
+  Object.values(r.statuses).forEach(s => { counts[s]=(counts[s]||0)+1; });
+  document.getElementById('finishStats').innerHTML = [
+    { label:'应到', num:Object.keys(r.statuses).length, color:'#94a3b8' },
+    { label:'实到', num:r.presentCount, color:'#10b981' },
+    { label:'缺勤', num:r.absentCount, color:'#ef4444' },
+    { label:'请假', num:r.leaveCount, color:'#3b82f6' }
+  ].map(s => `<div class="stat-card"><div class="stat-num" style="color:${s.color}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
+  document.getElementById('finalReport').value = r.report;
+  openModal('finishModal');
+}
+
+// ==================== 完整课表 ====================
+function renderFullSchedule() {
+  const weekNum = getCurrentWeek();
+  document.getElementById('semesterInfoText').textContent = `当前：第 ${weekNum} 周 · ${formatDate(new Date())} · 高亮的课程本周上课`;
+  const body = document.getElementById('scheduleViewBody');
+  const days = [1,2,3,4,5];
+  const sessions = [0,1,2,3]; // 4个节次
+
+  let html = '<div class="schedule-grid">';
+  html += '<div class="schedule-cell header">节次</div>';
+  days.forEach(d => html += `<div class="schedule-cell header">${WEEKDAY_NAMES[d]}</div>`);
+
+  sessions.forEach(s => {
+    const def = SESSION_DEFS[s];
+    html += `<div class="schedule-cell time-header">${def.name}<br>${def.time}</div>`;
+    days.forEach(day => {
+      const items = appData.scheduleItems.filter(i => i.weekday === day && i.session === s);
+      html += '<div class="schedule-cell">';
+      items.forEach(item => {
+        const active = isWeekActive(item.weekRanges, weekNum);
+        html += `<div class="schedule-lesson ${active ? 'active' : 'inactive'}">
+          <div class="lesson-name" style="color:${active ? 'var(--rose)' : 'var(--indigo)'}">${item.name}</div>
+          <div class="lesson-class">${item.className}</div>
+          <div class="lesson-class" style="color:var(--text-muted)">${item.room}</div>
+          <div class="lesson-weeks">第${item.weekRanges}周</div>
+        </div>`;
+      });
+      html += '</div>';
+    });
+  });
+  html += '</div>';
+  html += '<div style="font-size:12px;color:var(--text-muted);margin-top:8px"><span style="color:var(--rose);margin-right:12px">■ 本周上课</span><span style="color:var(--text-muted)">□ 本周无课</span></div>';
+
+  body.innerHTML = html;
+}
+
+// ==================== 班级管理 ====================
+function renderClasses() {
+  const container = document.getElementById('classesList');
+  if (appData.classes.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">暂无班级，点击右上角添加</div></div>';
+    return;
+  }
+  container.innerHTML = appData.classes.map((cls, ci) =>
+    `<div class="class-card" style="margin-bottom:14px">
+      <div class="class-card-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="class-name">${cls.name}</span>
+          <span class="badge badge-gray">${cls.students.length}人</span>
+          ${cls.monitor ? `<span class="badge badge-blue">学委 ${cls.monitor}</span>` : ''}
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" onclick="openEditClassModal(${ci})">编辑</button>
+          <button class="btn btn-sm" onclick="addStudentInline(${ci})">＋添加</button>
+          <button class="btn btn-sm" style="color:var(--rose)" onclick="deleteClass(${ci})">删除</button>
+        </div>
+      </div>
+      <div style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:6px">
+        ${cls.students.map((s,si)=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);font-size:13px;color:var(--text)"><span style="color:var(--text-muted);font-size:11px">${si+1}</span>${getStudentName(s)}<span style="cursor:pointer;color:var(--rose);font-size:12px;margin-left:2px" onclick="event.stopPropagation();removeStudent(${ci},${si})" title="删除">×</span></span>`).join('')}
+      </div>
+    </div>`
+  ).join('');
+}
+function openAddClassModal() {
+  document.getElementById('classModalTitle').textContent='添加班级';
+  document.getElementById('class-name').value=''; document.getElementById('class-monitor').value=''; document.getElementById('class-students').value='';
+  document.getElementById('classModal').dataset.editIdx='';
+  openModal('classModal');
+}
+function openEditClassModal(idx) {
+  const cls=appData.classes[idx];
+  document.getElementById('classModalTitle').textContent='编辑班级：'+cls.name;
+  document.getElementById('class-name').value=cls.name; document.getElementById('class-monitor').value=cls.monitor||''; document.getElementById('class-students').value=cls.students.join('\n');
+  document.getElementById('classModal').dataset.editIdx=idx;
+  openModal('classModal');
+}
+function saveClass() {
+  const name=document.getElementById('class-name').value.trim();
+  const monitor=document.getElementById('class-monitor').value.trim();
+  const raw=document.getElementById('class-students').value;
+  let students;
+
+  if (raw.includes('\t') && raw.includes('\n')) {
+    // 花名册格式：提取学号(第6列)和姓名(第7列)
+    students = raw.split('\n').map(line => {
+      const cols = line.split('\t');
+      if (cols.length >= 7) return { name: cols[6].trim(), studentId: cols[5].trim() };
+      if (cols.length >= 6) return { name: cols[5].trim(), studentId: '' };
+      return null;
+    }).filter(Boolean);
+  } else {
+    students = raw.split(/[\n,，\s]+/).map(s=>s.trim()).filter(Boolean).map(s=>({name:s,studentId:''}));
+  }
+
+  if(!name){showToast('请填写班级名称','error');return;}
+  if(students.length===0){showToast('请填写至少一个学生姓名','error');return;}
+
+  const editIdx=document.getElementById('classModal').dataset.editIdx;
+  if(editIdx!==''){appData.classes[parseInt(editIdx)]={...appData.classes[parseInt(editIdx)],name,monitor,students};}
+  else{appData.classes.push({id:genId(),name,monitor,students});}
+  saveData(appData); closeModal('classModal'); renderClasses(); showToast(`已保存 ${students.length} 名学生`,'success');
+}
+function deleteClass(idx){if(!confirm('确认删除该班级？'))return;appData.classes.splice(idx,1);saveData(appData);renderClasses();}
+function removeStudent(ci,si){appData.classes[ci].students.splice(si,1);saveData(appData);renderClasses();}
+function addStudentInline(ci){const name=prompt('输入学生姓名：');if(!name||!name.trim())return;appData.classes[ci].students.push({name:name.trim(),studentId:''});saveData(appData);renderClasses();showToast(`${name} 已添加`,'success');}
+
+// ==================== 历史 ====================
+function renderHistory() {
+  const container=document.getElementById('historyList');
+  if(appData.rollCallRecords.length===0){container.innerHTML='<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-text">暂无点名记录</div><div class="empty-sub">完成点名后记录将显示在这里</div></div>';return;}
+  container.innerHTML=appData.rollCallRecords.map(r=>
+    `<div class="history-item"><div class="history-icon">📋</div>
+      <div class="history-info">
+        <div class="history-course">《${r.courseName}》· ${r.className}</div>
+        <div class="history-meta">${r.date} · ${SESSION_DEFS[r.session].name} · ${r.room||''} · 教师：${r.teacher}</div>
+        <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">
+          <span class="badge badge-blue">应到 ${Object.keys(r.statuses).length}</span>
+          <span class="badge badge-green">实到 ${r.presentCount}</span>
+          ${r.absentCount>0?`<span class="badge badge-red">缺勤 ${r.absentCount}</span>`:''}
+          ${r.lateCount>0?`<span class="badge badge-yellow">迟到 ${r.lateCount}</span>`:''}
+          ${r.leaveCount>0?`<span class="badge" style="background:#dbeafe;color:#1d4ed8">请假 ${r.leaveCount}</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="btn btn-sm" onclick="viewRecord('${r.id}')">查看</button>
+        <button class="btn btn-sm" style="color:var(--warning)" onclick="editRecord('${r.id}')">编辑</button>
+        <button class="btn btn-sm" style="color:var(--rose)" onclick="deleteRecord('${r.id}')">删除</button>
+      </div>
+    </div>`
+  ).join('');
+}
+function deleteRecord(id){if(!confirm('确认删除该记录？'))return;appData.rollCallRecords=appData.rollCallRecords.filter(r=>r.id!==id);appData.todayCourses.forEach(c=>{if(c.recordId===id)c.recordId=null;});saveData(appData);renderHistory();}
+
+// 编辑历史记录：重新打开点名页，预填之前的状态
+function editRecord(recordId) {
+  const record = appData.rollCallRecords.find(r => r.id === recordId);
+  if (!record) return;
+
+  currentCourse = {
+    id: recordId + '_edit',
+    scheduleId: record.courseId,
+    name: record.courseName,
+    classId: record.classId,
+    className: record.className,
+    room: record.room,
+    session: record.session,
+    teacher: record.teacher,
+    recordId: recordId,
+    _editing: true
+  };
+
+  studentStatuses = { ...record.statuses };
+  const cls = appData.classes.find(c => c.id === record.classId);
+
+  document.getElementById('rc-courseName').textContent = `《${record.courseName}》[编辑中]`;
+  document.getElementById('rc-courseSub').textContent = `${record.className} · ${record.room} · ${record.date}`;
+  markMode = 'absent';
+  updateMarkModeUI();
+  if (cls) renderStudentGrid(cls.students);
+  updateRcStats();
+  updateReport();
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-rollcall').classList.add('active');
+  document.getElementById('markToolbar').style.display = 'flex';
+}
+
+// ==================== U盘导入导出 ====================
+// ==================== 5分钟缺勤提醒 ====================
+function scheduleAbsentReminder(lateNames) {
+  if (lateNames.length === 0) return;
+  setTimeout(() => {
+    showToast(`5 分钟已过，${lateNames.length} 人仍迟到：${lateNames.join('、')}。需标记缺勤吗？`, 'info');
+  }, 5 * 60 * 1000);
+}
+
+function exportToFile() {
+  const now = new Date();
+  const filename = `课粒数据_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}.json`;
+  const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast(`已导出 ${appData.rollCallRecords.length} 条记录`, 'success');
+}
+function importFromFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.classes) { showToast('无效的数据文件', 'error'); return; }
+      // 合并记录：保留已有 + 新增不重复的
+      const existingIds = new Set(appData.rollCallRecords.map(r => r.id));
+      const newRecords = (data.rollCallRecords || []).filter(r => !existingIds.has(r.id));
+      appData.rollCallRecords = [...appData.rollCallRecords, ...newRecords];
+      appData.todayCourses = data.todayCourses || appData.todayCourses;
+      saveData(appData);
+      showToast(`已导入 ${newRecords.length} 条新记录，刷新页面`, 'success');
+      setTimeout(() => location.reload(), 1000);
+    } catch(err) { showToast('文件解析失败', 'error'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ==================== 学期设置 ====================
+function openSemesterConfig() {
+  document.getElementById('sem-start').value = appData.semesterStart;
+  document.getElementById('sem-teacher').value = appData.teacherName;
+  openModal('semesterModal');
+}
+function saveSemester() {
+  appData.semesterStart = document.getElementById('sem-start').value;
+  appData.teacherName = document.getElementById('sem-teacher').value.trim() || '贺洋子';
+  saveData(appData);
+  document.getElementById('teacherNameBadge').textContent = appData.teacherName;
+  closeModal('semesterModal');
+  refreshToday();
+  showToast('学期设置已更新，课程已刷新','success');
+}
+
+// ==================== 新学期重置 ====================
+function openNewSemesterDialog() {
+  document.getElementById('ns-start').value = appData.semesterStart;
+  document.getElementById('ns-keepClasses').checked = true;
+  document.getElementById('ns-keepSchedule').checked = false;
+  openModal('newSemesterModal');
+}
+function newSemester() {
+  const start = document.getElementById('ns-start').value;
+  const keepClasses = document.getElementById('ns-keepClasses').checked;
+  const keepSchedule = document.getElementById('ns-keepSchedule').checked;
+  if (!start) { showToast('请选择学期起始日期', 'error'); return; }
+  if (!confirm('确认开始新学期？\n将清空本地点名记录和今日课程；不勾选保留的项目将载入本学期默认班级/课表（2026-2027-1）。')) return;
+
+  // 备份到 localStorage（带上学期日期）
+  const backupKey = 'courseStackBackup_' + appData.semesterStart;
+  try { localStorage.setItem(backupKey, JSON.stringify(appData)); } catch(e) {}
+
+  appData.semesterStart = start;
+  appData.todayCourses = [];
+  appData.rollCallRecords = [];
+  // 不保留时载入本学期默认班级/课表（真实名单+真实课表），而非清空
+  if (!keepClasses) appData.classes = getDefaultData().classes;
+  if (!keepSchedule) appData.scheduleItems = getDefaultData().scheduleItems;
+  saveData(appData);
+  closeModal('newSemesterModal');
+  refreshToday();
+  showToast('新学期已就绪！', 'success');
+}
+
+// ==================== 模态框关闭 ====================
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('open'); });
+});
+
+
+
+// 获取当前课程的学生列表
+function getCurrentStudents() {
+  if (!currentCourse) return [];
+  const cls = appData.classes.find(c => c.id === currentCourse.classId) || { students: [] };
+  return cls.students || [];
+}
+
+// ==================== 随机点名 ====================
+let randomCallState = { called: [], rolling: false, rollTimer: null };
+
+function openRandomCall() {
+  if (!currentCourse) { showToast('请先进入点名页', 'error'); return; }
+  randomCallState.called = [];
+  randomCallState.rolling = false;
+  document.getElementById('randomNameDisplay').textContent = '?';
+  document.getElementById('randomNameDisplay').className = 'random-name-display';
+  document.getElementById('btnRandomStart').textContent = '🎲 开始抽取';
+  updateRandomCallInfo();
+  openModal('randomCallModal');
+}
+
+function updateRandomCallInfo() {
+  const total = getCurrentStudents().length;
+  document.getElementById('randomCalledCount').textContent = `已点 ${randomCallState.called.length}/${total}`;
+}
+
+function startRandomRoll() {
+  if (!currentCourse || randomCallState.rolling) return;
+  const students = getCurrentStudents().map(getStudentName);
+  const exclude = document.getElementById('randomExcludeCalled').checked;
+  let pool = exclude ? students.filter(n => !randomCallState.called.includes(n)) : students;
+  if (pool.length === 0) {
+    showToast('所有学生都已点过，取消"排除已点过"可重新抽取', 'warning');
+    return;
+  }
+  randomCallState.rolling = true;
+  const display = document.getElementById('randomNameDisplay');
+  display.className = 'random-name-display rolling';
+  document.getElementById('btnRandomStart').textContent = '⏹ 停止';
+  document.getElementById('btnRandomStart').onclick = stopRandomRoll;
+
+  let count = 0;
+  randomCallState.rollTimer = setInterval(() => {
+    display.textContent = pool[Math.floor(Math.random() * pool.length)];
+    count++;
+  }, 60);
+  // 3秒后自动停止
+  setTimeout(() => { if (randomCallState.rolling) stopRandomRoll(); }, 3000);
+}
+
+function stopRandomRoll() {
+  if (!randomCallState.rolling) return;
+  clearInterval(randomCallState.rollTimer);
+  randomCallState.rolling = false;
+  const display = document.getElementById('randomNameDisplay');
+  const name = display.textContent;
+  display.className = 'random-name-display stopped';
+  document.getElementById('btnRandomStart').textContent = '🎲 再来一次';
+  document.getElementById('btnRandomStart').onclick = startRandomRoll;
+  // 记录发言 +1
+  if (currentCourse && name && name !== '?') {
+    markPerformance(currentCourse.className, name, 'speak', 1);
+    randomCallState.called.push(name);
+    updateRandomCallInfo();
+    if (typeof renderStudentGrid === 'function') { const ss = getCurrentStudents(); if (ss.length) renderStudentGrid(ss); }
+    // 语音播报
+    if (typeof speakName === 'function') speakName(name);
+  }
+}
+
+// ==================== 课堂表现记录 ====================
+function getPerf(className, name) {
+  if (!appData.performances) appData.performances = {};
+  if (!appData.performances[className]) appData.performances[className] = {};
+  if (!appData.performances[className][name]) appData.performances[className][name] = { speak: 0, discipline: 0, praise: 0 };
+  return appData.performances[className][name];
+}
+
+function markPerformance(className, name, type, delta) {
+  const perf = getPerf(className, name);
+  perf[type] = Math.max(0, (perf[type] || 0) + delta);
+  saveData(appData);
+}
+
+let ctxStudentName = null;
+function showStudentCtx(e, name) {
+  ctxStudentName = name;
+  const menu = document.getElementById('studentCtxMenu');
+  menu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
+  menu.style.top = Math.min(e.clientY, window.innerHeight - 200) + 'px';
+  menu.classList.add('show');
+}
+function hideStudentCtx() { document.getElementById('studentCtxMenu').classList.remove('show'); }
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.ctx-menu') && !e.target.closest('.student-card')) hideStudentCtx();
+});
+
+function ctxMarkPerf(type, delta) {
+  if (!ctxStudentName || !currentCourse) return;
+  const d = delta || 1;
+  markPerformance(currentCourse.className, ctxStudentName, type, d);
+  const labels = { speak: '发言', discipline: '违纪', praise: '表扬' };
+  showToast(`${ctxStudentName} ${labels[type]} ${d > 0 ? '+' : ''}${d}`, d > 0 ? 'success' : 'info');
+  hideStudentCtx();
+  const ss = getCurrentStudents(); if (ss.length) renderStudentGrid(ss);
+}
+
+function openPerformanceStats() {
+  if (!currentCourse) { showToast('请先进入点名页', 'error'); return; }
+  const clsName = currentCourse.className;
+  document.getElementById('perfModalClass').textContent = clsName + ' · ' + currentCourse.name;
+  const students = getCurrentStudents().map(getStudentName);
+  // 汇总
+  let totalSpeak = 0, totalDiscipline = 0, totalPraise = 0;
+  students.forEach(n => {
+    const p = getPerf(clsName, n);
+    totalSpeak += p.speak; totalDiscipline += p.discipline; totalPraise += p.praise;
+  });
+  document.getElementById('perfSummaryRow').innerHTML = `
+    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#1d4ed8">${totalSpeak}</div><div class="perf-summary-label">💬 总发言</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#b91c1c">${totalDiscipline}</div><div class="perf-summary-label">⚠️ 总违纪</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#047857">${totalPraise}</div><div class="perf-summary-label">⭐ 总表扬</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num">${students.length}</div><div class="perf-summary-label">👥 学生数</div></div>
+  `;
+  // 表格（按发言数降序）
+  const sorted = students.map(n => ({ name: n, ...getPerf(clsName, n) })).sort((a, b) => b.speak - a.speak);
+  const tbody = document.querySelector('#perfStatsTable tbody');
+  tbody.innerHTML = sorted.map(s => `
+    <tr>
+      <td>${s.name}</td>
+      <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','speak')">💬 ${s.speak}</button></td>
+      <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','discipline')">⚠️ ${s.discipline}</button></td>
+      <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','praise')">⭐ ${s.praise}</button></td>
+      <td><button class="btn btn-sm" style="padding:2px 6px;font-size:11px;color:var(--rose)" onclick="resetStudentPerf('${clsName}','${s.name}')">重置</button></td>
+    </tr>
+  `).join('');
+  openModal('performanceModal');
+}
+
+function quickPerf(clsName, name, type) {
+  markPerformance(clsName, name, type, 1);
+  openPerformanceStats(); // 刷新
+}
+function resetStudentPerf(clsName, name) {
+  if (!confirm(`重置 ${name} 的课堂表现记录？`)) return;
+  if (appData.performances[clsName]) delete appData.performances[clsName][name];
+  saveData(appData);
+  openPerformanceStats();
+}
+function resetCurrentClassPerf() {
+  if (!currentCourse) return;
+  if (!confirm(`清空 ${currentCourse.className} 的全部课堂表现记录？`)) return;
+  delete appData.performances[currentCourse.className];
+  saveData(appData);
+  closeModal('performanceModal');
+  const ss = getCurrentStudents(); if (ss.length) renderStudentGrid(ss);
+  showToast('已清空本班课堂表现', 'success');
+}
+
+// ==================== PWA Service Worker 注册 ====================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW注册失败:', err));
+  });
+}
+
+// ==================== 初始化 ====================
+(function init() {
+  const weekNum = getCurrentWeek();
+  document.getElementById('weekBadge').textContent = '第 ' + weekNum + ' 周';
+  document.getElementById('teacherNameBadge').textContent = appData.teacherName;
+  document.getElementById('todayDate').textContent = formatDate(new Date()) + ' · 第' + weekNum + '周';
+  refreshToday();
+  checkSyncStatus();
+  initVoices();
+})();
+</script>
+</body>
+</html>
