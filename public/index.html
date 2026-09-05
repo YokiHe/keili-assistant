@@ -608,6 +608,7 @@
 
   .empty-state { text-align: center; padding: 56px 24px; color: var(--text-muted); }
   .empty-icon { font-size: 44px; margin-bottom: 14px; }
+  .empty-icon .svg-ico { width: 46px; height: 46px; color: var(--text-muted); opacity: 0.55; stroke-width: 1.5; }
   .empty-text { font-size: 15px; color: var(--text-secondary); }
   .empty-sub { font-size: 13px; margin-top: 8px; }
 
@@ -948,6 +949,19 @@
   <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 21h18M6 17v-5M12 17V6M18 17v-8"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+  <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="15.5" cy="15.5" r="1.2"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M15 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 4.1 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 4.1a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12l2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-8"/><path d="M14 7h6v6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
 </svg>
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
 
@@ -985,11 +999,11 @@
 <div class="app-main">
 
 <header class="topbar">
-  <button class="hamburger" onclick="toggleSidebar()" title="菜单">☰</button>
+  <button class="hamburger" onclick="toggleSidebar()" title="菜单"><svg class="svg-ico"><use href="#i-menu"/></svg></button>
   <div class="topbar-title" id="topbarTitle">工作台</div>
   <div class="spacer"></div>
   <div class="week-badge" id="weekBadge">第 ? 周</div>
-  <button class="btn btn-sm" onclick="toggleFullscreen()" title="全屏">⛶</button>
+  <button class="btn btn-sm" onclick="toggleFullscreen()" title="全屏"><svg class="svg-ico"><use href="#i-expand"/></svg></button>
   <div class="teacher-badge">
     <div class="teacher-avatar" style="width:22px;height:22px;font-size:11px">贺</div>
     <span id="teacherNameBadge" style="font-size:13px">贺洋子</span>
@@ -1006,15 +1020,15 @@
         <div class="today-date" id="todayDate"></div>
         <div id="dashNext" style="font-size:13px;color:var(--indigo);margin-top:6px;font-weight:500"></div>
       </div>
-      <button class="btn btn-primary" onclick="refreshToday()">🔄 刷新今日</button>
+      <button class="btn btn-primary" onclick="refreshToday()"><svg class="svg-ico"><use href="#i-refresh"/></svg> 刷新今日</button>
     </div>
 
     <div class="dash-summary" id="dashSummary"></div>
 
     <div class="quick-actions">
-      <button class="quick-action-btn" onclick="document.getElementById('manualBody').classList.remove('hidden');document.getElementById('manualRollCallCard').scrollIntoView({behavior:'smooth'})">🔧 手动点名</button>
-      <button class="quick-action-btn" onclick="switchPage('homework')">📝 作业登记</button>
-      <button class="quick-action-btn" onclick="switchPage('schedule')">📅 查看课表</button>
+      <button class="quick-action-btn" onclick="document.getElementById('manualBody').classList.remove('hidden');document.getElementById('manualRollCallCard').scrollIntoView({behavior:'smooth'})"><svg class="svg-ico"><use href="#i-wrench"/></svg> 手动点名</button>
+      <button class="quick-action-btn" onclick="switchPage('homework')"><svg class="svg-ico"><use href="#i-file"/></svg> 作业登记</button>
+      <button class="quick-action-btn" onclick="switchPage('schedule')"><svg class="svg-ico"><use href="#i-calendar"/></svg> 查看课表</button>
     </div>
 
     <div class="section-header">今日课程</div>
@@ -1022,7 +1036,7 @@
 
     <div class="card" style="margin-top:20px" id="manualRollCallCard">
       <div class="card-header" onclick="document.getElementById('manualBody').classList.toggle('hidden')" style="cursor:pointer">
-        <span class="card-title">🔧 手动点名（调课/调休备用）</span>
+        <span class="card-title"><svg class="svg-ico"><use href="#i-wrench"/></svg> 手动点名（调课/调休备用）</span>
         <span style="font-size:12px;color:var(--text-muted)">点击展开</span>
       </div>
       <div class="card-body hidden" id="manualBody" style="padding:12px 20px">
@@ -1044,9 +1058,9 @@
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="finishRollCall()">完成记录</button>
-        <button class="btn" onclick="openRandomCall()">🎲 随机</button>
-        <button class="btn" onclick="resetRollcallStatus()" title="全部恢复为到场">🔄 重置</button>
-        <button class="btn" id="btnAutoCall" onclick="startAutoCall()" title="语音依次点名">🎙 自动点名</button>
+        <button class="btn" onclick="openRandomCall()"><svg class="svg-ico"><use href="#i-dice"/></svg> 随机</button>
+        <button class="btn" onclick="resetRollcallStatus()" title="全部恢复为到场"><svg class="svg-ico"><use href="#i-refresh"/></svg> 重置</button>
+        <button class="btn" id="btnAutoCall" onclick="startAutoCall()" title="语音依次点名"><svg class="svg-ico"><use href="#i-mic"/></svg> 自动点名</button>
       </div>
     </div>
     <div>
@@ -1069,11 +1083,11 @@
               </div>
             </div>
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="autoCallStatus" hidden>
-              <span style="font-size:12px;color:var(--warning);white-space:nowrap">🎙 点名中</span>
+              <span style="font-size:12px;color:var(--warning);white-space:nowrap"><svg class="svg-ico" style="width:14px;height:14px;vertical-align:-2px"><use href="#i-mic"/></svg> 点名中</span>
               <span style="font-size:18px;font-weight:700" id="autoCallCounter"></span>
-              <button class="btn btn-sm" id="btnPause" onclick="pauseAutoCall()">⏸</button>
-              <button class="btn btn-sm" id="btnResume" onclick="resumeAutoCall()" style="display:none">▶</button>
-              <button class="btn btn-sm" style="color:var(--rose)" onclick="stopAutoCall()">■</button>
+              <button class="btn btn-sm" id="btnPause" onclick="pauseAutoCall()"><svg class="svg-ico"><use href="#i-pause"/></svg></button>
+              <button class="btn btn-sm" id="btnResume" onclick="resumeAutoCall()" style="display:none"><svg class="svg-ico"><use href="#i-play"/></svg></button>
+              <button class="btn btn-sm" style="color:var(--rose)" onclick="stopAutoCall()"><svg class="svg-ico"><use href="#i-stop"/></svg></button>
             </div>
           </div>
           <div class="card-body"><div class="student-grid" id="studentGrid"></div></div>
@@ -1134,7 +1148,7 @@
         <h2 style="font-size:20px;font-weight:700;color:var(--text)">点名历史</h2>
         <div style="font-size:13px;color:var(--text-muted);margin-top:4px">历次课堂点名记录</div>
       </div>
-      <a class="btn btn-primary" href="https://my.feishu.cn/sheets/ID0ssj0Lrh2xvmtdqtpcOGQnnnh" target="_blank" style="text-decoration:none">☁ 打开飞书文档</a>
+      <a class="btn btn-primary" href="https://my.feishu.cn/sheets/ID0ssj0Lrh2xvmtdqtpcOGQnnnh" target="_blank" style="text-decoration:none"><svg class="svg-ico"><use href="#i-cloud"/></svg> 打开飞书文档</a>
     </div>
     <div id="historyList"></div>
   </div>
@@ -1203,9 +1217,9 @@
 
 <div class="modal-overlay" id="newSemesterModal">
   <div class="modal">
-    <div class="modal-title">🔄 新学期设置</div>
+    <div class="modal-title"><svg class="svg-ico" style="vertical-align:-3px"><use href="#i-refresh"/></svg> 新学期设置</div>
     <div style="font-size:13px;color:var(--warning);background:var(--warning-light);padding:10px;border-radius:6px;margin-bottom:16px">
-      ⚠️ 旧数据会保留在飞书文档中，仅清空本地课程和点名记录。班级和学生名单可选择性保留。
+      <svg class="svg-ico" style="width:14px;height:14px;vertical-align:-2px;color:var(--gold)"><use href="#i-alert"/></svg> 旧数据会保留在飞书文档中，仅清空本地课程和点名记录。班级和学生名单可选择性保留。
     </div>
     <div class="form-group">
       <label class="form-label">学期起始日期（第一周周一）</label>
@@ -1238,7 +1252,7 @@
   <!-- ====== 随机点名 ====== -->
   <div class="modal-overlay" id="randomCallModal">
     <div class="modal" style="max-width:420px">
-      <div class="modal-title">🎲 随机点名</div>
+      <div class="modal-title"><svg class="svg-ico" style="vertical-align:-3px"><use href="#i-dice"/></svg> 随机点名</div>
       <div class="random-info" id="randomCallInfo">点击开始，从当前班级随机抽取学生</div>
       <div class="random-name-display" id="randomNameDisplay">
         <div style="text-align:center">
@@ -1258,7 +1272,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn" onclick="closeModal('randomCallModal')">关闭</button>
-        <button class="btn btn-primary" id="btnRandomStart" onclick="startRandomRoll()">🎲 开始抽取</button>
+        <button class="btn btn-primary" id="btnRandomStart" onclick="startRandomRoll()"><svg class="svg-ico"><use href="#i-dice"/></svg> 开始抽取</button>
       </div>
     </div>
   </div>
@@ -1266,7 +1280,7 @@
   <!-- ====== 课堂表现统计 ====== -->
   <div class="modal-overlay" id="performanceModal">
     <div class="modal" style="max-width:560px;max-height:85vh;overflow-y:auto">
-      <div class="modal-title">📊 课堂表现统计</div>
+      <div class="modal-title"><svg class="svg-ico" style="vertical-align:-3px"><use href="#i-chart"/></svg> 课堂表现统计</div>
       <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px" id="perfModalClass"></div>
       <div class="perf-summary-row" id="perfSummaryRow"></div>
       <div style="max-height:40vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
@@ -1288,7 +1302,7 @@
     <div class="ctx-menu-item" onclick="ctxMarkPerf('discipline')">⚠️ 违纪 +1</div>
     <div class="ctx-menu-item" onclick="ctxMarkPerf('praise')">⭐ 表扬 +1</div>
     <div class="ctx-menu-sep"></div>
-    <div class="ctx-menu-item" onclick="ctxMarkPerf('speak',-1)">↩️ 撤销发言</div>
+    <div class="ctx-menu-item" onclick="ctxMarkPerf('speak',-1)">← 撤销发言</div>
   </div>
 
   <!-- ====== 布置作业弹窗 ====== -->
@@ -1317,7 +1331,7 @@
   <!-- ====== 从文件导入作业弹窗 ====== -->
   <div class="modal-overlay" id="hwImportModal">
     <div class="modal" style="max-width:560px">
-      <div class="modal-title" id="hwimp-title-label">📂 从文件导入作业</div>
+      <div class="modal-title" id="hwimp-title-label"><svg class="svg-ico" style="vertical-align:-3px"><use href="#i-folder"/></svg> <span id="hwimp-title-text">从文件导入作业</span></div>
       <div style="font-size:12px;color:var(--text-muted);background:var(--muted-bg);border-radius:8px;padding:8px 12px;margin-bottom:14px;line-height:1.7">
         选择学生提交的作业文件或文件夹，按<b>文件名中的学号/姓名</b>自动匹配名单。支持「学号后两位+姓名」（如 08李晨）等常见命名，也兼容只写姓名的；Word/PDF/压缩包任意格式均可，文件不会上传，仅本地读取文件名
       </div>
@@ -1337,13 +1351,13 @@
       </div>
       <div class="form-group">
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <label class="btn" style="cursor:pointer">📄 选择文件<input type="file" id="hwimp-files" multiple style="display:none"></label>
-          <label class="btn" style="cursor:pointer">📁 选择文件夹<input type="file" id="hwimp-folder" webkitdirectory style="display:none"></label>
+          <label class="btn" style="cursor:pointer"><svg class="svg-ico"><use href="#i-file"/></svg> 选择文件<input type="file" id="hwimp-files" multiple style="display:none"></label>
+          <label class="btn" style="cursor:pointer"><svg class="svg-ico"><use href="#i-folder"/></svg> 选择文件夹<input type="file" id="hwimp-folder" webkitdirectory style="display:none"></label>
           <span style="font-size:12px;color:var(--text-muted);align-self:center" id="hwimp-count"></span>
         </div>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);margin-top:10px;cursor:pointer">
           <input type="checkbox" id="hwimp-cloud" checked>
-          ☁️ 同时上传到飞书云盘（按 班级/作业 自动归档文件夹）
+          <svg class="svg-ico" style="width:15px;height:15px;vertical-align:-2px"><use href="#i-cloud"/></svg> 同时上传到飞书云盘（按 班级/作业 自动归档文件夹）
         </label>
       </div>
       <div id="hwimp-preview"></div>
@@ -1865,19 +1879,19 @@ function renderDashboardExtras() {
   const summary = document.getElementById('dashSummary');
   if (summary) summary.innerHTML = `
     <div class="stat-card">
-      <div class="dash-ico blue">📋</div>
+      <div class="dash-ico blue"><svg class="svg-ico" style="width:19px;height:19px"><use href="#i-list"/></svg></div>
       <div><div class="dash-stat-num">${weekRecords.length}</div><div class="dash-stat-label">本周点名次数</div></div>
     </div>
     <div class="stat-card">
-      <div class="dash-ico green">✅</div>
+      <div class="dash-ico green"><svg class="svg-ico" style="width:19px;height:19px"><use href="#i-check-circle"/></svg></div>
       <div><div class="dash-stat-num" style="${rate === null ? 'font-size:16px;color:var(--text-muted)' : ''}">${rate === null ? '暂无' : rate + '%'}</div><div class="dash-stat-label">本周出勤率</div></div>
     </div>
     <div class="stat-card">
-      <div class="dash-ico gold">📝</div>
+      <div class="dash-ico gold"><svg class="svg-ico" style="width:19px;height:19px"><use href="#i-file"/></svg></div>
       <div><div class="dash-stat-num">${hwMissing}</div><div class="dash-stat-label">本周作业未交人次</div></div>
     </div>
     <div class="stat-card">
-      <div class="dash-ico red">📈</div>
+      <div class="dash-ico red"><svg class="svg-ico" style="width:19px;height:19px"><use href="#i-trend"/></svg></div>
       <div><div class="dash-stat-num" style="${sRate === null ? 'font-size:16px;color:var(--text-muted)' : ''}">${sRate === null ? '暂无' : sRate + '%'}</div><div class="dash-stat-label">学期出勤率 · ${appData.rollCallRecords.length} 次</div></div>
     </div>`;
 
@@ -1900,7 +1914,7 @@ function renderDashboardExtras() {
       const def = SESSION_DEFS[next.session];
       const start = def.time.split('-')[0];
       const doneTag = doneIds.has(next.id) ? '（已点名）' : '';
-      nextEl.innerHTML = `▶ 下一节 ${start} 《${next.name}》 ${next.className} · ${next.room}${doneTag}`;
+      nextEl.innerHTML = `下一节 ${start} 《${next.name}》 ${next.className} · ${next.room}${doneTag}`;
     } else if (todayScheduled.length) {
       nextEl.textContent = '今日课程已全部结束';
     } else {
@@ -1974,7 +1988,7 @@ function renderTodayCourses() {
 
   if (allCards.length === 0) {
     container.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">🌟</div>
+      <div class="empty-icon"><svg class="svg-ico"><use href="#i-calendar"/></svg></div>
       <div class="empty-text">今天没有课程安排</div>
       <div class="empty-sub">第${weekNum}周 · ${WEEKDAY_NAMES[weekday]} · 课表无匹配课程</div>
     </div>`;
@@ -2005,7 +2019,7 @@ function renderTodayCourses() {
       <div class="course-info">
         <div class="course-name">《${c.name}》</div>
         <div class="course-meta">
-          <span class="course-meta-item">👥 ${c.className}</span>
+          <span class="course-meta-item"><svg class="svg-ico" style="width:13px;height:13px"><use href="#i-users"/></svg> ${c.className}</span>
           <span class="course-meta-item">🏫 ${c.room}</span>
           <span class="course-meta-item">👨‍🏫 ${appData.teacherName}</span>
           ${weeksDisplay ? `<span class="badge badge-blue">${weeksDisplay}</span>` : ''}
@@ -3070,13 +3084,13 @@ async function syncToCloud(record) {
       } else {
         updateSyncStatus(1);
         const errMsg = data.error ? '（' + String(data.error).slice(0, 50) + '）' : '';
-        showToast('保存成功，飞书同步失败' + errMsg + ' 点击右上角☁重试', 'warning');
+        showToast('保存成功，飞书同步失败' + errMsg + ' 点左侧「云同步」重试', 'warning');
         pollSyncResult(0);
       }
     }
   } catch(e) {
     updateSyncStatus(1);
-    showToast('已保存本地（飞书同步失败，点击右上角☁重试）', 'warning');
+    showToast('已保存本地（飞书同步失败，点左侧「云同步」重试）', 'warning');
   }
 }
 
@@ -3099,11 +3113,9 @@ function updateSyncStatus(pending) {
   const el = document.getElementById('syncPending');
   if (!el) return;
   if (pending > 0) {
-    el.textContent = '☁';
     el.style.color = '#f59e0b';
     el.title = `待同步 ${pending} 条`;
   } else {
-    el.textContent = '☁';
     el.style.color = '#10b981';
     el.title = '已同步';
   }
@@ -3206,7 +3218,7 @@ function renderFullSchedule() {
 function renderClasses() {
   const container = document.getElementById('classesList');
   if (appData.classes.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">暂无班级，点击右上角添加</div></div>';
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon"><svg class="svg-ico"><use href="#i-users"/></svg></div><div class="empty-text">暂无班级，点击右上角添加</div></div>';
     return;
   }
   container.innerHTML = appData.classes.map((cls, ci) =>
@@ -3302,7 +3314,7 @@ async function addStudentInline(ci){
 // ==================== 历史 ====================
 function renderHistory() {
   const container=document.getElementById('historyList');
-  if(appData.rollCallRecords.length===0){container.innerHTML='<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-text">暂无点名记录</div><div class="empty-sub">完成点名后记录将显示在这里</div></div>';return;}
+  if(appData.rollCallRecords.length===0){container.innerHTML='<div class="empty-state"><div class="empty-icon"><svg class="svg-ico"><use href="#i-clock"/></svg></div><div class="empty-text">暂无点名记录</div><div class="empty-sub">完成点名后记录将显示在这里</div></div>';return;}
   container.innerHTML=appData.rollCallRecords.map(r=>
     `<div class="history-item"><div class="history-icon">📋</div>
       <div class="history-info">
@@ -3560,10 +3572,10 @@ function renderHwList() {
   const cls = appData.classes.find(c => c.id === cid);
   const list = getHwList(cid).slice().sort((a,b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
   const body = document.getElementById('hwBody');
-  if (!cls) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">请先在班级管理中添加班级</div></div>'; return; }
+  if (!cls) { body.innerHTML = '<div class="empty-state"><div class="empty-icon"><svg class="svg-ico"><use href="#i-users"/></svg></div><div class="empty-text">请先在班级管理中添加班级</div></div>'; return; }
   if (list.length === 0) {
     body.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">📝</div>
+      <div class="empty-icon"><svg class="svg-ico"><use href="#i-file"/></svg></div>
       <div class="empty-text">「${cls.name}」还没有作业记录</div>
       <div class="empty-sub">点击右上角「＋ 布置作业」开始登记</div>
     </div>`;
@@ -3671,7 +3683,7 @@ function renderHwMark() {
       <button class="mark-btn submitted-btn ${hwState.markMode === 'submitted' ? 'active' : ''}" onclick="hwState.markMode='submitted';renderHwMark()">✓ 标记已交</button>
       <button class="mark-btn missing-btn ${hwState.markMode === 'missing' ? 'active' : ''}" onclick="hwState.markMode='missing';renderHwMark()">✗ 标记未交</button>
       <span style="flex:1"></span>
-      <button class="btn btn-sm" onclick="copyHwMissing('${hw.id}')">📋 复制未交名单</button>
+      <button class="btn btn-sm" onclick="copyHwMissing('${hw.id}')"><svg class="svg-ico"><use href="#i-clipboard"/></svg> 复制未交名单</button>
       <button class="btn btn-sm" onclick="openHwImport('${hw.id}')">📂 补交导入</button>
     </div>
     ${missing.length > 0 ? `<div class="hw-missing-list" onclick="hwState.missingOpen = !hwState.missingOpen; renderHwMark()">
@@ -3756,10 +3768,10 @@ function renderHwSummary() {
   const cid = getHwClassId();
   const cls = appData.classes.find(c => c.id === cid);
   const body = document.getElementById('hwBody');
-  if (!cls) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">请先添加班级</div></div>'; return; }
+  if (!cls) { body.innerHTML = '<div class="empty-state"><div class="empty-icon"><svg class="svg-ico"><use href="#i-users"/></svg></div><div class="empty-text">请先添加班级</div></div>'; return; }
   const list = getHwList(cid).slice().sort((a,b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt);
   if (list.length === 0) {
-    body.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">「${cls.name}」还没有作业记录</div><div class="empty-sub">先在列表页布置作业，这里会生成按学生的汇总表</div></div>`;
+    body.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg class="svg-ico"><use href="#i-chart"/></svg></div><div class="empty-text">「${cls.name}」还没有作业记录</div><div class="empty-sub">先在列表页布置作业，这里会生成按学生的汇总表</div></div>`;
     return;
   }
   const students = getStudentList(cls);
@@ -3782,7 +3794,7 @@ function renderHwSummary() {
       </div>
       <div style="display:flex;gap:8px">
         <button class="btn" onclick="hwState.mode='list';renderHomework()">← 返回列表</button>
-        <button class="btn btn-primary" onclick="copyHwSummary()">📋 复制汇总</button>
+        <button class="btn btn-primary" onclick="copyHwSummary()"><svg class="svg-ico"><use href="#i-clipboard"/></svg> 复制汇总</button>
       </div>
     </div>
     <div class="card" style="overflow-x:auto"><table class="hw-summary-table">
@@ -3822,7 +3834,7 @@ function openHwImport(appendHwId) {
   const appending = !!hwImpAppendId;
   const hw = appending ? getHwList(cid).find(h => h.id === hwImpAppendId) : null;
   if (appending && !hw) { showToast('作业不存在', 'error'); return; }
-  document.getElementById('hwimp-title-label').textContent = appending ? '📂 追加导入到「' + hw.title + '」' : '📂 从文件导入作业';
+  document.getElementById('hwimp-title-text').textContent = appending ? '追加导入到「' + hw.title + '」' : '从文件导入作业';
   document.getElementById('hwimp-class').innerHTML = appData.classes.map(c =>
     `<option value="${c.id}" ${c.id === cid ? 'selected' : ''}>${c.name}</option>`).join('');
   document.getElementById('hwimp-title').value = appending ? hw.title : '';
