@@ -1970,6 +1970,10 @@ function startRollCallInternal(tc) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-rollcall').classList.add('active');
+  const topbarTitle = document.getElementById('topbarTitle');
+  if (topbarTitle) topbarTitle.textContent = '点名考勤';
+  document.querySelectorAll('.sidebar-nav-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
 }
 
 function backToToday() {
@@ -2330,11 +2334,13 @@ function toggleFullscreen() {
 function toggleSettingsMenu(e) {
   e.stopPropagation();
   const menu = document.getElementById('settingsMenu');
+  if (!menu) return;
   menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
 document.addEventListener('click', function(e) {
-  if (!e.target.closest('.teacher-badge')) {
-    document.getElementById('settingsMenu').style.display = 'none';
+  const menu = document.getElementById('settingsMenu');
+  if (menu && !e.target.closest('.teacher-badge')) {
+    menu.style.display = 'none';
   }
 });
 
@@ -2977,6 +2983,10 @@ function editRecord(recordId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-rollcall').classList.add('active');
+  const topbarTitle = document.getElementById('topbarTitle');
+  if (topbarTitle) topbarTitle.textContent = '点名考勤';
+  document.querySelectorAll('.sidebar-nav-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
 }
 
 // ==================== U盘导入导出 ====================

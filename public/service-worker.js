@@ -1,5 +1,5 @@
 // 课栈助手 Service Worker - 离线缓存
-const CACHE_NAME = 'kstack-v1';
+const CACHE_NAME = 'kstack-v2';
 const ASSETS = [
   './',
   './index.html',
