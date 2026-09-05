@@ -12,41 +12,44 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0b1120;
-    --surface: #121d33;
-    --surface-hover: #1a2744;
-    --border: #1e3050;
-    --border-light: #121d33;
-    --text: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    /* 浅色办公风 */
+    --bg: #f4f6fa;
+    --surface: #ffffff;
+    --surface-hover: #f1f4f9;
+    --border: #e5e9f2;
+    --border-light: #eef1f7;
+    --text: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
 
-    --brand: #a5b4fc;
-    --brand-light: #c7d2fe;
-    --brand-bg: rgba(165,180,252,0.12);
-    --gold: #f59e0b;
-    --gold-bg: rgba(245,158,11,0.10);
-    --indigo: #818cf8;
-    --indigo-light: #c7d2fe;
-    --indigo-bg: rgba(129,140,248,0.12);
-    --indigo-glow: rgba(129,140,248,0.25);
-    --emerald: #34d399;
-    --emerald-bg: rgba(52,211,153,0.12);
-    --rose: #f87171;
-    --rose-bg: rgba(248,113,113,0.12);
-    --azure: #60a5fa;
-    --azure-bg: rgba(96,165,250,0.12);
-    --muted-bg: rgba(71,85,105,0.25);
-    --muted-border: #475569;
+    --brand: #4f46e5;
+    --brand-light: #eef2ff;
+    --brand-bg: rgba(79,70,229,0.07);
+    --gold: #d97706;
+    --gold-bg: rgba(217,119,6,0.09);
+    --indigo: #4f46e5;
+    --indigo-light: #6366f1;
+    --indigo-bg: rgba(79,70,229,0.07);
+    --indigo-glow: rgba(79,70,229,0.15);
+    --emerald: #059669;
+    --emerald-bg: rgba(5,150,105,0.09);
+    --rose: #dc2626;
+    --rose-bg: rgba(220,38,38,0.08);
+    --azure: #2563eb;
+    --azure-bg: rgba(37,99,235,0.08);
+    --muted-bg: #f1f5f9;
+    --muted-border: #cbd5e1;
+    --warning: #d97706;
+    --warning-light: #fffbeb;
 
     --radius: 10px;
     --radius-lg: 16px;
     --radius-sm: 6px;
-    --shadow: 0 4px 24px rgba(0,0,0,0.35);
-    --shadow-glow: 0 0 32px rgba(129,140,248,0.35), 0 0 64px rgba(129,140,248,0.12);
-    --shadow-emerald: 0 0 20px rgba(52,211,153,0.25);
+    --shadow: 0 1px 2px rgba(15,23,42,0.04), 0 4px 16px rgba(15,23,42,0.05);
+    --shadow-lg: 0 12px 32px rgba(15,23,42,0.12);
     --font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
   }
+  .hidden{display:none!important}
   html { background: var(--bg); scroll-behavior: smooth; }
   body {
     font-family: var(--font);
@@ -58,61 +61,101 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* ===== 整体骨架：侧边栏 + 主区 ===== */
+  .app-shell { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 224px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; bottom: 0; left: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 14px;
+    transition: transform 0.25s ease;
+  }
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 8px 18px;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 14px;
+  }
+  .sidebar-logo-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    overflow: hidden; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sidebar-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
+  .sidebar-logo-name { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .sidebar-logo-sub { font-size: 11px; color: var(--text-muted); }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .sidebar-nav-label {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 10px 10px 4px;
+  }
+  .sidebar-nav-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    font-size: 14px; font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .sidebar-nav-item:hover { background: var(--surface-hover); color: var(--text); }
+  .sidebar-nav-item.active { background: var(--indigo-bg); color: var(--indigo); font-weight: 600; }
+  .sidebar-nav-item .nav-ico { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+  .sidebar-footer { border-top: 1px solid var(--border-light); padding-top: 10px; display: flex; flex-direction: column; gap: 2px; }
+  .sidebar-footer-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 8px 12px; border-radius: var(--radius);
+    font-size: 13px; color: var(--text-secondary);
+    cursor: pointer; transition: all 0.15s; user-select: none;
+  }
+  .sidebar-footer-item:hover { background: var(--surface-hover); color: var(--text); }
+  .sidebar-footer-item.danger { color: var(--rose); }
+  .sidebar-version { font-size: 11px; color: var(--text-muted); padding: 8px 12px 0; }
+  .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.45); z-index: 190; }
+  .sidebar-backdrop.show { display: block; }
+  .app-main { flex: 1; margin-left: 224px; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
+
   /* Topbar */
   .topbar {
-    background: rgba(15,23,42,0.9);
+    background: rgba(255,255,255,0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
-    padding: 0 28px;
-    height: 60px;
+    padding: 0 24px;
+    height: 56px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 14px;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 150;
   }
-  .logo {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--brand);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    letter-spacing: -0.3px;
-  }
-  .logo-icon {
-    width: 34px; height: 34px;
+  .hamburger {
+    display: none;
+    border: 1px solid var(--border);
+    background: var(--surface);
     border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
+    width: 34px; height: 34px;
+    font-size: 16px; cursor: pointer;
+    color: var(--text-secondary);
     flex-shrink: 0;
   }
-  .logo-icon img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-  }
-  .nav-tabs { display: flex; gap: 2px; margin-left: 28px; }
-  .nav-tab {
-    padding: 7px 18px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--text-secondary);
-    transition: all 0.2s;
-    border: none;
-    background: none;
-    font-family: inherit;
-    font-weight: 500;
-  }
-  .nav-tab:hover { background: var(--surface); color: var(--text); }
-  .nav-tab.active { background: var(--indigo-bg); color: var(--indigo); font-weight: 600; }
+  .topbar-title { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+  .logo { display: none; }
+  .logo-icon { display: none; }
+  .logo-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+  .nav-tabs { display: none; }
   .spacer { flex: 1; }
   .teacher-badge {
-    display: flex; align-items: center; gap: 10px;
-    padding: 6px 14px;
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 12px;
     background: var(--surface);
     border-radius: 24px;
     font-size: 13px;
@@ -121,10 +164,10 @@
   }
   .teacher-avatar {
     width: 26px; height: 26px;
-    background: linear-gradient(135deg, var(--indigo), #d97706);
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    color: #0f172a; font-size: 13px; font-weight: 600;
+    color: #fff; font-size: 13px; font-weight: 600;
   }
   .settings-dropdown {
     position: absolute;
@@ -135,7 +178,7 @@
     border-radius: var(--radius);
     padding: 6px;
     min-width: 140px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    box-shadow: var(--shadow-lg);
     z-index: 300;
   }
   .settings-item {
@@ -149,15 +192,16 @@
   }
   .settings-item:hover { background: var(--surface-hover); }
   .week-badge {
-    padding: 7px 16px;
-    background: var(--surface);
-    color: var(--text-secondary);
+    padding: 6px 14px;
+    background: var(--indigo-bg);
+    color: var(--indigo);
     border-radius: 24px;
-    font-size: 13px; font-weight: 500;
+    font-size: 13px; font-weight: 600;
     display: flex; align-items: center; gap: 6px;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(79,70,229,0.15);
+    white-space: nowrap;
   }
-  .main { padding: 28px; max-width: 1500px; margin: 0 auto; }
+  .main { padding: 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
   .page { display: none; }
   .page.active { display: block; }
 
@@ -166,11 +210,12 @@
     background: var(--surface);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
+    box-shadow: var(--shadow);
     overflow: hidden;
   }
   .card-header {
     padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-light);
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
@@ -195,14 +240,15 @@
     background: var(--surface);
     color: var(--text-secondary);
   }
-  .btn:hover { background: var(--surface-hover); border-color: var(--indigo); color: var(--text); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .btn:hover { background: var(--surface-hover); border-color: var(--indigo-light); color: var(--indigo); }
   .btn:active { transform: scale(0.97); }
-  .btn-primary { background: linear-gradient(135deg, var(--indigo) 0%, #6366f1 100%); color: white; border-color: transparent; font-weight: 600; box-shadow: 0 2px 8px rgba(99,102,241,0.3); }
-  .btn-primary:hover { background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%); border-color: transparent; box-shadow: 0 4px 16px rgba(99,102,241,0.4); }
-  .btn-success { background: linear-gradient(135deg, var(--emerald) 0%, #10b981 100%); color: white; border-color: transparent; font-weight: 600; box-shadow: 0 2px 8px rgba(16,185,129,0.3); }
-  .btn-success:hover { background: linear-gradient(135deg, #34d399 0%, #10b981 100%); border-color: transparent; box-shadow: 0 4px 16px rgba(16,185,129,0.4); }
+  .btn-primary { background: var(--indigo); color: #fff; border-color: var(--indigo); font-weight: 600; }
+  .btn-primary:hover { background: #4338ca; border-color: #4338ca; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,0.25); }
+  .btn-success { background: var(--emerald); color: #fff; border-color: var(--emerald); font-weight: 600; }
+  .btn-success:hover { background: #047857; border-color: #047857; color: #fff; }
+  .btn-danger { background: var(--rose); color: #fff; border-color: var(--rose); font-weight: 600; }
   .btn-outline { background: transparent; color: var(--text-secondary); }
-  .btn-outline:hover { background: var(--surface); }
+  .btn-outline:hover { background: var(--surface-hover); }
   .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
 
   .form-group { margin-bottom: 18px; }
@@ -217,9 +263,9 @@
     color: var(--text);
     transition: border-color 0.2s;
     outline: none;
-    background: var(--bg);
+    background: #fff;
   }
-  .form-control:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px var(--indigo-bg); }
+  .form-control:focus { border-color: var(--indigo-light); box-shadow: 0 0 0 3px var(--indigo-bg); }
   textarea.form-control { resize: vertical; min-height: 80px; }
 
   .badge {
@@ -236,54 +282,71 @@
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 
-  .stat-card { background: var(--bg); border-radius: var(--radius); padding: 18px 14px; text-align: center; border: 1px solid var(--border); }
-  .stat-num { font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 6px; color: var(--text); }
-  .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 12px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-color: var(--indigo-light); box-shadow: 0 4px 14px rgba(79,70,229,0.1); }
+  .stat-num { font-size: 26px; font-weight: 700; line-height: 1.2; color: var(--text); }
+  .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+
+  /* ===== 工作台首页 ===== */
+  .dash-greeting { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+  .dash-hello { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+  .today-date { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+  .dash-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .dash-summary .stat-card { padding: 16px 14px; text-align: left; display: flex; align-items: center; gap: 12px; }
+  .dash-ico {
+    width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 19px;
+  }
+  .dash-ico.blue { background: var(--azure-bg); }
+  .dash-ico.green { background: var(--emerald-bg); }
+  .dash-ico.red { background: var(--rose-bg); }
+  .dash-ico.gold { background: var(--gold-bg); }
+  .dash-stat-num { font-size: 22px; font-weight: 800; line-height: 1.1; color: var(--text); }
+  .dash-stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .quick-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+  .quick-action-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    font-size: 13px; font-weight: 500; color: var(--text-secondary);
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .quick-action-btn:hover { border-color: var(--indigo-light); color: var(--indigo); box-shadow: 0 4px 12px rgba(79,70,229,0.1); transform: translateY(-1px); }
 
   .today-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
   .today-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
-  .today-date { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
   .course-list { display: flex; flex-direction: column; gap: 14px; }
-  #todayCourseList:empty::after {
-    content: '📭 今天没有课程安排';
-    display: block;
-    text-align: center;
-    padding: 48px 24px;
-    color: var(--text-muted);
-    font-size: 15px;
-  }
   .course-card {
     background: var(--surface);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
+    box-shadow: var(--shadow);
     padding: 18px 24px;
     display: flex;
     align-items: center;
     gap: 18px;
     transition: all 0.2s;
   }
-  .course-card:hover { border-color: var(--indigo); }
-  .course-card.current { border-color: var(--indigo); background: var(--indigo-bg); animation: courseBreath 3s ease-in-out infinite; }
-  .course-card.current .course-time-block { animation: timePulse 3s ease-in-out infinite; }
-  @keyframes courseBreath {
-    0%, 100% { box-shadow: 0 0 16px rgba(245,158,11,0.1); }
-    50% { box-shadow: 0 0 24px rgba(245,158,11,0.25); }
-  }
-  @keyframes timePulse {
-    0%, 100% { background: var(--indigo); }
-    50% { background: #d97706; }
-  }
+  .course-card:hover { border-color: var(--indigo-light); }
+  .course-card.current { border-color: var(--indigo-light); background: linear-gradient(135deg, #fff, var(--indigo-bg)); }
   .course-card.multi { border-left: 4px solid var(--indigo); }
   .course-time-block {
     background: var(--indigo);
-    color: #0f172a;
+    color: #fff;
     border-radius: var(--radius);
     padding: 12px 16px;
     text-align: center;
     min-width: 85px;
     flex-shrink: 0;
   }
-  .course-time-block.done { background: var(--muted-border); color: var(--text-secondary); }
+  .course-time-block.done { background: var(--muted-border); color: #fff; }
   .course-session { font-size: 20px; font-weight: 800; line-height: 1; }
   .course-time-text { font-size: 11px; margin-top: 3px; opacity: 0.85; }
   .course-info { flex: 1; }
@@ -298,38 +361,27 @@
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    padding: 12px 0 6px;
+    padding: 12px 0 8px;
   }
 
   /* Roll Call — the core experience */
   .rollcall-layout { display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start; }
   .rollcall-header {
-    background: linear-gradient(135deg, var(--surface) 0%, rgba(99,102,241,0.08) 100%);
+    background: var(--surface);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
+    box-shadow: var(--shadow);
     padding: 20px 24px;
     margin-bottom: 18px;
     display: flex;
     align-items: center;
     gap: 18px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   }
   .rollcall-info { flex: 1; }
-  .rollcall-course { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; background: linear-gradient(135deg, var(--text) 0%, var(--indigo-light) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .rollcall-sub { font-size: 13px; color: var(--text-muted); margin-top: 6px; display: flex; gap: 12px; align-items: center; }
+  .rollcall-course { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .rollcall-sub { font-size: 13px; color: var(--text-muted); margin-top: 6px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
   .rollcall-sub span { display: inline-flex; align-items: center; gap: 4px; }
   .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 12px;
-    text-align: center;
-    transition: all 0.2s;
-  }
-  .stat-card:hover { transform: translateY(-2px); border-color: var(--indigo); box-shadow: 0 4px 16px rgba(99,102,241,0.15); }
-  .stat-num { font-size: 24px; font-weight: 700; line-height: 1.2; }
-  .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
 
   /* Student Grid */
   .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
@@ -345,42 +397,32 @@
     position: relative;
     overflow: hidden;
   }
-  .student-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, var(--indigo), transparent);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
   .student-card:hover {
-    border-color: var(--indigo);
+    border-color: var(--indigo-light);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99,102,241,0.2);
+    box-shadow: 0 6px 16px rgba(79,70,229,0.12);
   }
-  .student-card:hover::before { opacity: 1; }
   .student-card:active {
     transform: scale(0.96);
     transition: transform 0.1s;
   }
-  .student-card.present { border-color: var(--emerald); background: linear-gradient(135deg, var(--emerald-bg) 0%, rgba(52,211,153,0.05) 100%); }
+  .student-card.present { border-color: var(--emerald); background: var(--emerald-bg); }
   .student-card.present .student-num { color: var(--emerald); }
-  .student-card.absent { border-color: var(--rose); background: linear-gradient(135deg, var(--rose-bg) 0%, rgba(248,113,113,0.05) 100%); }
+  .student-card.absent { border-color: var(--rose); background: var(--rose-bg); }
   .student-card.absent .student-num { color: var(--rose); }
-  .student-card.late { border-color: var(--gold); background: linear-gradient(135deg, var(--gold-bg) 0%, rgba(245,158,11,0.05) 100%); }
+  .student-card.late { border-color: var(--gold); background: var(--gold-bg); }
   .student-card.late .student-num { color: var(--gold); }
-  .student-card.leave { border-color: var(--azure); background: linear-gradient(135deg, var(--azure-bg) 0%, rgba(96,165,250,0.05) 100%); }
+  .student-card.leave { border-color: var(--azure); background: var(--azure-bg); }
   .student-card.leave .student-num { color: var(--azure); }
   .student-card.unknown { border-color: var(--muted-border); background: var(--muted-bg); }
 
   /* Calling — the dramatic moment */
   .student-card.calling {
     border-color: var(--gold) !important;
-    background: #1e293b !important;
+    background: #fffbeb !important;
     animation: callGlow 1s ease-in-out infinite alternate;
     transform: scale(1.15);
-    box-shadow: 0 0 32px rgba(245,158,11,0.4), 0 0 64px rgba(245,158,11,0.15);
+    box-shadow: 0 0 0 4px rgba(217,119,6,0.15), 0 8px 24px rgba(217,119,6,0.25);
     z-index: 10;
     position: relative;
   }
@@ -398,12 +440,12 @@
     pointer-events: none;
   }
   @keyframes ringGlow {
-    0% { border-color: rgba(245,158,11,0.4); }
-    100% { border-color: rgba(245,158,11,1); }
+    0% { border-color: rgba(217,119,6,0.4); }
+    100% { border-color: rgba(217,119,6,1); }
   }
   @keyframes callGlow {
-    0% { box-shadow: 0 0 28px rgba(245,158,11,0.5), 0 0 56px rgba(245,158,11,0.2); }
-    100% { box-shadow: 0 0 40px rgba(245,158,11,0.7), 0 0 80px rgba(245,158,11,0.35); }
+    0% { box-shadow: 0 0 0 3px rgba(217,119,6,0.12), 0 6px 20px rgba(217,119,6,0.2); }
+    100% { box-shadow: 0 0 0 6px rgba(217,119,6,0.18), 0 10px 28px rgba(217,119,6,0.32); }
   }
   .student-num { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; letter-spacing: 0.08em; opacity: 0.7; }
   .student-name { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: 0.3px; line-height: 1.3; }
@@ -431,7 +473,7 @@
     padding: 10px 12px;
     border-radius: var(--radius);
     font-size: 13px;
-    background: var(--bg);
+    background: var(--muted-bg);
   }
   .absent-name { font-weight: 500; color: var(--text); }
 
@@ -448,7 +490,7 @@
   .side-panel .card.collapsed .card-body { display: none; }
 
   .report-box {
-    background: var(--bg);
+    background: var(--muted-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 16px;
@@ -476,51 +518,51 @@
     position: relative;
   }
   .schedule-cell.header {
-    background: var(--bg);
+    background: var(--muted-bg);
     font-weight: 600; font-size: 12px;
     color: var(--text-secondary); text-align: center;
     min-height: auto; padding: 10px 4px;
   }
   .schedule-cell.time-header {
-    background: var(--bg);
+    background: var(--muted-bg);
     text-align: right; padding: 8px 10px;
     font-size: 11px; color: var(--text-muted);
     min-height: auto;
   }
   .schedule-lesson {
     background: var(--indigo-bg);
-    border-left: 3px solid var(--indigo);
+    border-left: 3px solid var(--indigo-light);
     border-radius: 4px;
     padding: 5px 8px; margin-bottom: 4px;
     cursor: pointer; font-size: 11px;
     color: var(--text);
   }
-  .schedule-lesson:hover { background: rgba(245,158,11,0.2); }
+  .schedule-lesson:hover { background: var(--gold-bg); }
   .schedule-lesson.active { background: var(--rose-bg); border-left-color: var(--rose); }
-  .schedule-lesson.inactive { opacity: 0.3; }
+  .schedule-lesson.inactive { opacity: 0.35; }
   .lesson-name { font-weight: 600; color: var(--indigo); font-size: 11px; }
   .lesson-class { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
   .lesson-weeks { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
 
-  .class-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; }
-  .class-card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .class-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px; }
+  .class-card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; }
   .class-name { font-weight: 600; font-size: 15px; color: var(--text); }
   .student-table { width: 100%; border-collapse: collapse; }
-  .student-table th { padding: 12px 14px; background: var(--bg); font-size: 12px; font-weight: 600; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.04em; }
-  .student-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text); }
+  .student-table th { padding: 12px 14px; background: var(--muted-bg); font-size: 12px; font-weight: 600; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.04em; }
+  .student-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-light); font-size: 13px; color: var(--text); }
   .student-table tr:last-child td { border-bottom: none; }
   .student-table tr:hover td { background: var(--surface-hover); }
 
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.45); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 28px; width: 540px; max-width: 92vw; max-height: 82vh; overflow-y: auto; box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 28px; width: 540px; max-width: 92vw; max-height: 82vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
   .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 22px; color: var(--text); }
   .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
 
-  .toast-container { position: fixed; top: 76px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-  .toast { background: var(--surface); color: var(--text); padding: 12px 18px; border-radius: var(--radius); font-size: 13px; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.3); animation: slideIn 0.25s ease; max-width: 320px; }
-  .toast.success { background: #065f46; border-color: var(--emerald); color: #d1fae5; }
-  .toast.error { background: #7f1d1d; border-color: var(--rose); color: #fecaca; }
+  .toast-container { position: fixed; top: 72px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast { background: var(--surface); color: var(--text); padding: 12px 18px; border-radius: var(--radius); font-size: 13px; border: 1px solid var(--border); box-shadow: var(--shadow-lg); animation: slideIn 0.25s ease; max-width: 320px; }
+  .toast.success { background: #ecfdf5; border-color: #6ee7b7; color: #047857; }
+  .toast.error { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
   @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
   .empty-state { text-align: center; padding: 56px 24px; color: var(--text-muted); }
@@ -529,22 +571,22 @@
   .empty-sub { font-size: 13px; margin-top: 8px; }
 
   .manual-course { padding: 12px 16px; margin-bottom: 8px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; }
-  .manual-course:hover { border-color: var(--indigo); background: var(--indigo-bg); }
+  .manual-course:hover { border-color: var(--indigo-light); background: var(--indigo-bg); }
   .manual-course-main { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
   .manual-course-name { font-size: 15px; font-weight: 600; color: var(--text); }
   .manual-course-class { font-size: 13px; color: var(--text-muted); }
   .manual-course-meta { font-size: 12px; color: var(--text-muted); }
 
-  .history-item { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 18px 24px; margin-bottom: 14px; display: flex; align-items: center; gap: 18px; }
+  .history-item { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 18px 24px; margin-bottom: 14px; display: flex; align-items: center; gap: 18px; }
   .history-icon { width: 42px; height: 42px; border-radius: var(--radius); background: var(--indigo-bg); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
   .history-info { flex: 1; }
   .history-course { font-weight: 600; font-size: 14px; color: var(--text); }
   .history-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
-  .inner-tabs { display: flex; gap: 4px; margin-bottom: 18px; }
+  .inner-tabs { display: flex; gap: 4px; margin-bottom: 18px; flex-wrap: wrap; }
   .inner-tab { padding: 7px 16px; border-radius: var(--radius); cursor: pointer; font-size: 13px; color: var(--text-secondary); transition: all 0.15s; border: none; background: none; font-family: inherit; }
   .inner-tab:hover { background: var(--surface-hover); }
-  .inner-tab.active { background: var(--indigo-bg); color: var(--indigo); font-weight: 500; }
+  .inner-tab.active { background: var(--indigo-bg); color: var(--indigo); font-weight: 600; }
 
   .semester-info { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--text-secondary); }
   .semester-dot { width: 8px; height: 8px; background: var(--emerald); border-radius: 50%; }
@@ -566,12 +608,12 @@
     font-family: inherit;
     font-weight: 600;
     transition: all 0.15s;
-    background: var(--bg);
+    background: #fff;
     color: var(--text-secondary);
     white-space: nowrap;
   }
-  .mark-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-  .mark-btn.active { transform: translateY(-1px); box-shadow: 0 2px 12px rgba(0,0,0,0.25); }
+  .mark-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(15,23,42,0.08); }
+  .mark-btn.active { transform: translateY(-1px); box-shadow: 0 2px 10px rgba(15,23,42,0.1); }
   .mark-btn.absent-btn, .mark-btn.absent-btn.active { border-color: var(--rose); color: var(--rose); background: var(--rose-bg); }
   .mark-btn.late-btn, .mark-btn.late-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
   .mark-btn.leave-btn, .mark-btn.leave-btn.active { border-color: var(--azure); color: var(--azure); background: var(--azure-bg); }
@@ -580,11 +622,13 @@
   .mark-btn.praise-btn, .mark-btn.praise-btn.active { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-bg); }
   .mark-btn.discipline-btn, .mark-btn.discipline-btn.active { border-color: var(--rose); color: var(--rose); background: var(--rose-bg); }
   .mark-btn.nophone-btn, .mark-btn.nophone-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
+  .mark-btn.submitted-btn, .mark-btn.submitted-btn.active { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-bg); }
+  .mark-btn.missing-btn, .mark-btn.missing-btn.active { border-color: var(--rose); color: var(--rose); background: var(--rose-bg); }
 
   /* 点名完成庆祝 */
   .celebration-flash {
     position: fixed; inset: 0;
-    background: radial-gradient(circle, rgba(16,185,129,0.3), transparent 70%);
+    background: radial-gradient(circle, rgba(16,185,129,0.25), transparent 70%);
     pointer-events: none;
     z-index: 9999;
     animation: flashOut 1.2s ease-out forwards;
@@ -598,19 +642,16 @@
   /* ========== 平板/手机（教师操作端）========== */
   @media (max-width: 900px) {
     .main { padding: 14px; }
-    .topbar { padding: 0 12px; height: 48px; }
-    .logo { font-size: 15px; }
-    .logo-icon { width: 28px; height: 28px; }
-    .nav-tabs { margin-left: 4px; gap: 1px; }
-    .nav-tab { padding: 4px 10px; font-size: 11px; }
+    .topbar { padding: 0 12px; height: 50px; }
     .teacher-badge { display: none; }
-    .week-badge { font-size: 10px; padding: 4px 8px; }
+    .week-badge { font-size: 11px; padding: 4px 10px; }
     .rollcall-layout { grid-template-columns: 1fr; }
     .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .dash-summary { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .stat-num { font-size: 24px; }
     .stat-label { font-size: 11px; }
-    .today-title { font-size: 18px; }
+    .dash-hello { font-size: 19px; }
     .course-card { padding: 12px; flex-wrap: wrap; gap: 10px; }
     .course-name { font-size: 14px; }
     .course-actions { width: 100%; justify-content: flex-start; }
@@ -632,20 +673,20 @@
 
   @media (max-width: 480px) {
     .main { padding: 10px; }
-    .topbar { height: 42px; padding: 0 8px; gap: 4px; }
-    .logo { font-size: 13px; }
-    .logo-icon { width: 24px; height: 24px; }
-    .nav-tab { padding: 3px 8px; font-size: 10px; }
+    .topbar { height: 46px; padding: 0 8px; gap: 8px; }
+    .topbar-title { font-size: 14px; }
     .card { border-radius: 10px; }
     .card-header { padding: 10px 12px; }
     .card-body { padding: 10px; }
     .card-title { font-size: 13px; }
-    .today-title { font-size: 16px; }
     .course-card { padding: 10px; gap: 8px; }
     .course-name { font-size: 13px; }
     .stats-row { gap: 6px; }
     .stat-card { padding: 10px 6px; }
     .stat-num { font-size: 22px; }
+    .dash-summary { gap: 8px; }
+    .dash-ico { width: 34px; height: 34px; font-size: 16px; }
+    .dash-stat-num { font-size: 18px; }
     .student-grid { grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: 5px; }
     .student-card { padding: 7px 4px; border-radius: 8px; }
     .student-name { font-size: 11px; }
@@ -666,8 +707,9 @@
     .manual-course-meta { font-size: 10px; }
     .inner-tab { padding: 5px 10px; font-size: 11px; }
     #btnAutoCall, #btnPause, #btnResume { font-size: 11px; padding: 5px 10px; }
-    .mark-toolbar { bottom: 12px; padding: 4px; gap: 2px; border-radius: 10px; }
+    .mark-toolbar { gap: 2px; }
     .mark-btn { padding: 6px 10px; font-size: 11px; border-radius: 8px; }
+    .quick-action-btn { padding: 8px 12px; font-size: 12px; }
   }
 
   /* ===== 大屏展示（教室屏幕广播 / 智慧黑板）===== */
@@ -698,9 +740,10 @@
     font-size: 48px; font-weight: 800; text-align: center;
     padding: 40px 20px; min-height: 120px; display: flex;
     align-items: center; justify-content: center;
-    background: linear-gradient(135deg, var(--indigo-bg), var(--surface));
+    background: var(--indigo-bg);
     border-radius: 16px; margin: 16px 0;
     transition: transform 0.1s;
+    color: var(--text);
   }
   .random-name-display.rolling { animation: shake 0.1s infinite; color: var(--indigo); }
   .random-name-display.stopped { color: var(--emerald); transform: scale(1.1); }
@@ -711,7 +754,7 @@
   .ctx-menu {
     position: fixed; z-index: 9999; background: var(--surface);
     border: 1px solid var(--border); border-radius: 10px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 6px; min-width: 160px;
+    box-shadow: var(--shadow-lg); padding: 6px; min-width: 160px;
     display: none;
   }
   .ctx-menu.show { display: block; }
@@ -733,18 +776,52 @@
   /* ===== 表现统计模态框 ===== */
   .perf-stats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .perf-stats-table th { background: var(--indigo-bg); color: var(--indigo); padding: 8px; text-align: center; font-weight: 600; }
-  .perf-stats-table td { padding: 6px 8px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-stats-table td { padding: 6px 8px; text-align: center; border-bottom: 1px solid var(--border-light); }
   .perf-stats-table td:first-child { text-align: left; font-weight: 500; }
   .perf-summary-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
   .perf-summary-card { flex: 1; min-width: 80px; text-align: center; padding: 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
   .perf-summary-num { font-size: 24px; font-weight: 700; }
   .perf-summary-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
+  /* ===== 作业统计模块 ===== */
+  .hw-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 12px; flex-wrap: wrap; }
+  .hw-page-title { font-size: 20px; font-weight: 700; color: var(--text); }
+  .hw-page-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .hw-item {
+    background: var(--surface); border-radius: var(--radius-lg);
+    border: 1px solid var(--border); box-shadow: var(--shadow);
+    padding: 16px 20px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 16px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .hw-item:hover { border-color: var(--indigo-light); }
+  .hw-item-icon {
+    width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+    background: var(--gold-bg); display: flex; align-items: center; justify-content: center; font-size: 19px;
+  }
+  .hw-item-info { flex: 1; min-width: 0; }
+  .hw-item-title { font-weight: 600; font-size: 15px; color: var(--text); }
+  .hw-item-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .hw-rate-wrap { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .hw-rate-bar { width: 90px; height: 8px; background: var(--muted-bg); border-radius: 4px; overflow: hidden; }
+  .hw-rate-fill { height: 100%; background: var(--emerald); border-radius: 4px; }
+  .hw-rate-num { font-size: 13px; font-weight: 700; color: var(--text-secondary); min-width: 44px; text-align: right; }
+  .hw-stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+  .hw-actions-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .hw-summary-table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--surface); }
+  .hw-summary-table th { background: var(--muted-bg); padding: 10px 8px; font-size: 12px; color: var(--text-secondary); border-bottom: 1px solid var(--border); text-align: center; white-space: nowrap; }
+  .hw-summary-table td { padding: 9px 8px; border-bottom: 1px solid var(--border-light); text-align: center; }
+  .hw-summary-table td:first-child { text-align: left; font-weight: 500; white-space: nowrap; }
+  .hw-cell-yes { color: var(--emerald); font-weight: 600; }
+  .hw-cell-no { color: var(--rose); font-weight: 600; }
+  .hw-cell-na { color: var(--text-muted); }
+  .hw-missing-list { background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius); padding: 12px 16px; margin-bottom: 14px; font-size: 13px; color: #b91c1c; line-height: 1.8; }
+
   /* ===== 移动端底部导航 ===== */
   .mobile-nav {
     display: none; position: fixed; bottom: 0; left: 0; right: 0;
     background: var(--surface); border-top: 1px solid var(--border);
-    padding: 6px 0 env(safe-area-inset-bottom, 8px); z-index: 100;
+    padding: 6px 0 env(safe-area-inset-bottom, 8px); z-index: 200;
     justify-content: space-around;
   }
   .mobile-nav-item {
@@ -755,9 +832,14 @@
   .mobile-nav-item.active { color: var(--indigo); }
   .mobile-nav-item .nav-icon { font-size: 20px; }
   @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); box-shadow: var(--shadow-lg); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-backdrop.show { display: block; }
+    .app-main { margin-left: 0; }
+    .hamburger { display: flex; align-items: center; justify-content: center; }
     .mobile-nav { display: flex; }
-    .main { padding-bottom: 70px; }
-    .topbar .nav-tabs { display: none; }
+    .main { padding-bottom: 76px; }
+    .topbar { padding: 0 12px; }
   }
   @media (max-width: 480px) {
     .random-name-display { font-size: 32px; padding: 24px 12px; min-height: 80px; }
@@ -773,50 +855,73 @@
 </head>
 <body>
 
-<div class="topbar">
-  <div class="logo">
-    <div class="logo-icon"><img src="logo.png" alt="课粒"></div>
-    课粒
-  </div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchPage('today')">今日课程</button>
-    <button class="nav-tab" onclick="switchPage('schedule')">完整课表</button>
-    <button class="nav-tab" onclick="switchPage('history')">点名历史</button>
-  </div>
-  <div class="spacer"></div>
-  <button class="btn btn-sm" onclick="toggleFullscreen()" title="全屏">⛶</button>
-  <div class="teacher-badge" style="gap:8px;padding:5px 12px;cursor:pointer;position:relative" onclick="toggleSettingsMenu(event)">
-    <span id="weekBadge" style="font-size:12px;color:var(--text-muted)">第?周</span>
-    <span style="color:var(--border)">|</span>
-    <span id="syncPending" onclick="retryPendingSync()" style="font-size:12px;color:#fcd34d;cursor:pointer" title="云同步状态（点击重试未同步记录）">☁</span>
-    <span style="color:var(--border)">|</span>
-    <div class="teacher-avatar" style="width:22px;height:22px;font-size:11px">贺</div>
-    <span id="teacherNameBadge" style="font-size:13px">贺洋子</span>
-    <span style="font-size:10px;color:var(--text-muted)">▾</span>
-    <div id="settingsMenu" class="settings-dropdown" style="display:none">
-      <div class="settings-item" onclick="event.stopPropagation();switchPage('classes')">👥 班级管理</div>
-      <div class="settings-item" onclick="event.stopPropagation();openSemesterConfig()">⚙ 学期设置</div>
-      <div class="settings-item" onclick="event.stopPropagation();openNewSemesterDialog()" style="color:var(--rose)">🔄 新学期</div>
+<div class="toast-container" id="toastContainer"></div>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+<div class="app-shell">
+
+<!-- ====== 左侧导航栏 ====== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon"><img src="logo.png" alt="课粒"></div>
+    <div>
+      <div class="sidebar-logo-name">课粒</div>
+      <div class="sidebar-logo-sub">教师工作台</div>
     </div>
   </div>
-</div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-nav-label">常用功能</div>
+    <div class="sidebar-nav-item active" data-page="dashboard" onclick="switchPage('dashboard')"><span class="nav-ico">🏠</span>工作台</div>
+    <div class="sidebar-nav-item" data-page="homework" onclick="switchPage('homework')"><span class="nav-ico">📝</span>作业统计</div>
+    <div class="sidebar-nav-item" data-page="schedule" onclick="switchPage('schedule')"><span class="nav-ico">📅</span>完整课表</div>
+    <div class="sidebar-nav-item" data-page="history" onclick="switchPage('history')"><span class="nav-ico">🗂️</span>点名历史</div>
+    <div class="sidebar-nav-item" data-page="classes" onclick="switchPage('classes')"><span class="nav-ico">👥</span>班级管理</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-footer-item" onclick="retryPendingSync()" title="云同步状态（点击重试未同步记录）"><span class="nav-ico" id="syncPending" style="font-size:14px">☁️</span>云同步</div>
+    <div class="sidebar-footer-item" onclick="openSemesterConfig()"><span class="nav-ico">⚙️</span>学期设置</div>
+    <div class="sidebar-footer-item danger" onclick="openNewSemesterDialog()"><span class="nav-ico">🔄</span>新学期</div>
+    <div class="sidebar-version">课粒 · 教师工作台 v2</div>
+  </div>
+</aside>
 
-<div class="toast-container" id="toastContainer"></div>
+<div class="app-main">
+
+<header class="topbar">
+  <button class="hamburger" onclick="toggleSidebar()" title="菜单">☰</button>
+  <div class="topbar-title" id="topbarTitle">工作台</div>
+  <div class="spacer"></div>
+  <div class="week-badge" id="weekBadge">第 ? 周</div>
+  <button class="btn btn-sm" onclick="toggleFullscreen()" title="全屏">⛶</button>
+  <div class="teacher-badge">
+    <div class="teacher-avatar" style="width:22px;height:22px;font-size:11px">贺</div>
+    <span id="teacherNameBadge" style="font-size:13px">贺洋子</span>
+  </div>
+</header>
 
 <div class="main">
 
-  <!-- ====== 今日课程 ====== -->
-  <div id="page-today" class="page active">
-    <div class="today-header">
+  <!-- ====== 工作台首页 ====== -->
+  <div id="page-dashboard" class="page active">
+    <div class="dash-greeting">
       <div>
-        <div class="today-title">今日课程</div>
+        <div class="dash-hello" id="dashHello">你好，老师</div>
         <div class="today-date" id="todayDate"></div>
       </div>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-primary" onclick="refreshToday()">🔄 刷新</button>
-      </div>
+      <button class="btn btn-primary" onclick="refreshToday()">🔄 刷新今日</button>
     </div>
+
+    <div class="dash-summary" id="dashSummary"></div>
+
+    <div class="quick-actions">
+      <button class="quick-action-btn" onclick="document.getElementById('manualBody').classList.remove('hidden');document.getElementById('manualRollCallCard').scrollIntoView({behavior:'smooth'})">🔧 手动点名</button>
+      <button class="quick-action-btn" onclick="switchPage('homework')">📝 作业登记</button>
+      <button class="quick-action-btn" onclick="switchPage('schedule')">📅 查看课表</button>
+    </div>
+
+    <div class="section-header">今日课程</div>
     <div id="todayCourseList"></div>
+
     <div class="card" style="margin-top:20px" id="manualRollCallCard">
       <div class="card-header" onclick="document.getElementById('manualBody').classList.toggle('hidden')" style="cursor:pointer">
         <span class="card-title">🔧 手动点名（调课/调休备用）</span>
@@ -827,7 +932,9 @@
         <div id="manualCourseList" style="display:flex;flex-wrap:wrap;gap:8px"></div>
       </div>
     </div>
-    <style>.hidden{display:none!important}</style>
+
+    <div class="section-header">最近点名</div>
+    <div id="dashRecent"></div>
   </div>
 
   <!-- ====== 点名页面 ====== -->
@@ -895,6 +1002,19 @@
     </div>
   </div>
 
+  <!-- ====== 作业统计 ====== -->
+  <div id="page-homework" class="page">
+    <div class="hw-header">
+      <div>
+        <div class="hw-page-title">平时作业统计</div>
+        <div class="hw-page-sub">登记每次作业提交情况，自动统计完成率与未交名单</div>
+      </div>
+      <button class="btn btn-primary" onclick="openAddHwModal()">＋ 布置作业</button>
+    </div>
+    <div class="inner-tabs" id="hwClassTabs"></div>
+    <div id="hwBody"></div>
+  </div>
+
   <!-- ====== 班级管理 ====== -->
   <div id="page-classes" class="page">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
@@ -918,7 +1038,10 @@
     </div>
     <div id="historyList"></div>
   </div>
-</div>
+</div><!-- /main -->
+
+</div><!-- /app-main -->
+</div><!-- /app-shell -->
 
 <!-- Modals -->
 <div class="modal-overlay" id="semesterModal">
@@ -1065,11 +1188,35 @@
     <div class="ctx-menu-item" onclick="ctxMarkPerf('speak',-1)">↩️ 撤销发言</div>
   </div>
 
+  <!-- ====== 布置作业弹窗 ====== -->
+  <div class="modal-overlay" id="hwModal">
+    <div class="modal" style="max-width:440px">
+      <div class="modal-title" id="hwModalTitle">布置作业</div>
+      <div class="form-group">
+        <label class="form-label">班级 *</label>
+        <select class="form-control" id="hw-class"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">作业名称 *</label>
+        <input class="form-control" id="hw-title" placeholder="如：第3周实验报告 / 课后习题P45">
+      </div>
+      <div class="form-group">
+        <label class="form-label">布置日期</label>
+        <input class="form-control" type="date" id="hw-date">
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('hwModal')">取消</button>
+        <button class="btn btn-primary" onclick="saveHw()">保存并登记</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ====== 移动端底部导航 ====== -->
   <div class="mobile-nav" id="mobileNav">
-    <div class="mobile-nav-item active" data-page="today" onclick="switchPage('today')"><span class="nav-icon">📅</span>今日</div>
+    <div class="mobile-nav-item active" data-page="dashboard" onclick="switchPage('dashboard')"><span class="nav-icon">🏠</span>工作台</div>
     <div class="mobile-nav-item" data-page="schedule" onclick="switchPage('schedule')"><span class="nav-icon">📋</span>课表</div>
-    <div class="mobile-nav-item" data-page="history" onclick="switchPage('history')"><span class="nav-icon">📝</span>历史</div>
+    <div class="mobile-nav-item" data-page="homework" onclick="switchPage('homework')"><span class="nav-icon">📝</span>作业</div>
+    <div class="mobile-nav-item" data-page="history" onclick="switchPage('history')"><span class="nav-icon">🗂️</span>历史</div>
     <div class="mobile-nav-item" data-page="classes" onclick="switchPage('classes')"><span class="nav-icon">👥</span>班级</div>
   </div>
 
@@ -1088,6 +1235,7 @@ function loadData() {
           cls.students = cls.students.map(s => ({ name: s, studentId: '' }));
         }
       });
+      if (!data.homework) data.homework = {};
       return data;
     }
   } catch(e) {}
@@ -1393,7 +1541,8 @@ function getDefaultData() {
     ],
     todayCourses: [],
     rollCallRecords: [],
-    performances: {}
+    performances: {},
+    homework: {}
   };
 }
 
@@ -1473,21 +1622,94 @@ function formatDate(d) {
 }
 
 // ==================== 页面切换 ====================
+const PAGE_TITLES = { dashboard:'工作台', homework:'作业统计', schedule:'完整课表', history:'点名历史', classes:'班级管理', rollcall:'点名考勤' };
 function switchPage(name) {
+  if (name === 'today') name = 'dashboard';
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  const names = ['today','schedule','history'];
-  const idx = names.indexOf(name);
-  if (idx >= 0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
-  // 移动端底部导航
+  const page = document.getElementById('page-' + name);
+  if (!page) return;
+  page.classList.add('active');
+  document.querySelectorAll('.sidebar-nav-item').forEach(i => {
+    i.classList.toggle('active', i.dataset.page === name);
+  });
   document.querySelectorAll('.mobile-nav-item').forEach(item => {
     item.classList.toggle('active', item.dataset.page === name);
   });
-  if (name === 'today') { renderTodayCourses(); renderManualCourseList(); }
+  const title = document.getElementById('topbarTitle');
+  if (title) title.textContent = PAGE_TITLES[name] || '';
+  closeSidebar();
+  if (name === 'dashboard') { renderTodayCourses(); renderManualCourseList(); renderDashboardExtras(); }
   if (name === 'schedule') renderFullSchedule();
   if (name === 'classes') renderClasses();
   if (name === 'history') renderHistory();
+  if (name === 'homework') renderHomework();
+}
+
+// ==================== 侧边栏（移动端抽屉） ====================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarBackdrop').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebarBackdrop')?.classList.remove('show');
+}
+
+// ==================== 工作台：概况统计 + 最近记录 ====================
+function renderDashboardExtras() {
+  const h = new Date().getHours();
+  const greet = h < 6 ? '夜深了' : h < 12 ? '上午好' : h < 14 ? '中午好' : h < 18 ? '下午好' : '晚上好';
+  const hello = document.getElementById('dashHello');
+  if (hello) hello.textContent = greet + '，' + (appData.teacherName || '老师');
+
+  const weekNum = getCurrentWeek();
+  const weekRecords = appData.rollCallRecords.filter(r => r.weekNum === weekNum);
+  let should = 0, arrived = 0;
+  weekRecords.forEach(r => { should += r.totalCount || 0; arrived += (r.presentCount || 0) + (r.lateCount || 0) + (r.leaveCount || 0); });
+  const rate = should > 0 ? Math.round(arrived / should * 100) : null;
+
+  // 本周作业未交人次
+  let hwMissing = 0;
+  Object.values(appData.homework || {}).forEach(list => {
+    (list || []).forEach(hw => {
+      if (hw.week === weekNum) Object.values(hw.records || {}).forEach(v => { if (v === 'missing') hwMissing++; });
+    });
+  });
+
+  const summary = document.getElementById('dashSummary');
+  if (summary) summary.innerHTML = `
+    <div class="stat-card">
+      <div class="dash-ico blue">📋</div>
+      <div><div class="dash-stat-num">${weekRecords.length}</div><div class="dash-stat-label">本周点名次数</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="dash-ico green">✅</div>
+      <div><div class="dash-stat-num" style="${rate === null ? 'font-size:16px;color:var(--text-muted)' : ''}">${rate === null ? '暂无' : rate + '%'}</div><div class="dash-stat-label">本周出勤率</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="dash-ico gold">📝</div>
+      <div><div class="dash-stat-num">${hwMissing}</div><div class="dash-stat-label">本周作业未交人次</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="dash-ico red">👥</div>
+      <div><div class="dash-stat-num">${appData.classes.length}</div><div class="dash-stat-label">班级数量</div></div>
+    </div>`;
+
+  const recent = document.getElementById('dashRecent');
+  if (recent) {
+    if (appData.rollCallRecords.length === 0) {
+      recent.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">暂无点名记录，完成一次点名后会显示在这里</div>';
+    } else {
+      recent.innerHTML = appData.rollCallRecords.slice(0, 3).map(r =>
+        `<div class="history-item" style="padding:14px 20px">
+          <div class="history-info">
+            <div class="history-course">《${r.courseName}》· ${r.className}</div>
+            <div class="history-meta">${r.date} · 应到 ${r.totalCount} · 实到 ${r.presentCount}${r.absentCount > 0 ? ' · 缺勤 ' + r.absentCount : ''}</div>
+          </div>
+          <button class="btn btn-sm" onclick="switchPage('history');setTimeout(()=>viewRecord('${r.id}'),100)">查看</button>
+        </div>`).join('');
+    }
+  }
 }
 
 // ==================== 今日课程（核心：自动检测） ====================
@@ -1872,10 +2094,120 @@ function updateCallingCard(idx) {
   }
 }
 
+// 多音字映射表（姓氏+常见名字用字），播放语音前自动替换为同音字
+const POLYPHONE_MAP = {
+  // 常见多音字姓氏
+  '覃': '秦', '查': '渣', '解': '谢', '单': '善', '朴': '瓢',
+  '区': '欧', '仇': '求', '秘': '必', '折': '舌', '冼': '显',
+  '曾': '增', '缪': '妙', '晟': '胜', '翟': '宅', '逄': '旁',
+  '芮': '瑞', '阚': '看', '亓': '其', '乜': '聂', '甯': '宁',
+  '郇': '寻', '隗': '伟', '郗': '吃', '昝': '攒', '殳': '书',
+  '恽': '运', '蒯': '快', '荆': '京', '龚': '公', '谌': '陈',
+  '扈': '户', '羿': '义', '莘': '深', '柘': '这', '雒': '洛',
+  '颉': '结', '颛': '专', '顼': '需', '端木': '端木', '皇甫': '黄甫',
+  '令狐': '令胡', '慕容': '木容', '司徒': '私图', '司空': '私空',
+  // 名字中常见多音字
+  '行': '航', '重': '虫', '长': '常', '少': '哨', '乐': '月',
+  '朝': '潮', '盛': '胜', '奇': '齐', '都': '督', '华': '化',
+  '强': '墙', '传': '船', '相': '香', '柏': '百', '石': '时',
+  '舍': '社', '曲': '取', '省': '醒', '种': '肿', '参': '餐',
+  '差': '叉', '藏': '脏', '几': '机', '教': '交', '觉': '决',
+  '角': '脚', '结': '节', '据': '句', '卷': '娟', '壳': '俏',
+  '落': '洛', '没': '梅', '模': '魔', '难': '南', '宁': '凝',
+  '片': '骗', '漂': '飘', '屏': '平', '迫': '破', '铺': '扑',
+  '栖': '七', '卡': '咔', '切': '窃', '亲': '钦', '撒': '洒',
+  '散': '伞', '丧': '桑', '色': '瑟', '刹': '沙', '啥': '沙',
+  '晒': '筛', '善': '扇', '稍': '烧', '蛇': '舌', '射': '社',
+  '谁': '水', '沈': '审', '胜': '剩', '识': '时', '实': '十',
+  '食': '时', '史': '使', '始': '史', '氏': '是', '世': '事',
+  '市': '是', '似': '四', '事': '是', '势': '是', '视': '是',
+  '试': '是', '饰': '是', '室': '是', '逝': '是', '释': '是',
+  '匙': '时', '殖': '直', '值': '直', '职': '直', '植': '直',
+  '执': '直', '指': '纸', '止': '纸', '只': '纸', '旨': '纸',
+  '址': '纸', '祉': '纸', '枳': '纸', '咫': '纸',
+  // 生僻字常见读音
+  '龑': '眼', '赟': '晕', '祎': '一', '旻': '民', '燮': '谢',
+  '燚': '易', '淼': '秒', '焱': '艳', '垚': '摇', '犇': '奔',
+  '羴': '山', '鱻': '鲜', '惢': '锁', '叒': '若', '叕': '卓',
+  '朤': '朗', '茻': '莽', '烎': '银', '玊': '素', '氼': '溺',
+  '砳': '乐', '嘦': '叫', '嫑': '标', '砼': '同', '喹': '葵',
+  '啉': '林', '喔': '窝', '嗳': '爱', '嘘': '需', '嘤': '英',
+  '嘱': '主', '噜': '卢', '噌': '层', '噔': '登', '嚯': '货',
+  '囔': '囊', '囗': '围', '囙': '因', '囜': '您', '広': '广',
+  '庄': '装', '圵': '荡', '圶': '恰', '坙': '经', '坔': '地',
+  '坕': '经', '坖': '忌', '坂': '板', '坜': '力', '圻': '其',
+  '埈': '俊', '埇': '永', '埊': '地', '埍': '卷', '埐': '秦',
+  '埑': '哲', '埓': '列', '埖': '花', '埗': '步', '埘': '时',
+  '埙': '勋', '埜': '野', '埞': '低', '埡': '亚', '埢': '全',
+  '埣': '岁', '埤': '皮', '埥': '青', '埦': '碗', '埧': '巨',
+  '埨': '轮', '埩': '争', '埪': '空', '埫': '淌', '埬': '东',
+  '埭': '代', '埯': '俺', '埰': '彩', '埱': '叔', '埲': '本',
+  '埳': '砍', '埴': '直', '埵': '朵', '埶': '艺', '埸': '易',
+  '培': '悲', '埾': '聚', '埿': '泥', '堀': '枯', '堁': '克',
+  '堃': '坤', '堄': '逆', '堈': '刚', '堉': '玉', '堊': '恶',
+  '堋': '朋', '堌': '固', '堍': '兔', '堎': '楞', '堏': '方',
+  '堐': '牙', '堒': '昆', '堓': '岸', '堔': '深', '堕': '围',
+  '堖': '脑', '堗': '突', '堘': '成', '堙': '因', '堚': '环',
+  '堛': '必', '堜': '练', '堝': '锅', '堞': '蝶', '堟': '转',
+  '堠': '后', '堡': '保', '堢': '宝', '堣': '禹', '堤': '辟',
+  '堥': '毛', '堦': '阶', '堧': '软', '堨': '爱', '堩': '更',
+  '堪': '刊', '堫': '总', '堬': '余', '堭': '皇', '堮': '饿',
+  '堯': '尧', '堲': '疾', '堳': '眉', '場': '场', '堶': '驼',
+  '堷': '音', '堸': '风', '堹': '正', '堺': '界', '堻': '金',
+  '堼': '恒', '堽': '刚', '堾': '春', '堿': '碱', '塀': '平',
+  '塁': '泪', '塂': '讲', '塃': '荒', '塄': '楞', '塅': '段',
+  '塆': '湾', '塇': '宣', '塈': '记', '塉': '吉', '塊': '快',
+  '塋': '营', '塍': '成', '塎': '永', '塏': '凯', '塐': '素',
+  '塑': '觉', '塒': '时', '塓': '密', '塔': '君', '塕': '翁',
+  '塖': '乘', '塗': '图', '塘': '匹', '塙': '确', '塚': '肿',
+  '塛': '栗', '塜': '朋', '塝': '棒', '塞': '赛', '塟': '葬',
+  '塠': '堆', '塡': '天', '塢': '物', '塣': '正', '塤': '勋',
+  '塥': '格', '塦': '阵', '塧': '爱', '塨': '公', '塩': '盐',
+  '塪': '陷', '填': '田', '塬': '原', '塭': '温', '塮': '谢',
+  '塯': '六', '塰': '海', '塱': '朗', '塲': '场', '塳': '朋',
+  '塴': '蹦', '塵': '尘', '塶': '鹿', '塷': '鲁', '塸': '欧',
+  '塹': '欠', '塺': '梅', '塻': '莫', '塼': '专', '塽': '爽',
+  '塾': '熟', '塿': '楼', '墀': '迟', '墁': '慢', '墂': '标',
+  '墄': '七', '墆': '至', '墇': '张', '墈': '看', '墉': '庸',
+  '墊': '电', '墋': '惨', '墌': '只', '墍': '记', '墎': '郭',
+  '墏': '枪', '墐': '尽', '墑': '低', '墒': '伤', '墓': '颠',
+  '墔': '催', '墕': '燕', '墖': '塔', '増': '增', '墘': '前',
+  '墙': '店', '墚': '梁', '墛': '为', '墜': '坠', '墝': '敲',
+  '增': '端', '墟': '宾', '墠': '善', '墡': '善', '墢': '拔',
+  '墣': '仆', '墤': '快', '墥': '童', '墦': '凡', '墧': '乔',
+  '墨': '莫', '墩': '蹲', '墪': '蹲', '墫': '尊', '墬': '地',
+  '墭': '盛', '墮': '堕', '墯': '堕', '墰': '谈', '墱': '登',
+  '墲': '无', '墳': '坟', '墴': '黄', '墵': '坛', '墶': '达',
+  '墷': '夜', '墸': '主', '墹': '满', '墺': '奥', '墻': '墙',
+  '墼': '机', '墽': '敲', '墾': '肯', '墿': '易', '壀': '皮',
+  '壁': '哀', '壂': '殿', '壃': '江', '壄': '野', '壅': '周',
+  '壆': '学', '壇': '坛', '壈': '凛', '壉': '巨', '壊': '坏',
+  '壋': '当', '壌': '壤', '壍': '欠', '壎': '勋', '壏': '烂',
+  '壐': '喜', '壑': '仇', '壒': '爱', '壓': '高', '壔': '岛',
+  '壕': '豪', '壖': '软', '壗': '尽', '壓': '压', '壙': '旷',
+  '壚': '卢', '壛': '言', '壜': '谈', '壝': '围', '壞': '坏',
+  '壟': '垄', '壠': '龙', '壡': '锐', '壢': '立', '壣': '林',
+  '壤': '大', '壥': '连', '壦': '宣', '壧': '严', '壨': '雷',
+  '壩': '坝', '壪': '弯'
+};
+
+// 获取语音播放名（自动替换多音字为同音字）
+function getVoiceName(name) {
+  if (!name) return name;
+  let result = '';
+  for (let i = 0; i < name.length; i++) {
+    const ch = name[i];
+    result += POLYPHONE_MAP[ch] || ch;
+  }
+  return result;
+}
+
 async function speakName(name) {
+  // 自动替换多音字
+  const voiceName = getVoiceName(name);
   // 优先使用后端 TTS（微软晓晓声音），失败时回退到浏览器原生
   try {
-    const res = await fetch('/tts?text=' + encodeURIComponent(name));
+    const res = await fetch('/tts?text=' + encodeURIComponent(voiceName));
     if (res.ok) {
       const blob = await res.blob();
       if (blob.size > 200) {
@@ -1905,7 +2237,7 @@ async function speakName(name) {
   }
 
   try {
-    const u = new SpeechSynthesisUtterance(name);
+    const u = new SpeechSynthesisUtterance(voiceName);
     u.lang = 'zh-CN';
     u.rate = 0.85;
     u.pitch = 1.2;
@@ -2705,6 +3037,265 @@ function saveSemester() {
   showToast('学期设置已更新，课程已刷新','success');
 }
 
+// ==================== 平时作业统计 ====================
+let hwState = { classId: null, hwId: null, mode: 'list', markMode: 'submitted' };
+
+function getHwList(classId) { return appData.homework[classId] || []; }
+function getHwClassId() {
+  if (!hwState.classId || !appData.classes.find(c => c.id === hwState.classId)) {
+    hwState.classId = appData.classes.length ? appData.classes[0].id : null;
+  }
+  return hwState.classId;
+}
+
+function renderHomework() {
+  const tabs = document.getElementById('hwClassTabs');
+  const cid = getHwClassId();
+  tabs.innerHTML = appData.classes.map(c =>
+    `<button class="inner-tab ${c.id === cid ? 'active' : ''}" onclick="hwState.classId='${c.id}';hwState.mode='list';renderHomework()">${c.name}</button>`
+  ).join('') + `<button class="inner-tab ${hwState.mode === 'summary' ? 'active' : ''}" style="margin-left:auto" onclick="hwState.mode='summary';renderHomework()">📊 按学生汇总</button>`;
+
+  const body = document.getElementById('hwBody');
+  if (hwState.mode === 'mark' && hwState.hwId) { renderHwMark(); return; }
+  if (hwState.mode === 'summary') { renderHwSummary(); return; }
+  renderHwList();
+}
+
+function renderHwList() {
+  const cid = getHwClassId();
+  const cls = appData.classes.find(c => c.id === cid);
+  const list = getHwList(cid).slice().sort((a,b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
+  const body = document.getElementById('hwBody');
+  if (!cls) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">请先在班级管理中添加班级</div></div>'; return; }
+  if (list.length === 0) {
+    body.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📝</div>
+      <div class="empty-text">「${cls.name}」还没有作业记录</div>
+      <div class="empty-sub">点击右上角「＋ 布置作业」开始登记</div>
+    </div>`;
+    return;
+  }
+  body.innerHTML = list.map(hw => {
+    const total = Object.keys(hw.records || {}).length;
+    const ok = Object.values(hw.records || {}).filter(v => v === 'submitted').length;
+    const rate = total > 0 ? Math.round(ok / total * 100) : 0;
+    const missing = total - ok;
+    return `<div class="hw-item" onclick="hwState.hwId='${hw.id}';hwState.mode='mark';renderHomework()">
+      <div class="hw-item-icon">📝</div>
+      <div class="hw-item-info">
+        <div class="hw-item-title">${hw.title}</div>
+        <div class="hw-item-meta"><span>📅 ${hw.date}</span><span>第${hw.week}周</span><span>已交 ${ok}/${total}</span>${missing > 0 ? `<span style="color:var(--rose)">未交 ${missing} 人</span>` : '<span style="color:var(--emerald)">全部提交</span>'}</div>
+      </div>
+      <div class="hw-rate-wrap">
+        <div class="hw-rate-bar"><div class="hw-rate-fill" style="width:${rate}%"></div></div>
+        <div class="hw-rate-num">${rate}%</div>
+      </div>
+      <button class="btn btn-sm" onclick="event.stopPropagation();hwConfirmDelete('${hw.id}')" style="color:var(--rose)">删除</button>
+    </div>`;
+  }).join('');
+}
+
+function openAddHwModal() {
+  const cid = getHwClassId();
+  if (!cid) { showToast('请先添加班级', 'error'); return; }
+  document.getElementById('hw-class').innerHTML = appData.classes.map(c =>
+    `<option value="${c.id}" ${c.id === cid ? 'selected' : ''}>${c.name}</option>`).join('');
+  document.getElementById('hw-title').value = '';
+  document.getElementById('hw-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('hwModalTitle').textContent = '布置作业';
+  openModal('hwModal');
+  setTimeout(() => document.getElementById('hw-title').focus(), 100);
+}
+
+function saveHw() {
+  const classId = document.getElementById('hw-class').value;
+  const title = document.getElementById('hw-title').value.trim();
+  const date = document.getElementById('hw-date').value || new Date().toISOString().split('T')[0];
+  if (!title) { showToast('请填写作业名称', 'error'); return; }
+  const hw = { id: genId(), title, date, week: getCurrentWeek(), createdAt: Date.now(), records: {} };
+  if (!appData.homework[classId]) appData.homework[classId] = [];
+  appData.homework[classId].unshift(hw);
+  saveData(appData);
+  closeModal('hwModal');
+  hwState.classId = classId;
+  hwState.hwId = hw.id;
+  hwState.mode = 'mark';
+  switchPage('homework');
+  showToast('作业已创建，点击学生姓名登记提交情况', 'success');
+}
+
+function hwConfirmDelete(hwId) {
+  if (!confirm('确认删除该作业及其登记记录？')) return;
+  const cid = getHwClassId();
+  appData.homework[cid] = getHwList(cid).filter(h => h.id !== hwId);
+  saveData(appData);
+  renderHomework();
+  showToast('已删除', 'success');
+}
+
+function renderHwMark() {
+  const cid = getHwClassId();
+  const cls = appData.classes.find(c => c.id === cid) || { students: [] };
+  const hw = getHwList(cid).find(h => h.id === hwState.hwId);
+  const body = document.getElementById('hwBody');
+  if (!hw) { hwState.mode = 'list'; renderHwList(); return; }
+  if (!hw.records) hw.records = {};
+
+  const students = getStudentList(cls);
+  const total = students.length;
+  const ok = students.filter(n => hw.records[n] === 'submitted').length;
+  const missing = students.filter(n => hw.records[n] === 'missing');
+  const rate = total > 0 ? Math.round(ok / total * 100) : 0;
+
+  body.innerHTML = `
+    <div class="hw-header" style="margin-bottom:12px">
+      <div>
+        <div class="hw-page-title" style="font-size:17px">📝 ${hw.title}</div>
+        <div class="hw-page-sub">${cls.name} · ${hw.date} · 第${hw.week}周 · 点击学生卡片标记（再次点击可取消）</div>
+      </div>
+      <button class="btn" onclick="hwState.mode='list';renderHomework()">← 返回列表</button>
+    </div>
+    <div class="hw-stats-row">
+      <div class="stat-card"><div class="stat-num" style="color:var(--emerald)">${ok}</div><div class="stat-label">已交</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--rose)">${missing.length}</div><div class="stat-label">未交</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--indigo)">${rate}%</div><div class="stat-label">完成率</div></div>
+    </div>
+    <div class="hw-actions-bar">
+      <button class="mark-btn submitted-btn ${hwState.markMode === 'submitted' ? 'active' : ''}" onclick="hwState.markMode='submitted';renderHwMark()">✓ 标记已交</button>
+      <button class="mark-btn missing-btn ${hwState.markMode === 'missing' ? 'active' : ''}" onclick="hwState.markMode='missing';renderHwMark()">✗ 标记未交</button>
+      <span style="width:1px;height:22px;background:var(--border)"></span>
+      <button class="btn btn-sm" onclick="hwMarkAll('${hw.id}',true)">✓ 全部已交</button>
+      <button class="btn btn-sm" onclick="hwMarkAll('${hw.id}',false)">✗ 全部未交</button>
+      <span style="flex:1"></span>
+      ${missing.length > 0 ? `<button class="btn btn-sm" onclick="copyHwMissing('${hw.id}')">📋 复制未交名单</button>` : ''}
+    </div>
+    ${missing.length > 0 ? `<div class="hw-missing-list"><b>未交名单：</b>${missing.join('、')}</div>` : ''}
+    <div class="card">
+      <div class="card-header"><span class="card-title">学生名单（${total}人）</span></div>
+      <div class="card-body"><div class="student-grid" id="hwGrid">${students.map(n => {
+        const st = hw.records[n];
+        const stCls = st === 'submitted' ? 'present' : st === 'missing' ? 'absent' : '';
+        const icon = st === 'submitted' ? '✓' : st === 'missing' ? '✗' : '';
+        return `<div class="student-card ${stCls}" onclick="hwHandleCardClick('${n}')">
+          <div class="student-num">${st === 'submitted' ? '已交' : st === 'missing' ? '未交' : '·'}</div>
+          <div class="student-name">${n}</div>
+          <div class="student-status-icon">${icon}</div>
+        </div>`;
+      }).join('')}</div></div>
+    </div>`;
+}
+
+function hwHandleCardClick(name) {
+  const cid = getHwClassId();
+  const hw = getHwList(cid).find(h => h.id === hwState.hwId);
+  if (!hw) return;
+  if (!hw.records) hw.records = {};
+  // 点击：设为当前模式；已是该模式则取消
+  hw.records[name] = (hw.records[name] === hwState.markMode) ? '' : hwState.markMode;
+  if (!hw.records[name]) delete hw.records[name];
+  saveData(appData);
+  renderHwMark();
+}
+
+function hwMarkAll(hwId, submitted) {
+  const cid = getHwClassId();
+  const hw = getHwList(cid).find(h => h.id === hwId);
+  if (!hw) return;
+  const cls = appData.classes.find(c => c.id === cid);
+  if (!confirm(submitted ? '确认将全部学生标记为已交？' : '确认清空为全部未交？')) return;
+  hw.records = {};
+  if (submitted) getStudentList(cls).forEach(n => hw.records[n] = 'submitted');
+  saveData(appData);
+  renderHwMark();
+}
+
+function copyHwMissing(hwId) {
+  const cid = getHwClassId();
+  const hw = getHwList(cid).find(h => h.id === hwId);
+  const cls = appData.classes.find(c => c.id === cid);
+  if (!hw || !cls) return;
+  const missing = getStudentList(cls).filter(n => (hw.records || {})[n] === 'missing');
+  if (missing.length === 0) { showToast('没有未交的学生', 'info'); return; }
+  const text = `《${hw.title}》未交名单（${cls.name} · ${hw.date} · 第${hw.week}周，共${missing.length}人）：\n${missing.join('、')}`;
+  copyText(text, '未交名单已复制');
+}
+
+function copyText(text, okMsg) {
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => showToast(okMsg, 'success')).catch(() => fallbackCopy(text, okMsg));
+  } else {
+    fallbackCopy(text, okMsg);
+  }
+}
+function fallbackCopy(text, okMsg) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast(okMsg, 'success'); } catch(e) { showToast('复制失败，请手动复制', 'error'); }
+  ta.remove();
+}
+
+function renderHwSummary() {
+  const cid = getHwClassId();
+  const cls = appData.classes.find(c => c.id === cid);
+  const body = document.getElementById('hwBody');
+  if (!cls) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">请先添加班级</div></div>'; return; }
+  const list = getHwList(cid).slice().sort((a,b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt);
+  if (list.length === 0) {
+    body.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">「${cls.name}」还没有作业记录</div><div class="empty-sub">先在列表页布置作业，这里会生成按学生的汇总表</div></div>`;
+    return;
+  }
+  const students = getStudentList(cls);
+  const rows = students.map(n => {
+    let miss = 0;
+    const cells = list.map(hw => {
+      const v = (hw.records || {})[n];
+      if (v === 'submitted') return '<td class="hw-cell-yes">✓</td>';
+      if (v === 'missing') { miss++; return '<td class="hw-cell-no">✗</td>'; }
+      return '<td class="hw-cell-na">—</td>';
+    }).join('');
+    return `<tr><td>${n}</td>${cells}<td class="${miss > 0 ? 'hw-cell-no' : 'hw-cell-yes'}">${miss}</td></tr>`;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="hw-header" style="margin-bottom:12px">
+      <div>
+        <div class="hw-page-title" style="font-size:17px">📊 作业提交汇总 · ${cls.name}</div>
+        <div class="hw-page-sub">共 ${list.length} 次作业 · ✓ 已交 · ✗ 未交 · — 未登记 · 末列为未交总次数</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="hwState.mode='list';renderHomework()">← 返回列表</button>
+        <button class="btn btn-primary" onclick="copyHwSummary()">📋 复制汇总</button>
+      </div>
+    </div>
+    <div class="card" style="overflow-x:auto"><table class="hw-summary-table">
+      <thead><tr><th style="text-align:left">姓名</th>${list.map(hw => `<th title="${hw.title}（${hw.date}）">${hw.title.length > 8 ? hw.title.slice(0,8) + '…' : hw.title}</th>`).join('')}<th>未交</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+}
+
+function copyHwSummary() {
+  const cid = getHwClassId();
+  const cls = appData.classes.find(c => c.id === cid);
+  const list = getHwList(cid).slice().sort((a,b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt);
+  if (!cls || list.length === 0) return;
+  const header = ['姓名', ...list.map(h => h.title), '未交次数'].join('\t');
+  const rows = getStudentList(cls).map(n => {
+    let miss = 0;
+    const cells = list.map(hw => {
+      const v = (hw.records || {})[n];
+      if (v === 'submitted') return '已交';
+      if (v === 'missing') { miss++; return '未交'; }
+      return '—';
+    });
+    return [n, ...cells, miss].join('\t');
+  });
+  copyText(`【${cls.name} 平时作业汇总】共${list.length}次\n` + [header, ...rows].join('\n'), '汇总表已复制，可粘贴到 Excel/飞书表格');
+}
+
 // ==================== 新学期重置 ====================
 function openNewSemesterDialog() {
   document.getElementById('ns-start').value = appData.semesterStart;
@@ -2726,6 +3317,7 @@ function newSemester() {
   appData.semesterStart = start;
   appData.todayCourses = [];
   appData.rollCallRecords = [];
+  appData.homework = {};
   // 不保留时载入本学期默认班级/课表（真实名单+真实课表），而非清空
   if (!keepClasses) appData.classes = getDefaultData().classes;
   if (!keepSchedule) appData.scheduleItems = getDefaultData().scheduleItems;
@@ -2939,6 +3531,7 @@ if ('serviceWorker' in navigator) {
   document.getElementById('teacherNameBadge').textContent = appData.teacherName;
   document.getElementById('todayDate').textContent = formatDate(new Date()) + ' · 第' + weekNum + '周';
   refreshToday();
+  renderDashboardExtras();
   checkSyncStatus();
 })();
 </script>
