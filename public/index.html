@@ -122,6 +122,29 @@
   .sidebar-backdrop.show { display: block; }
   .app-main { flex: 1; margin-left: 224px; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
 
+  /* 侧边栏收起（仅桌面端生效） */
+  @media (min-width: 769px) {
+    body.sidebar-collapsed .sidebar { width: 68px; padding: 18px 10px; }
+    body.sidebar-collapsed .app-main { margin-left: 68px; }
+    body.sidebar-collapsed .sidebar-logo { justify-content: center; padding: 4px 0 14px; }
+    body.sidebar-collapsed .sidebar-logo-info { display: none; }
+    body.sidebar-collapsed .sidebar-nav-label,
+    body.sidebar-collapsed .nav-label,
+    body.sidebar-collapsed .sidebar-version { display: none; }
+    body.sidebar-collapsed .sidebar-nav-item,
+    body.sidebar-collapsed .sidebar-footer-item { justify-content: center; padding: 10px 8px; gap: 0; }
+    body.sidebar-collapsed .sidebar-nav-item { position: relative; }
+    body.sidebar-collapsed .sidebar-nav-item:hover::after {
+      content: attr(data-tip);
+      position: absolute; left: calc(100% + 10px); top: 50%;
+      transform: translateY(-50%);
+      background: var(--text); color: #fff;
+      font-size: 12px; padding: 4px 10px; border-radius: 6px;
+      white-space: nowrap; z-index: 300;
+    }
+  }
+  .sidebar-collapse-btn { margin-bottom: 4px; }
+
   /* Topbar */
   .topbar {
     background: rgba(255,255,255,0.85);
@@ -201,7 +224,7 @@
     border: 1px solid rgba(79,70,229,0.15);
     white-space: nowrap;
   }
-  .main { padding: 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
+  .main { padding: 28px 36px; max-width: 1400px; margin: 0 auto; width: 100%; }
   .page { display: none; }
   .page.active { display: block; }
 
@@ -247,6 +270,9 @@
   .btn-success { background: var(--emerald); color: #fff; border-color: var(--emerald); font-weight: 600; }
   .btn-success:hover { background: #047857; border-color: #047857; color: #fff; }
   .btn-danger { background: var(--rose); color: #fff; border-color: var(--rose); font-weight: 600; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+  :focus-visible { outline: 2px solid var(--indigo-light); outline-offset: 2px; }
+  .btn:focus-visible, .mark-btn:focus-visible, .sidebar-nav-item:focus-visible { outline: 2px solid var(--indigo); outline-offset: 1px; }
   .btn-outline { background: transparent; color: var(--text-secondary); }
   .btn-outline:hover { background: var(--surface-hover); }
   .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
@@ -296,7 +322,7 @@
 
   /* ===== 工作台首页 ===== */
   .dash-greeting { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
-  .dash-hello { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+  .dash-hello { font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
   .today-date { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
   .dash-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
   .dash-summary .stat-card { padding: 16px 14px; text-align: left; display: flex; align-items: center; gap: 12px; }
@@ -308,7 +334,7 @@
   .dash-ico.green { background: var(--emerald-bg); }
   .dash-ico.red { background: var(--rose-bg); }
   .dash-ico.gold { background: var(--gold-bg); }
-  .dash-stat-num { font-size: 22px; font-weight: 800; line-height: 1.1; color: var(--text); }
+  .dash-stat-num { font-size: 22px; font-weight: 700; line-height: 1.1; color: var(--text); }
   .dash-stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
   .quick-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
   .quick-action-btn {
@@ -321,7 +347,7 @@
   .quick-action-btn:hover { border-color: var(--indigo-light); color: var(--indigo); box-shadow: 0 4px 12px rgba(79,70,229,0.1); transform: translateY(-1px); }
 
   .today-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-  .today-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+  .today-title { font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
   .course-list { display: flex; flex-direction: column; gap: 14px; }
   .course-card {
     background: var(--surface);
@@ -347,7 +373,7 @@
     flex-shrink: 0;
   }
   .course-time-block.done { background: var(--muted-border); color: #fff; }
-  .course-session { font-size: 20px; font-weight: 800; line-height: 1; }
+  .course-session { font-size: 20px; font-weight: 700; line-height: 1; }
   .course-time-text { font-size: 11px; margin-top: 3px; opacity: 0.85; }
   .course-info { flex: 1; }
   .course-name { font-size: 16px; font-weight: 600; color: var(--text); }
@@ -406,8 +432,10 @@
     transform: scale(0.96);
     transition: transform 0.1s;
   }
-  .student-card.present { border-color: var(--emerald); background: var(--emerald-bg); }
-  .student-card.present .student-num { color: var(--emerald); }
+  /* 到场是默认态：白底弱化，让缺勤/迟到/请假的强着色一眼可辨 */
+  .student-card.present { border-color: var(--border); background: var(--surface); }
+  .student-card.present .student-num { color: var(--text-muted); }
+  .student-card.present .student-status-icon { color: var(--emerald); opacity: 0.45; font-size: 13px; }
   .student-card.absent { border-color: var(--rose); background: var(--rose-bg); }
   .student-card.absent .student-num { color: var(--rose); }
   .student-card.late { border-color: var(--gold); background: var(--gold-bg); }
@@ -428,7 +456,7 @@
   }
   .student-card.calling .student-status-icon {
     color: var(--gold);
-    font-weight: 800;
+    font-weight: 700;
   }
   .student-card.calling::after {
     content: '';
@@ -641,7 +669,7 @@
 
   /* ========== 平板/手机（教师操作端）========== */
   @media (max-width: 900px) {
-    .main { padding: 14px; }
+    .main { padding: 18px; }
     .topbar { padding: 0 12px; height: 50px; }
     .teacher-badge { display: none; }
     .week-badge { font-size: 11px; padding: 4px 10px; }
@@ -672,7 +700,7 @@
   }
 
   @media (max-width: 480px) {
-    .main { padding: 10px; }
+    .main { padding: 14px; }
     .topbar { height: 46px; padding: 0 8px; gap: 8px; }
     .topbar-title { font-size: 14px; }
     .card { border-radius: 10px; }
@@ -737,7 +765,7 @@
 
   /* ===== 随机点名动画 ===== */
   .random-name-display {
-    font-size: 48px; font-weight: 800; text-align: center;
+    font-size: 48px; font-weight: 700; text-align: center;
     padding: 40px 20px; min-height: 120px; display: flex;
     align-items: center; justify-content: center;
     background: var(--indigo-bg);
@@ -815,7 +843,36 @@
   .hw-cell-yes { color: var(--emerald); font-weight: 600; }
   .hw-cell-no { color: var(--rose); font-weight: 600; }
   .hw-cell-na { color: var(--text-muted); }
-  .hw-missing-list { background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius); padding: 12px 16px; margin-bottom: 14px; font-size: 13px; color: #b91c1c; line-height: 1.8; }
+  .hw-missing-list { background: #fdf7f7; border: 1px solid #f3e1e1; border-radius: var(--radius); padding: 8px 14px; margin-bottom: 14px; font-size: 12px; color: #9b7b7b; line-height: 1.8; cursor: pointer; user-select: none; }
+  .hw-missing-list b { color: var(--rose); font-weight: 600; margin-right: 8px; }
+  .hw-missing-list .hw-missing-toggle { color: var(--text-muted); font-size: 12px; }
+  .hw-missing-list .hw-missing-names { color: #7c5c5c; font-size: 13px; }
+
+  /* ===== SVG 结构图标 ===== */
+  .svg-ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  /* ===== 标记工具栏滚动悬浮条 ===== */
+  .floating-toolbar {
+    display: none;
+    position: fixed;
+    top: 64px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 180;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    padding: 8px 14px;
+    align-items: center;
+    gap: 12px;
+    max-width: calc(100vw - 24px);
+  }
+  .floating-toolbar.show { display: flex; }
+  .floating-toolbar .mark-toolbar { display: flex; gap: 4px; }
+
+  /* ===== 作业文件导入 ===== */
+  .hw-import-summary { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
 
   /* ===== 移动端底部导航 ===== */
   .mobile-nav {
@@ -832,6 +889,7 @@
   .mobile-nav-item.active { color: var(--indigo); }
   .mobile-nav-item .nav-icon { font-size: 20px; }
   @media (max-width: 768px) {
+    .floating-toolbar { top: 56px; flex-wrap: wrap; justify-content: center; row-gap: 6px; }
     .sidebar { transform: translateX(-100%); box-shadow: var(--shadow-lg); }
     .sidebar.open { transform: translateX(0); }
     .sidebar-backdrop.show { display: block; }
@@ -856,6 +914,23 @@
 <body>
 
 <div class="toast-container" id="toastContainer"></div>
+<audio id="keliAudio" style="display:none"></audio>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 3.6a3.5 3.5 0 0 1 0 6.8M17.5 14.4c2.4.8 4 2.9 4 5.6"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 21V9M7 14l5-5 5 5M4 3h16"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H7a4 4 0 1 1 .9-7.9A5.5 5.5 0 0 1 18.6 9.6 3.8 3.8 0 0 1 17.5 19z"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7M21 3v6h-6"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 21h18M6 17v-5M12 17V6M18 17v-8"/></symbol>
+</svg>
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
 
 <div class="app-shell">
@@ -864,23 +939,27 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="sidebar-logo-icon"><img src="logo.png" alt="课粒"></div>
-    <div>
+    <div class="sidebar-logo-info">
       <div class="sidebar-logo-name">课粒</div>
       <div class="sidebar-logo-sub">教师工作台</div>
     </div>
   </div>
   <nav class="sidebar-nav">
     <div class="sidebar-nav-label">常用功能</div>
-    <div class="sidebar-nav-item active" data-page="dashboard" onclick="switchPage('dashboard')"><span class="nav-ico">🏠</span>工作台</div>
-    <div class="sidebar-nav-item" data-page="homework" onclick="switchPage('homework')"><span class="nav-ico">📝</span>作业统计</div>
-    <div class="sidebar-nav-item" data-page="schedule" onclick="switchPage('schedule')"><span class="nav-ico">📅</span>完整课表</div>
-    <div class="sidebar-nav-item" data-page="history" onclick="switchPage('history')"><span class="nav-ico">🗂️</span>点名历史</div>
-    <div class="sidebar-nav-item" data-page="classes" onclick="switchPage('classes')"><span class="nav-ico">👥</span>班级管理</div>
+    <div class="sidebar-nav-item active" data-page="dashboard" data-tip="工作台" onclick="switchPage('dashboard')"><span class="nav-ico"><svg class="svg-ico"><use href="#i-home"/></svg></span><span class="nav-label">工作台</span></div>
+    <div class="sidebar-nav-item" data-page="homework" data-tip="作业统计" onclick="switchPage('homework')"><span class="nav-ico"><svg class="svg-ico"><use href="#i-file"/></svg></span><span class="nav-label">作业统计</span></div>
+    <div class="sidebar-nav-item" data-page="schedule" data-tip="完整课表" onclick="switchPage('schedule')"><span class="nav-ico"><svg class="svg-ico"><use href="#i-calendar"/></svg></span><span class="nav-label">完整课表</span></div>
+    <div class="sidebar-nav-item" data-page="history" data-tip="点名历史" onclick="switchPage('history')"><span class="nav-ico"><svg class="svg-ico"><use href="#i-clock"/></svg></span><span class="nav-label">点名历史</span></div>
+    <div class="sidebar-nav-item" data-page="classes" data-tip="班级管理" onclick="switchPage('classes')"><span class="nav-ico"><svg class="svg-ico"><use href="#i-users"/></svg></span><span class="nav-label">班级管理</span></div>
   </nav>
   <div class="sidebar-footer">
-    <div class="sidebar-footer-item" onclick="retryPendingSync()" title="云同步状态（点击重试未同步记录）"><span class="nav-ico" id="syncPending" style="font-size:14px">☁️</span>云同步</div>
-    <div class="sidebar-footer-item" onclick="openSemesterConfig()"><span class="nav-ico">⚙️</span>学期设置</div>
-    <div class="sidebar-footer-item danger" onclick="openNewSemesterDialog()"><span class="nav-ico">🔄</span>新学期</div>
+    <div class="sidebar-footer-item" onclick="retryPendingSync()" data-tip="云同步（点击重试未同步记录）" title="云同步状态（点击重试未同步记录）"><span class="nav-ico" id="syncPending" style="font-size:14px"><svg class="svg-ico"><use href="#i-cloud"/></svg></span><span class="nav-label">云同步</span></div>
+    <div class="sidebar-footer-item" onclick="openSemesterConfig()" data-tip="学期设置"><span class="nav-ico"><svg class="svg-ico"><use href="#i-sliders"/></svg></span><span class="nav-label">学期设置</span></div>
+    <div class="sidebar-footer-item" onclick="exportToFile()" data-tip="备份数据" title="导出全部数据（班级/课表/考勤/作业）为 JSON 文件"><span class="nav-ico"><svg class="svg-ico"><use href="#i-download"/></svg></span><span class="nav-label">备份数据</span></div>
+    <div class="sidebar-footer-item" onclick="document.getElementById('importFileInput').click()" data-tip="恢复备份" title="从备份 JSON 恢复数据"><span class="nav-ico"><svg class="svg-ico"><use href="#i-upload"/></svg></span><span class="nav-label">恢复备份</span></div>
+    <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importFromFile(event)">
+    <div class="sidebar-footer-item danger" onclick="openNewSemesterDialog()" data-tip="新学期"><span class="nav-ico"><svg class="svg-ico"><use href="#i-refresh"/></svg></span><span class="nav-label">新学期</span></div>
+    <div class="sidebar-footer-item sidebar-collapse-btn" id="collapseBtn" onclick="toggleSidebarCollapse()" data-tip="展开菜单"><span class="nav-ico" id="collapseIcon">«</span><span class="nav-label">收起菜单</span></div>
     <div class="sidebar-version">课粒 · 教师工作台 v2</div>
   </div>
 </aside>
@@ -907,6 +986,7 @@
       <div>
         <div class="dash-hello" id="dashHello">你好，老师</div>
         <div class="today-date" id="todayDate"></div>
+        <div id="dashNext" style="font-size:13px;color:var(--indigo);margin-top:6px;font-weight:500"></div>
       </div>
       <button class="btn btn-primary" onclick="refreshToday()">🔄 刷新今日</button>
     </div>
@@ -945,9 +1025,10 @@
         <div class="rollcall-sub" id="rc-courseSub"></div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-success" onclick="finishRollCall()">完成记录</button>
-        <button class="btn btn-sm" onclick="openRandomCall()" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);color:white;border:none">🎲 随机</button>
-        <button class="btn btn-primary" id="btnAutoCall" onclick="startAutoCall()">🎙 自动点名</button>
+        <button class="btn btn-primary" onclick="finishRollCall()">完成记录</button>
+        <button class="btn" onclick="openRandomCall()">🎲 随机</button>
+        <button class="btn" onclick="resetRollcallStatus()" title="全部恢复为到场">🔄 重置</button>
+        <button class="btn" id="btnAutoCall" onclick="startAutoCall()" title="语音依次点名">🎙 自动点名</button>
       </div>
     </div>
     <div>
@@ -956,14 +1037,13 @@
           <div class="card-header">
             <span class="card-title">学生名单</span>
             <div class="mark-toolbar" id="markToolbar" style="display:flex;align-items:center;gap:12px">
-              <div style="display:flex;gap:4px">
+              <div style="display:flex;gap:4px" class="att-grp">
                 <button class="mark-btn present-btn active" onclick="setMarkMode('present')">✓ 到场</button>
                 <button class="mark-btn late-btn" onclick="setMarkMode('late')">▲ 迟到</button>
                 <button class="mark-btn absent-btn" onclick="setMarkMode('absent')">❌ 缺勤</button>
                 <button class="mark-btn leave-btn" onclick="setMarkMode('leave')">〇 请假</button>
               </div>
-              <div style="width:1px;height:24px;background:var(--border)"></div>
-              <div style="display:flex;gap:4px">
+              <div style="display:flex;gap:4px" class="perf-grp" hidden>
                 <button class="mark-btn speak-btn" onclick="setMarkMode('speak')">💬 发言</button>
                 <button class="mark-btn praise-btn" onclick="setMarkMode('praise')">⭐ 加分</button>
                 <button class="mark-btn discipline-btn" onclick="setMarkMode('discipline')">⚠️ 扣分</button>
@@ -981,7 +1061,6 @@
           <div class="card-body"><div class="student-grid" id="studentGrid"></div></div>
         </div>
       </div>
-    </div>
     <div id="reportBox" style="display:none"></div>
   </div>
 
@@ -990,7 +1069,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div>
         <h2 style="font-size:20px;font-weight:700;color:var(--text)">完整课表</h2>
-        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">2025-2026-2 学期 · 贺洋子 · 信创学院</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px"><span id="semesterName">-</span> · 贺洋子 · 信创学院</div>
       </div>
     </div>
     <div class="semester-info" id="semesterInfoBar">
@@ -1009,7 +1088,10 @@
         <div class="hw-page-title">平时作业统计</div>
         <div class="hw-page-sub">登记每次作业提交情况，自动统计完成率与未交名单</div>
       </div>
-      <button class="btn btn-primary" onclick="openAddHwModal()">＋ 布置作业</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="openHwImport()"><svg class="svg-ico"><use href="#i-folder"/></svg> 从文件导入</button>
+        <button class="btn btn-primary" onclick="openAddHwModal()"><svg class="svg-ico"><use href="#i-plus"/></svg> 布置作业</button>
+      </div>
     </div>
     <div class="inner-tabs" id="hwClassTabs"></div>
     <div id="hwBody"></div>
@@ -1089,15 +1171,14 @@
 <div class="modal-overlay" id="finishModal">
   <div class="modal">
     <div class="modal-title">点名完成 — 汇报信息</div>
-    <div id="finishStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
+    <div id="finishStats" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px"></div>
     <div class="form-group">
       <label class="form-label">报备信息（可编辑后复制）</label>
       <textarea class="form-control" id="finalReport" rows="12" style="font-family:'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.8"></textarea>
     </div>
     <div class="modal-footer">
-      <button class="btn" onclick="closeModal('finishModal')">关闭</button>
       <button class="btn btn-success" onclick="copyFinalReport()">复制报备信息</button>
-      <button class="btn btn-primary" onclick="saveRecord()">保存记录</button>
+      <button class="btn btn-primary" onclick="closeModal('finishModal')">关闭 · 继续记表现</button>
     </div>
   </div>
 </div>
@@ -1123,6 +1204,10 @@
         <input type="checkbox" id="ns-keepSchedule" style="margin-right:6px">
         保留课表数据
       </label>
+    </div>
+    <div class="form-group">
+      <label class="form-label">重置密码 *</label>
+      <input class="form-control" type="password" id="ns-password" placeholder="请输入重置密码" autocomplete="off">
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('newSemesterModal')">取消</button>
@@ -1211,13 +1296,71 @@
     </div>
   </div>
 
+  <!-- ====== 从文件导入作业弹窗 ====== -->
+  <div class="modal-overlay" id="hwImportModal">
+    <div class="modal" style="max-width:560px">
+      <div class="modal-title" id="hwimp-title-label">📂 从文件导入作业</div>
+      <div style="font-size:12px;color:var(--text-muted);background:var(--muted-bg);border-radius:8px;padding:8px 12px;margin-bottom:14px;line-height:1.7">
+        选择学生提交的作业文件或文件夹，按<b>文件名中的学号/姓名</b>自动匹配名单。支持「学号后两位+姓名」（如 08李晨）等常见命名，也兼容只写姓名的；Word/PDF/压缩包任意格式均可，文件不会上传，仅本地读取文件名
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">班级 *</label>
+          <select class="form-control" id="hwimp-class"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">布置日期</label>
+          <input class="form-control" type="date" id="hwimp-date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">作业名称 *</label>
+        <input class="form-control" id="hwimp-title" placeholder="如：第2周实验报告">
+      </div>
+      <div class="form-group">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <label class="btn" style="cursor:pointer">📄 选择文件<input type="file" id="hwimp-files" multiple style="display:none"></label>
+          <label class="btn" style="cursor:pointer">📁 选择文件夹<input type="file" id="hwimp-folder" webkitdirectory style="display:none"></label>
+          <span style="font-size:12px;color:var(--text-muted);align-self:center" id="hwimp-count"></span>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);margin-top:10px;cursor:pointer">
+          <input type="checkbox" id="hwimp-cloud" checked>
+          ☁️ 同时上传到飞书云盘（按 班级/作业 自动归档文件夹）
+        </label>
+      </div>
+      <div id="hwimp-preview"></div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('hwImportModal')">取消</button>
+        <button class="btn btn-primary" id="hwimp-save" onclick="confirmHwImport()" disabled>创建作业并导入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 标记工具栏滚动悬浮条 ====== -->
+  <div id="floatingToolbar" class="floating-toolbar"></div>
+
+  <!-- ====== 通用确认/输入弹窗 ====== -->
+  <div class="modal-overlay" id="uiDialog">
+    <div class="modal" style="max-width:400px">
+      <div class="modal-title" id="uid-title">确认</div>
+      <div id="uid-message" style="font-size:14px;color:var(--text-secondary);line-height:1.8;white-space:pre-wrap"></div>
+      <div class="form-group" id="uid-input-wrap" style="display:none;margin-top:14px">
+        <input class="form-control" id="uid-input" autocomplete="off">
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="uidCancel()">取消</button>
+        <button class="btn btn-primary" id="uid-ok" onclick="uidOk()">确认</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ====== 移动端底部导航 ====== -->
   <div class="mobile-nav" id="mobileNav">
-    <div class="mobile-nav-item active" data-page="dashboard" onclick="switchPage('dashboard')"><span class="nav-icon">🏠</span>工作台</div>
-    <div class="mobile-nav-item" data-page="schedule" onclick="switchPage('schedule')"><span class="nav-icon">📋</span>课表</div>
-    <div class="mobile-nav-item" data-page="homework" onclick="switchPage('homework')"><span class="nav-icon">📝</span>作业</div>
-    <div class="mobile-nav-item" data-page="history" onclick="switchPage('history')"><span class="nav-icon">🗂️</span>历史</div>
-    <div class="mobile-nav-item" data-page="classes" onclick="switchPage('classes')"><span class="nav-icon">👥</span>班级</div>
+    <div class="mobile-nav-item active" data-page="dashboard" onclick="switchPage('dashboard')"><span class="nav-icon"><svg class="svg-ico" style="width:22px;height:22px"><use href="#i-home"/></svg></span>工作台</div>
+    <div class="mobile-nav-item" data-page="schedule" onclick="switchPage('schedule')"><span class="nav-icon"><svg class="svg-ico" style="width:22px;height:22px"><use href="#i-calendar"/></svg></span>课表</div>
+    <div class="mobile-nav-item" data-page="homework" onclick="switchPage('homework')"><span class="nav-icon"><svg class="svg-ico" style="width:22px;height:22px"><use href="#i-file"/></svg></span>作业</div>
+    <div class="mobile-nav-item" data-page="history" onclick="switchPage('history')"><span class="nav-icon"><svg class="svg-ico" style="width:22px;height:22px"><use href="#i-clock"/></svg></span>历史</div>
+    <div class="mobile-nav-item" data-page="classes" onclick="switchPage('classes')"><span class="nav-icon"><svg class="svg-ico" style="width:22px;height:22px"><use href="#i-users"/></svg></span>班级</div>
   </div>
 
 <script>
@@ -1637,6 +1780,8 @@ function switchPage(name) {
   });
   const title = document.getElementById('topbarTitle');
   if (title) title.textContent = PAGE_TITLES[name] || '';
+  const ft = document.getElementById('floatingToolbar');
+  if (ft) ft.classList.remove('show');
   closeSidebar();
   if (name === 'dashboard') { renderTodayCourses(); renderManualCourseList(); renderDashboardExtras(); }
   if (name === 'schedule') renderFullSchedule();
@@ -1645,7 +1790,7 @@ function switchPage(name) {
   if (name === 'homework') renderHomework();
 }
 
-// ==================== 侧边栏（移动端抽屉） ====================
+// ==================== 侧边栏（移动端抽屉 + 桌面端收起） ====================
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('sidebarBackdrop').classList.toggle('show');
@@ -1654,6 +1799,21 @@ function closeSidebar() {
   document.getElementById('sidebar')?.classList.remove('open');
   document.getElementById('sidebarBackdrop')?.classList.remove('show');
 }
+
+// 桌面端收起/展开侧边栏（记忆到 localStorage，仅宽度>768时生效）
+function toggleSidebarCollapse() {
+  const collapsed = !document.body.classList.contains('sidebar-collapsed');
+  setSidebarCollapsed(collapsed);
+  localStorage.setItem('kelliSidebarCollapsed', collapsed ? '1' : '0');
+}
+function setSidebarCollapsed(collapsed) {
+  document.body.classList.toggle('sidebar-collapsed', collapsed);
+  const icon = document.getElementById('collapseIcon');
+  const tip = document.getElementById('collapseBtn');
+  if (icon) icon.textContent = collapsed ? '»' : '«';
+  if (tip) tip.dataset.tip = collapsed ? '展开菜单' : '收起菜单';
+}
+if ((localStorage.getItem('kelliSidebarCollapsed') || '') === '1') setSidebarCollapsed(true);
 
 // ==================== 工作台：概况统计 + 最近记录 ====================
 function renderDashboardExtras() {
@@ -1676,6 +1836,14 @@ function renderDashboardExtras() {
     });
   });
 
+  // 学期累计出勤率
+  let sShould = 0, sArrived = 0;
+  appData.rollCallRecords.forEach(r => {
+    sShould += r.totalCount || 0;
+    sArrived += (r.presentCount || 0) + (r.lateCount || 0);
+  });
+  const sRate = sShould > 0 ? Math.round(sArrived / sShould * 100) : null;
+
   const summary = document.getElementById('dashSummary');
   if (summary) summary.innerHTML = `
     <div class="stat-card">
@@ -1691,9 +1859,36 @@ function renderDashboardExtras() {
       <div><div class="dash-stat-num">${hwMissing}</div><div class="dash-stat-label">本周作业未交人次</div></div>
     </div>
     <div class="stat-card">
-      <div class="dash-ico red">👥</div>
-      <div><div class="dash-stat-num">${appData.classes.length}</div><div class="dash-stat-label">班级数量</div></div>
+      <div class="dash-ico red">📈</div>
+      <div><div class="dash-stat-num" style="${sRate === null ? 'font-size:16px;color:var(--text-muted)' : ''}">${sRate === null ? '暂无' : sRate + '%'}</div><div class="dash-stat-label">学期出勤率 · ${appData.rollCallRecords.length} 次</div></div>
     </div>`;
+
+  // 下节课提示
+  const nextEl = document.getElementById('dashNext');
+  if (nextEl) {
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const todayScheduled = (appData.scheduleItems || [])
+      .filter(s => s.weekday === getTodayWeekday() && isWeekActive(s.weekRanges, weekNum))
+      .sort((a, b) => a.session - b.session);
+    const doneIds = new Set(appData.todayCourses.filter(c => c.recordId).map(c => c.scheduleId));
+    let next = null;
+    for (const s of todayScheduled) {
+      const def = SESSION_DEFS[s.session];
+      const endMin = def.time.split('-')[1].split(':').reduce((h, m) => h * 60 + +m, 0);
+      if (endMin > nowMin) { next = s; break; }
+    }
+    if (next) {
+      const def = SESSION_DEFS[next.session];
+      const start = def.time.split('-')[0];
+      const doneTag = doneIds.has(next.id) ? '（已点名）' : '';
+      nextEl.innerHTML = `▶ 下一节 ${start} 《${next.name}》 ${next.className} · ${next.room}${doneTag}`;
+    } else if (todayScheduled.length) {
+      nextEl.textContent = '今日课程已全部结束';
+    } else {
+      nextEl.textContent = '';
+    }
+  }
 
   const recent = document.getElementById('dashRecent');
   if (recent) {
@@ -1962,8 +2157,7 @@ function startRollCallInternal(tc) {
   cls.students.forEach(s => { studentStatuses[getStudentName(s)] = 'present'; });
   document.getElementById('rc-courseName').textContent = `《${tc.name}》`;
   document.getElementById('rc-courseSub').textContent = `${tc.className} · ${tc.room} · ${SESSION_DEFS[tc.session].name} ${SESSION_DEFS[tc.session].time}`;
-  markMode = 'present';
-  updateMarkModeUI();
+  setRcPhase('attendance');
   renderStudentGrid(cls.students);
   updateRcStats();
   updateReport();
@@ -2004,6 +2198,8 @@ function startAutoCall() {
   document.getElementById('btnResume').style.display = 'none';
 
   // 启动轮询，每 500ms 检查一次状态
+  prefetchVoice(0);  // 先预取前两位的语音，第一名学生不再现场等待
+  prefetchVoice(1);
   autoCallState.interval = setInterval(autoCallTick, 500);
   autoCallTick();
 }
@@ -2021,23 +2217,28 @@ function autoCallTick() {
     }
     autoCallState.callCount = 1;
     autoCallState.startTime = Date.now();
-    speakCurStudent();
+    autoCallState.speaking = true;
+    speakCurStudent().finally(() => { if (autoCallState) autoCallState.speaking = false; });
+    prefetchVoice(autoCallState.index + 1);  // 利用等待窗口预取下一位语音
+    prefetchVoice(autoCallState.index + 2);
     highlightCurStudent();
   } else {
     // 等待 3 秒响应 → 更新倒计时
     const elapsed = Date.now() - autoCallState.startTime;
+    const speaking = autoCallState.speaking;
     const remaining = Math.max(0, Math.ceil((2000 - elapsed) / 1000));
     const card = document.querySelector(`.student-card[data-idx="${autoCallState.index}"]`);
     if (card && card.classList.contains('calling')) {
       const iconEl = card.querySelector('.student-status-icon');
-      if (iconEl) iconEl.textContent = remaining;
+      if (iconEl) iconEl.textContent = speaking ? '🔊' : remaining;
     }
     const sname = getStudentName(autoCallState.students[autoCallState.index]);
     const status = studentStatuses[sname];
 
     if (status === 'absent' || status === 'leave' || status === 'present') {
       nextStudent();
-    } else if (elapsed > 2000) {
+    } else if (!autoCallState.speaking && elapsed > 2000) {
+      // 语音读完才开始计 2 秒应答窗口；网络慢时 speaking 阻止提前跳过
       studentStatuses[sname] = 'present';
       nextStudent();
     }
@@ -2080,7 +2281,11 @@ function skipStudent() {
 
 function speakCurStudent() {
   const sname = getStudentName(autoCallState.students[autoCallState.index]);
-  speakName(sname);
+  const idx = autoCallState.index;
+  return speakName(sname).then(() => {
+    // 语音读完后才开始计 2 秒应答窗口（期间 autoCallState.speaking 阻止自动跳过）
+    if (autoCallState && autoCallState.index === idx) autoCallState.startTime = Date.now();
+  });
 }
 
 function highlightCurStudent() {
@@ -2206,57 +2411,106 @@ function getVoiceName(name) {
   return result;
 }
 
-async function speakName(name) {
-  // 自动替换多音字
-  const voiceName = getVoiceName(name);
-  // 优先使用后端 TTS（微软晓晓声音），失败时回退到浏览器原生
-  try {
-    const res = await fetch('/tts?text=' + encodeURIComponent(voiceName));
-    if (res.ok) {
-      const blob = await res.blob();
-      if (blob.size > 200) {
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audio.playbackRate = 0.9;
-        await new Promise((resolve) => {
-          audio.onended = resolve;
-          audio.onerror = resolve;
-          setTimeout(resolve, 4000);
-          audio.play().catch(() => resolve());
-        });
-        URL.revokeObjectURL(url);
-        return;
-      }
-    }
-  } catch (e) {}
+// ==================== TTS 语音层：单实例播放 + 令牌防串音 + 预取缓存 ====================
+let speakSeq = 0;                 // 播放令牌：慢网络返回的过期音频直接丢弃
+const ttsCache = new Map();       // 姓名 → 音频URL（同名字秒出，跨班复用）
+const _prefetching = new Set();
 
-  // 回退：浏览器原生 SpeechSynthesis
+function stopAllVoice() {
+  const a = document.getElementById('keliAudio');
+  if (a) { try { a.pause(); } catch (e) {} }
+  try { window.speechSynthesis?.cancel(); } catch (e) {}
+}
+
+// 获取某名字的 Edge TTS 音频 URL（带 2.5s 超时 + 本地缓存），失败返回 null
+async function fetchTtsUrl(voiceName) {
+  if (ttsCache.has(voiceName)) return ttsCache.get(voiceName);
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 2500);
+  try {
+    const res = await fetch('/tts?text=' + encodeURIComponent(voiceName), { signal: ctl.signal });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    if (blob.size <= 200) return null;
+    const url = URL.createObjectURL(blob);
+    if (ttsCache.size > 200) {
+      const oldest = ttsCache.keys().next().value;
+      URL.revokeObjectURL(ttsCache.get(oldest));
+      ttsCache.delete(oldest);
+    }
+    ttsCache.set(voiceName, url);
+    return url;
+  } catch (e) { clearTimeout(timer); return null; }
+}
+
+// 自动点名时预取 idx 处学生的语音（利用当前学生的等待窗口）
+function prefetchVoice(idx) {
+  if (!autoCallState) return;
+  const s = autoCallState.students[idx];
+  if (!s) return;
+  const vn = getVoiceName(getStudentName(s));
+  if (!vn || ttsCache.has(vn) || _prefetching.has(vn)) return;
+  _prefetching.add(vn);
+  fetchTtsUrl(vn).finally(() => _prefetching.delete(vn));
+}
+
+async function speakName(name) {
+  const mySeq = ++speakSeq;
+  const voiceName = getVoiceName(name);
+  stopAllVoice();  // 任何时候只有一个声音
+
+  // 优先：Edge TTS 音频（有本地缓存则零延迟）
+  const url = await fetchTtsUrl(voiceName);
+  if (mySeq !== speakSeq) return;  // 已被新的点名取代，丢弃过期音频
+  const audio = document.getElementById('keliAudio');
+  if (url && audio) {
+    try {
+      await new Promise(resolve => {
+        let done = false;
+        const finish = () => { if (!done) { done = true; resolve(); } };
+        audio.onended = finish;
+        audio.onerror = finish;
+        audio.src = url;
+        audio.playbackRate = 0.9;
+        const guard = setTimeout(finish, 5000);
+        audio.play().catch(() => { clearTimeout(guard); finish(); });
+      });
+      if (mySeq !== speakSeq) return;
+      return;
+    } catch (e) {}
+  }
+
+  // 回退：浏览器原生语音（离线可用）
   const ss = window.speechSynthesis;
   if (!ss) return;
-
+  if (mySeq !== speakSeq) return;
   let voices = ss.getVoices();
   for (let i = 0; voices.length === 0 && i < 20; i++) {
     await new Promise(r => setTimeout(r, 250));
     voices = ss.getVoices();
   }
-
   try {
+    ss.cancel();  // 双保险
     const u = new SpeechSynthesisUtterance(voiceName);
     u.lang = 'zh-CN';
     u.rate = 0.85;
     u.pitch = 1.2;
     u.volume = 1;
-
     if (voices.length > 0) {
       const savedVoice = localStorage.getItem('courseStackVoice');
       let picked = null;
       if (savedVoice) picked = voices.find(v => v.name === savedVoice || v.voiceURI === savedVoice);
-      if (!picked) picked = voices.find(v => v.lang.includes('zh-CN'))
-        || voices.find(v => v.lang.includes('zh'))
-        || voices.find(v => v.lang.includes('cmn'));
+      if (!picked) {
+        // 优先微软系语音（音色最接近主语音晓晓），再退中文任意
+        picked = voices.find(v => v.lang.replace('_', '-').includes('zh-CN') && /microsoft|xiaoxiao|yaoyao|kangkang/i.test(v.name))
+          || voices.find(v => v.lang.replace('_', '-').includes('zh-CN') && /microsoft/i.test(v.name))
+          || voices.find(v => v.lang.replace('_', '-').includes('zh-CN'))
+          || voices.find(v => v.lang.includes('zh'))
+          || voices.find(v => v.lang.includes('cmn'));
+      }
       if (picked) u.voice = picked;
     }
-
     ss.speak(u);
     await new Promise(r => {
       let done = false;
@@ -2265,9 +2519,8 @@ async function speakName(name) {
       u.onerror = finish;
       setTimeout(finish, 4000);
     });
-  } catch(e) {}
+  } catch (e) {}
 }
-
 // 语音预热
 async function warmUpVoice() {
   const btn = document.querySelector('[onclick="warmUpVoice()"]');
@@ -2312,7 +2565,13 @@ function initVoices() {
     const u = new SpeechSynthesisUtterance('');
     u.volume = 0;
     speechSynthesis.speak(u);
-  }, { once: true });
+    // 解锁 TTS 音频元素的自动播放限制（首次手势后以 0 音量播放一次）
+    const a = document.getElementById('keliAudio');
+    if (a) {
+      a.volume = 0;
+      a.play().then(() => { a.pause(); a.volume = 1; a.currentTime = 0; }).catch(() => { a.volume = 1; });
+    }
+  }, { once: true, capture: true });
 
   populate();
   // 每次点击页面时再检查一次（移动端）
@@ -2345,7 +2604,7 @@ document.addEventListener('click', function(e) {
 });
 
 function stopAutoCall() {
-  window.speechSynthesis.cancel();
+  stopAllVoice();
   if (autoCallState?.interval) clearInterval(autoCallState.interval);
   autoCallState = null;
   document.getElementById('autoCallStatus').hidden = true;
@@ -2357,6 +2616,7 @@ function stopAutoCall() {
 }
 
 function pauseAutoCall() {
+  stopAllVoice();
   if (!autoCallState) return;
   window.speechSynthesis.cancel();
   if (autoCallState.interval) { clearInterval(autoCallState.interval); autoCallState.interval = null; }
@@ -2401,17 +2661,40 @@ function finishAutoCall() {
 // 重写点击事件：自动点名模式下点击=到场并跳到下一个
 function setMarkMode(mode) { markMode = mode; updateMarkModeUI(); }
 
+// 点名页工具栏两阶段：attendance=考勤登记（进页面默认），performance=课堂表现（完成点名后切换）
+let rcPhase = 'attendance';
+function setRcPhase(phase, mode) {
+  rcPhase = phase;
+  const isAtt = phase === 'attendance';
+  // 原工具栏与悬浮条里的分组都用 class 标记，一起切换（元素带内联 display:flex，hidden 属性会被覆盖）
+  document.querySelectorAll('.att-grp').forEach(g => g.style.display = isAtt ? 'flex' : 'none');
+  document.querySelectorAll('.perf-grp').forEach(g => g.style.display = isAtt ? 'none' : 'flex');
+  markMode = mode || (phase === 'attendance' ? 'present' : 'speak');
+  updateMarkModeUI();
+}
+
 function updateMarkModeUI() {
   document.querySelectorAll('.legend-item').forEach(item => item.classList.toggle('active-mode', item.dataset.mode === markMode));
   document.querySelectorAll('.mark-btn').forEach(btn => {
-    const modeMap = { 
+    // 只按按钮自身的类型判定高亮（旧逻辑循环全部映射项，后项会把前项点亮的高亮强制熄灭）
+    const own = Object.entries({
       'present-btn':'present', 'late-btn':'late', 'absent-btn':'absent', 'leave-btn':'leave',
-      'speak-btn':'speak', 'praise-btn':'praise', 'discipline-btn':'discipline', 'nophone-btn':'nophone' 
-    };
-    for (const [cls, mode] of Object.entries(modeMap)) {
-      btn.classList.toggle('active', cls === mode+'-btn' && markMode === mode);
-    }
+      'speak-btn':'speak', 'praise-btn':'praise', 'discipline-btn':'discipline', 'nophone-btn':'nophone'
+    }).find(([cls]) => btn.classList.contains(cls));
+    btn.classList.toggle('active', !!own && markMode === own[1]);
   });
+}
+
+// 单个学生卡片局部刷新（点击标记后只更新该卡片，避免整格重绘）
+function updateCard(name, idx) {
+  const grid = document.getElementById('studentGrid');
+  const card = grid && grid.querySelector('.student-card[data-idx="' + idx + '"]');
+  if (!card || card.dataset.name !== name) { renderStudentGrid(getCurrentStudents()); return; }
+  const icons = { present:'✓', absent:'❌', late:'▲', leave:'〇', unknown:'' };
+  const status = studentStatuses[name] || 'unknown';
+  const calling = card.classList.contains('calling');
+  card.className = 'student-card ' + status + (calling ? ' calling' : '');
+  card.querySelector('.student-status-icon').textContent = icons[status] || '';
 }
 
 function renderStudentGrid(students) {
@@ -2480,6 +2763,7 @@ function handleCardClick(name, idx, cardEl) {
     markPerformance(className, name, 'nophone', 1);
     showToast(name + ' 未交手机 +1', 'warning');
   }
+  updateRcStats();
   // 自动点名中：如果点击的是当前学生，跳到下一个
   if (autoCallState && idx === autoCallState.index) {
     nextStudent();
@@ -2515,6 +2799,16 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       return;
     }
+    // 回车：当前学生迟到，点到下一个
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (autoCallState.index < autoCallState.students.length) {
+        const sname = getStudentName(autoCallState.students[autoCallState.index]);
+        studentStatuses[sname] = 'late';
+        nextStudent();
+      }
+      return;
+    }
     // 上箭头：重新点上一个人
     if (e.key === 'ArrowUp') {
       e.preventDefault();
@@ -2546,6 +2840,14 @@ function toggleStudent(name, idx, cardEl) {
   updateReport();
 }
 
+// 重置点名状态：全部恢复为到场（进页面时的默认状态）
+async function resetRollcallStatus() {
+  if (!currentCourse) return;
+  if (!await uiConfirm('确认重置全部学生状态为「到场」？当前标记将被清空。', { danger: true })) return;
+  markAllPresent();
+  showToast('已重置为全部到场', 'success');
+}
+
 function markAllPresent() {
   const cls = appData.classes.find(c => c.id === currentCourse.classId);
   cls.students.forEach(s => { const n=getStudentName(s); studentStatuses[n]='present'; });
@@ -2563,51 +2865,66 @@ function resetAllStatus() {
 }
 
 function updateRcStats() {
-  const clsName = currentCourse ? currentCourse.className : '';
   const students = getCurrentStudents();
-  const perfStats = { speak: 0, praise: 0, discipline: 0, nophone: 0 };
-  students.forEach(s => {
-    const perf = getPerf(clsName, getStudentName(s));
-    perfStats.speak += perf.speak || 0;
-    perfStats.praise += perf.praise || 0;
-    perfStats.discipline += perf.discipline || 0;
-    perfStats.nophone += perf.nophone || 0;
-  });
-  document.getElementById('rcStats').innerHTML = [
-    { label:'总人数', num:students.length, color:'#94a3b8' },
-    { label:'💬 发言', num:perfStats.speak, color:'#6366f1' },
-    { label:'⭐ 加分', num:perfStats.praise, color:'#10b981' },
-    { label:'⚠️ 扣分', num:perfStats.discipline, color:'#ef4444' },
-    { label:'📱 未交手机', num:perfStats.nophone, color:'#f59e0b' }
-  ].map(s => `<div class="stat-card"><div class="stat-num" style="color:${s.color}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
+  let items;
+  if (rcPhase === 'attendance') {
+    // 考勤阶段：实时出勤统计
+    const counts = { present:0, absent:0, late:0, leave:0 };
+    students.forEach(s => {
+      const st = studentStatuses[getStudentName(s)];
+      if (counts[st] !== undefined) counts[st]++;
+    });
+    const arrived = counts.present + counts.late;
+    items = [
+      { label:'应到', num:students.length, color:'#94a3b8' },
+      { label:'实到', num:arrived, color:'#10b981' },
+      { label:'缺勤', num:counts.absent, color:'#ef4444' },
+      { label:'迟到', num:counts.late, color:'#d97706' },
+      { label:'请假', num:counts.leave, color:'#2563eb' }
+    ];
+  } else {
+    // 表现阶段：课堂表现统计
+    const clsName = currentCourse ? currentCourse.className : '';
+    const perfStats = { speak: 0, praise: 0, discipline: 0, nophone: 0 };
+    students.forEach(s => {
+      const perf = getPerf(clsName, getStudentName(s));
+      perfStats.speak += perf.speak || 0;
+      perfStats.praise += perf.praise || 0;
+      perfStats.discipline += perf.discipline || 0;
+      perfStats.nophone += perf.nophone || 0;
+    });
+    items = [
+      { label:'总人数', num:students.length, color:'#94a3b8' },
+      { label:'💬 发言', num:perfStats.speak, color:'#6366f1' },
+      { label:'⭐ 加分', num:perfStats.praise, color:'#10b981' },
+      { label:'⚠️ 扣分', num:perfStats.discipline, color:'#ef4444' },
+      { label:'📱 未交手机', num:perfStats.nophone, color:'#f59e0b' }
+    ];
+  }
+  document.getElementById('rcStats').innerHTML = items.map(s => `<div class="stat-card"><div class="stat-num" style="color:${s.color}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
 }
 
 function generateReport() {
+  // 报备信息只含考勤内容（课堂表现在完成点名之后记录，属于表现统计页的职责）
   const today = new Date();
-  const clsName = currentCourse ? currentCourse.className : '';
   const students = getCurrentStudents();
-  // 统计表现记录
-  const perfStats = { speak: 0, praise: 0, discipline: 0, nophone: 0 };
-  const speakNames = [], praiseNames = [], disciplineNames = [], nophoneNames = [];
+  const counts = { present:0, absent:0, late:0, leave:0 };
+  const absentNames = [], lateNames = [], leaveNames = [];
   students.forEach(s => {
     const name = getStudentName(s);
-    const perf = getPerf(clsName, name);
-    perfStats.speak += perf.speak || 0;
-    perfStats.praise += perf.praise || 0;
-    perfStats.discipline += perf.discipline || 0;
-    perfStats.nophone += perf.nophone || 0;
-    if (perf.speak > 0) speakNames.push(name);
-    if (perf.praise > 0) praiseNames.push(name);
-    if (perf.discipline > 0) disciplineNames.push(name);
-    if (perf.nophone > 0) nophoneNames.push(name);
+    const st = studentStatuses[name];
+    if (counts[st] !== undefined) counts[st]++;
+    if (st === 'absent') absentNames.push(name);
+    if (st === 'late') lateNames.push(name);
+    if (st === 'leave') leaveNames.push(name);
   });
+  const arrived = counts.present + counts.late;
   const weekNames = ['日','一','二','三','四','五','六'];
   const dateStr = `${today.getMonth()+1}月${today.getDate()}日星期${weekNames[today.getDay()]} ${SESSION_DEFS[currentCourse.session].name}`;
-  let r = `时间：${dateStr}\n教室：${currentCourse.room}\n班级：${currentCourse.className}\n教师：${currentCourse.teacher || appData.teacherName}\n课程名称：《${currentCourse.name}》\n应到人数：${students.length}\n💬 发言：${perfStats.speak}人次\n⭐ 加分：${perfStats.praise}人次\n⚠️ 扣分：${perfStats.discipline}人次\n📱 未交手机：${perfStats.nophone}人次`;
-  if (speakNames.length>0) r += `\n发言学生：${speakNames.join('、')}`;
-  if (praiseNames.length>0) r += `\n加分学生：${praiseNames.join('、')}`;
-  if (disciplineNames.length>0) r += `\n扣分学生：${disciplineNames.join('、')}`;
-  if (nophoneNames.length>0) r += `\n未交手机：${nophoneNames.join('、')}`;
+  let r = `时间：${dateStr}\n教室：${currentCourse.room}\n班级：${currentCourse.className}\n教师：${currentCourse.teacher || appData.teacherName}\n课程名称：《${currentCourse.name}》\n应到人数：${students.length}\n实到人数：${arrived}`;
+  if (counts.absent > 0) r += `\n❌ 缺勤（${counts.absent}人）：${absentNames.join('、')}`;
+  if (counts.late > 0) r += `\n▲ 迟到（${counts.late}人）：${lateNames.join('、')}`;
+  if (counts.leave > 0) r += `\n〇 请假（${counts.leave}人）：${leaveNames.join('、')}`;
   return r;
 }
 
@@ -2622,25 +2939,27 @@ function copyReport() {
 }
 
 function finishRollCall() {
+  if (!currentCourse) return;
+  // 先保存/更新考勤记录（含云同步），失败即中断
+  saveAttendanceRecord();
+  // 工具栏与统计栏切换为课堂表现模式，关闭弹窗后可继续记录
+  setRcPhase('performance');
+  updateRcStats();
   const report = generateReport();
-  // 点名完成，自动切换到表现记录模式
-  setMarkMode('speak');
-  // 统计表现记录
-  const clsName = currentCourse ? currentCourse.className : '';
-  const perfStats = { speak: 0, praise: 0, discipline: 0, nophone: 0 };
+  // 弹窗展示考勤统计（表现是完成点名之后才记录的，不在这里显示）
   const students = getCurrentStudents();
+  const counts = { present:0, absent:0, late:0, leave:0 };
   students.forEach(s => {
-    const perf = getPerf(clsName, getStudentName(s));
-    perfStats.speak += perf.speak || 0;
-    perfStats.praise += perf.praise || 0;
-    perfStats.discipline += perf.discipline || 0;
-    perfStats.nophone += perf.nophone || 0;
+    const st = studentStatuses[getStudentName(s)];
+    if (counts[st] !== undefined) counts[st]++;
   });
+  const arrived = counts.present + counts.late;
   document.getElementById('finishStats').innerHTML = [
-    { label:'💬 发言', num:perfStats.speak, color:'#6366f1' },
-    { label:'⭐ 加分', num:perfStats.praise, color:'#10b981' },
-    { label:'⚠️ 扣分', num:perfStats.discipline, color:'#ef4444' },
-    { label:'📱 未交手机', num:perfStats.nophone, color:'#f59e0b' }
+    { label:'应到', num:students.length, color:'#94a3b8' },
+    { label:'实到', num:arrived, color:'#10b981' },
+    { label:'缺勤', num:counts.absent, color:'#ef4444' },
+    { label:'迟到', num:counts.late, color:'#d97706' },
+    { label:'请假', num:counts.leave, color:'#2563eb' }
   ].map(s => `<div class="stat-card"><div class="stat-num" style="color:${s.color}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
   document.getElementById('finalReport').value = report;
   openModal('finishModal');
@@ -2654,12 +2973,13 @@ function copyFinalReport() {
   });
 }
 
-function saveRecord() {
+function saveAttendanceRecord() {
   const students = getCurrentStudents();
-  // 默认全部到场
   students.forEach(s => {
     const name = getStudentName(s);
-    if (!studentStatuses[name]) studentStatuses[name] = 'present';
+    const st = studentStatuses[name];
+    // 空状态视为到场；自动点名未应答的 unknown 视为缺勤，保证 应到=实到+缺勤+迟到+请假
+    if (!st || st === 'unknown') studentStatuses[name] = 'absent';
   });
   const counts = { present:0, absent:0, late:0, leave:0 };
   Object.values(studentStatuses).forEach(s => { counts[s]=(counts[s]||0)+1; });
@@ -2691,29 +3011,29 @@ function saveRecord() {
     totalCount: students.length,
     presentCount: arrived, absentCount: counts.absent, lateCount: counts.late, leaveCount: counts.leave,
     absentNames: absentNames.join('、'), lateNames: lateNames.join('、'), leaveNames: leaveNames.join('、'),
-    report: document.getElementById('finalReport').value
+    report: generateReport()
   };
-  if (currentCourse._editing && currentCourse.recordId) {
-    // 编辑模式：覆盖原记录
-    const idx = appData.rollCallRecords.findIndex(r => r.id === currentCourse.recordId);
-    if (idx >= 0) {
-      record.id = currentCourse.recordId;
-      record.courseId = appData.rollCallRecords[idx].courseId;
-      appData.rollCallRecords[idx] = record;
-    }
+  // 查重：优先按 recordId；否则按「课程+当日日期」，避免刷新/换天后重复保存
+  const courseId = currentCourse.scheduleId || currentCourse.id;
+  const updating = currentCourse.recordId && appData.rollCallRecords.some(r => r.id === currentCourse.recordId)
+    || appData.rollCallRecords.some(r => r.courseId === courseId && r.date === record.date);
+  const idx = appData.rollCallRecords.findIndex(r =>
+    r.id === currentCourse.recordId || (r.courseId === courseId && r.date === record.date));
+  if (idx >= 0) {
+    record.id = appData.rollCallRecords[idx].id;
+    appData.rollCallRecords[idx] = record;
   } else {
     appData.rollCallRecords.unshift(record);
   }
+  currentCourse.recordId = record.id;
   const tc = appData.todayCourses.find(c => c.scheduleId === currentCourse.scheduleId);
   if (tc) tc.recordId = record.id;
   saveData(appData);
-  closeModal('finishModal');
-  showToast(currentCourse._editing ? '记录已更新' : '点名记录已保存','success');
+  showToast(updating ? '考勤记录已更新，可继续记录课堂表现' : '考勤已保存，可继续记录课堂表现','success');
   // 同步到飞书文档
   syncToCloud(record);
   // 5 分钟后提醒标记缺勤
   scheduleAbsentReminder(lateNames);
-  switchPage('history');
 }
 
 // 同步记录到本地队列（供自动化推送到飞书文档）
@@ -2797,7 +3117,7 @@ async function retryPendingSync() {
       }
     }
   } catch(e) {
-    showToast('重试失败：' + e.message, 'error');
+    showToast('云同步服务未连接（请先启动 serve.js 后端）', 'error');
   } finally {
     checkSyncStatus();
   }
@@ -2819,7 +3139,17 @@ function viewRecord(recordId) {
 }
 
 // ==================== 完整课表 ====================
+// 由学期起始日期推导学期名（8月及以后为秋季学期"YYYY-YYYY-1"，否则为春季"YYYY-YYYY-2"）
+function getSemesterName() {
+  const d = getSemesterStart();
+  const y = d.getFullYear();
+  const m = d.getMonth() + 1;
+  return m >= 8 ? `${y}-${y + 1}-1` : `${y - 1}-${y}-2`;
+}
+
 function renderFullSchedule() {
+  const nameEl = document.getElementById('semesterName');
+  if (nameEl) nameEl.textContent = getSemesterName() + ' 学期';
   const weekNum = getCurrentWeek();
   document.getElementById('semesterInfoText').textContent = `当前：第 ${weekNum} 周 · ${formatDate(new Date())} · 高亮的课程本周上课`;
   const body = document.getElementById('scheduleViewBody');
@@ -2894,7 +3224,7 @@ function openEditClassModal(idx) {
   document.getElementById('classModal').dataset.editIdx=idx;
   openModal('classModal');
 }
-function saveClass() {
+async function saveClass() {
   const name=document.getElementById('class-name').value.trim();
   const monitor=document.getElementById('class-monitor').value.trim();
   const raw=document.getElementById('class-students').value;
@@ -2915,14 +3245,41 @@ function saveClass() {
   if(!name){showToast('请填写班级名称','error');return;}
   if(students.length===0){showToast('请填写至少一个学生姓名','error');return;}
 
+  // 重名检测：同名学生会导致作业匹配和表现记录互相串
+  const seen = new Set(); const dupes = new Set();
+  students.forEach(s => { if (seen.has(s.name)) dupes.add(s.name); seen.add(s.name); });
+  if (dupes.size) {
+    if (!await uiConfirm(`检测到重名学生：${[...dupes].join('、')}\n同名会导致作业文件匹配歧义、表现记录合并统计，建议加上区分（如中间名）。\n仍要保存吗？`, { danger: true, confirmText: '仍要保存' })) return;
+  }
+
   const editIdx=document.getElementById('classModal').dataset.editIdx;
   if(editIdx!==''){appData.classes[parseInt(editIdx)]={...appData.classes[parseInt(editIdx)],name,monitor,students};}
   else{appData.classes.push({id:genId(),name,monitor,students});}
   saveData(appData); closeModal('classModal'); renderClasses(); showToast(`已保存 ${students.length} 名学生`,'success');
 }
-function deleteClass(idx){if(!confirm('确认删除该班级？'))return;appData.classes.splice(idx,1);saveData(appData);renderClasses();}
+async function deleteClass(idx){
+  const cls = appData.classes[idx];
+  if (!cls) return;
+  const hwN = (appData.homework[cls.id] || []).length;
+  if (!await uiConfirm(`确认删除「${cls.name}」？` + (hwN ? `\n该班 ${hwN} 次作业记录将一并删除。` : '') + '\n该班课堂表现记录也将删除。', { danger: true, confirmText: '确认删除' })) return;
+  appData.classes.splice(idx, 1);
+  delete appData.homework[cls.id];
+  if (appData.performances) delete appData.performances[cls.name];
+  saveData(appData);
+  renderClasses();
+  showToast('班级已删除', 'success');
+}
 function removeStudent(ci,si){appData.classes[ci].students.splice(si,1);saveData(appData);renderClasses();}
-function addStudentInline(ci){const name=prompt('输入学生姓名：');if(!name||!name.trim())return;appData.classes[ci].students.push({name:name.trim(),studentId:''});saveData(appData);renderClasses();showToast(`${name} 已添加`,'success');}
+async function addStudentInline(ci){
+  const name = await uiPrompt('添加学生', { placeholder: '输入学生姓名' });
+  if (!name) return;
+  const cls = appData.classes[ci];
+  if (cls.students.some(s => getStudentName(s) === name)) { showToast('该班已有同名学生', 'error'); return; }
+  cls.students.push({ name, studentId: '' });
+  saveData(appData);
+  renderClasses();
+  showToast(`${name} 已添加`, 'success');
+}
 
 // ==================== 历史 ====================
 function renderHistory() {
@@ -2942,6 +3299,7 @@ function renderHistory() {
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="btn btn-sm" onclick="syncRecordToFeishu('${r.id}')" title="本地数据有修改或未同步成功时，点击更新飞书对应记录">☁️ 同步</button>
         <button class="btn btn-sm" onclick="viewRecord('${r.id}')">查看</button>
         <button class="btn btn-sm" style="color:var(--warning)" onclick="editRecord('${r.id}')">编辑</button>
         <button class="btn btn-sm" style="color:var(--rose)" onclick="deleteRecord('${r.id}')">删除</button>
@@ -2949,7 +3307,68 @@ function renderHistory() {
     </div>`
   ).join('');
 }
-function deleteRecord(id){if(!confirm('确认删除该记录？'))return;appData.rollCallRecords=appData.rollCallRecords.filter(r=>r.id!==id);appData.todayCourses.forEach(c=>{if(c.recordId===id)c.recordId=null;});saveData(appData);renderHistory();}
+async function deleteRecord(id){
+  if(!await uiConfirm('确认删除该记录？\n将同步删除飞书「出勤汇总」表中的对应记录。', { danger: true, confirmText: '确认删除' }))return;
+  const rec = appData.rollCallRecords.find(r=>r.id===id);
+  appData.rollCallRecords=appData.rollCallRecords.filter(r=>r.id!==id);
+  appData.todayCourses.forEach(c=>{if(c.recordId===id)c.recordId=null;});
+  saveData(appData);renderHistory();
+  // 同步删除飞书端记录（失败只提示，不影响本地删除）
+  if(!rec) return;
+  fetch('/delete-record',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    id:rec.id, weekNum:rec.weekNum, date:rec.date, weekday:rec.weekday, session:rec.session, className:rec.className
+  })}).then(r=>r.json()).then(d=>{
+    if(d.ok){
+      if(d.skipped) showToast('本地已删除（未配置飞书同步）','success');
+      else if(d.summary||d.classSheet) showToast('飞书对应记录已删除','success');
+      else showToast('本地已删除（飞书中未找到对应记录）','success');
+    } else showToast('本地已删除，但飞书删除失败：'+(d.error||'未知错误'),'error');
+  }).catch(()=>showToast('本地已删除；云同步服务未连接，飞书记录未删除','error'));
+}
+
+// 同步单条考勤记录到飞书：刷新表现快照后走 /sync（命中旧行即更新）
+async function syncRecordToFeishu(id) {
+  const rec = appData.rollCallRecords.find(r => r.id === id);
+  if (!rec) return;
+  const cls = appData.classes.find(c => c.id === rec.classId);
+  // 完成点名后可能又记了课堂表现，同步前刷新表现快照
+  const perf = {};
+  (cls ? cls.students : []).forEach(s => {
+    const n = getStudentName(s);
+    const p = (appData.performances[rec.className] || {})[n] || {};
+    perf[n] = { speak: p.speak || 0, discipline: p.discipline || 0, praise: p.praise || 0, nophone: p.nophone || 0 };
+  });
+  const payload = { ...rec, performances: perf };
+  showToast('正在同步考勤到飞书…');
+  try {
+    const r = await fetch('/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const d = await r.json();
+    if (d.ok && d.synced) showToast('考勤已同步到飞书（命中旧记录已更新）', 'success');
+    else showToast('暂时未连上飞书，已加入待同步队列，可稍后点右上角云图标重试', 'error');
+  } catch (e) { showToast('同步失败：云同步服务未连接', 'error'); }
+}
+
+// 同步单条作业到飞书：作业汇总表一行 + 班级子表一列
+async function syncHwToFeishu(hwId) {
+  const cid = getHwClassId();
+  const cls = appData.classes.find(c => c.id === cid);
+  const hw = getHwList(cid).find(h => h.id === hwId);
+  if (!cls || !hw) return;
+  const students = getStudentList(cls);
+  const submitted = students.filter(n => (hw.records || {})[n] === 'submitted');
+  const missing = students.filter(n => (hw.records || {})[n] !== 'submitted');
+  showToast('正在同步作业到飞书…');
+  try {
+    const r = await fetch('/hw-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      className: cls.name, title: hw.title, date: hw.date, week: hw.week,
+      total: students.length, submittedCount: submitted.length,
+      missingNames: missing.join('、'), records: hw.records || {}
+    }) });
+    const d = await r.json();
+    if (d.ok) showToast('作业已同步到飞书（' + (d.updated ? '已更新原记录' : '新增记录') + '）', 'success');
+    else showToast('作业同步失败：' + (d.error || '未知错误'), 'error');
+  } catch (e) { showToast('同步失败：云同步服务未连接', 'error'); }
+}
 
 // 编辑历史记录：重新打开点名页，预填之前的状态
 function editRecord(recordId) {
@@ -2974,8 +3393,7 @@ function editRecord(recordId) {
 
   document.getElementById('rc-courseName').textContent = `《${record.courseName}》[编辑中]`;
   document.getElementById('rc-courseSub').textContent = `${record.className} · ${record.room} · ${record.date}`;
-  markMode = 'absent';
-  updateMarkModeUI();
+  setRcPhase('attendance', 'absent');
   if (cls) renderStudentGrid(cls.students);
   updateRcStats();
   updateReport();
@@ -3009,26 +3427,25 @@ function exportToFile() {
   document.body.removeChild(a); URL.revokeObjectURL(url);
   showToast(`已导出 ${appData.rollCallRecords.length} 条记录`, 'success');
 }
-function importFromFile(event) {
+async function importFromFile(event) {
   const file = event.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (!data.classes) { showToast('无效的数据文件', 'error'); return; }
-      // 合并记录：保留已有 + 新增不重复的
-      const existingIds = new Set(appData.rollCallRecords.map(r => r.id));
-      const newRecords = (data.rollCallRecords || []).filter(r => !existingIds.has(r.id));
-      appData.rollCallRecords = [...appData.rollCallRecords, ...newRecords];
-      appData.todayCourses = data.todayCourses || appData.todayCourses;
-      saveData(appData);
-      showToast(`已导入 ${newRecords.length} 条新记录，刷新页面`, 'success');
-      setTimeout(() => location.reload(), 1000);
-    } catch(err) { showToast('文件解析失败', 'error'); }
-  };
-  reader.readAsText(file);
   event.target.value = '';
+  let data;
+  try { data = JSON.parse(await file.text()); } catch (e) { showToast('文件解析失败', 'error'); return; }
+  if (!data.classes) { showToast('无效的数据文件', 'error'); return; }
+  const recN = (data.rollCallRecords || []).length;
+  const hwN = Object.values(data.homework || {}).reduce((s, l) => s + (l || []).length, 0);
+  if (!await uiConfirm(`将导入备份：${(data.classes || []).length} 个班级、${recN} 条考勤记录、${hwN} 次作业。\n考勤记录按 id 去重合并，其余字段以备份为准覆盖本地。`, { confirmText: '导入' })) return;
+  const existingIds = new Set(appData.rollCallRecords.map(r => r.id));
+  const newRecords = (data.rollCallRecords || []).filter(r => !existingIds.has(r.id));
+  appData.rollCallRecords = [...appData.rollCallRecords, ...newRecords];
+  ['classes', 'scheduleItems', 'performances', 'homework'].forEach(k => { if (data[k]) appData[k] = data[k]; });
+  if (data.semesterStart) appData.semesterStart = data.semesterStart;
+  if (data.teacherName) appData.teacherName = data.teacherName;
+  saveData(appData);
+  showToast(`已导入：新增考勤 ${newRecords.length} 条，刷新页面`, 'success');
+  setTimeout(() => location.reload(), 1000);
 }
 
 // ==================== 学期设置 ====================
@@ -3047,6 +3464,55 @@ function saveSemester() {
   showToast('学期设置已更新，课程已刷新','success');
 }
 
+// ==================== 自定义确认/输入弹窗 ====================
+let _uiDialogResolve = null;
+function openUiDialog(opts) {
+  const { title, message = '', placeholder = '', value = '', input = false, confirmText = '确认', cancelText = '取消', danger = false } = opts;
+  return new Promise(resolve => {
+    _uiDialogResolve = resolve;
+    document.getElementById('uid-title').textContent = title;
+    const msgEl = document.getElementById('uid-message');
+    msgEl.textContent = message;
+    msgEl.style.display = message ? '' : 'none';
+    const wrap = document.getElementById('uid-input-wrap');
+    wrap.style.display = input ? '' : 'none';
+    if (input) {
+      const el = document.getElementById('uid-input');
+      el.value = value;
+      el.placeholder = placeholder;
+    }
+    const ok = document.getElementById('uid-ok');
+    ok.textContent = confirmText;
+    ok.className = 'btn ' + (danger ? 'btn-danger' : 'btn-primary');
+    openModal('uiDialog');
+    if (input) setTimeout(() => { const el = document.getElementById('uid-input'); el.focus(); el.select(); }, 80);
+  });
+}
+function uidFinish(result, isInput) {
+  closeModal('uiDialog');
+  if (_uiDialogResolve) { _uiDialogResolve(result); _uiDialogResolve = null; }
+}
+function uidOk() {
+  const isInput = document.getElementById('uid-input-wrap').style.display !== 'none';
+  uidFinish(isInput ? document.getElementById('uid-input').value.trim() : true, isInput);
+}
+function uidCancel() {
+  const isInput = document.getElementById('uid-input-wrap').style.display !== 'none';
+  uidFinish(isInput ? null : false, isInput);
+}
+function uiConfirm(message, opts = {}) {
+  return openUiDialog({ title: opts.title || '确认操作', message, confirmText: opts.confirmText || '确认', danger: opts.danger });
+}
+function uiPrompt(title, opts = {}) {
+  return openUiDialog({ title, input: true, placeholder: opts.placeholder || '', value: opts.value || '', confirmText: '确定' });
+}
+document.addEventListener('keydown', e => {
+  const dlg = document.getElementById('uiDialog');
+  if (!dlg || !dlg.classList.contains('open')) return;
+  if (e.key === 'Enter') { e.preventDefault(); uidOk(); }
+  if (e.key === 'Escape') { e.preventDefault(); uidCancel(); }
+});
+
 // ==================== 平时作业统计 ====================
 let hwState = { classId: null, hwId: null, mode: 'list', markMode: 'submitted' };
 
@@ -3063,7 +3529,7 @@ function renderHomework() {
   const cid = getHwClassId();
   tabs.innerHTML = appData.classes.map(c =>
     `<button class="inner-tab ${c.id === cid ? 'active' : ''}" onclick="hwState.classId='${c.id}';hwState.mode='list';renderHomework()">${c.name}</button>`
-  ).join('') + `<button class="inner-tab ${hwState.mode === 'summary' ? 'active' : ''}" style="margin-left:auto" onclick="hwState.mode='summary';renderHomework()">📊 按学生汇总</button>`;
+  ).join('') + `<button class="inner-tab ${hwState.mode === 'summary' ? 'active' : ''}" style="margin-left:auto" onclick="hwState.mode='summary';renderHomework()"><svg class="svg-ico" style="width:14px;height:14px;vertical-align:-2px"><use href="#i-chart"/></svg> 按学生汇总</button>`;
 
   const body = document.getElementById('hwBody');
   if (hwState.mode === 'mark' && hwState.hwId) { renderHwMark(); return; }
@@ -3091,7 +3557,7 @@ function renderHwList() {
     const rate = total > 0 ? Math.round(ok / total * 100) : 0;
     const missing = total - ok;
     return `<div class="hw-item" onclick="hwState.hwId='${hw.id}';hwState.mode='mark';renderHomework()">
-      <div class="hw-item-icon">📝</div>
+      <div class="hw-item-icon" style="color:var(--gold)"><svg class="svg-ico" style="width:20px;height:20px"><use href="#i-file"/></svg></div>
       <div class="hw-item-info">
         <div class="hw-item-title">${hw.title}</div>
         <div class="hw-item-meta"><span>📅 ${hw.date}</span><span>第${hw.week}周</span><span>已交 ${ok}/${total}</span>${missing > 0 ? `<span style="color:var(--rose)">未交 ${missing} 人</span>` : '<span style="color:var(--emerald)">全部提交</span>'}</div>
@@ -3100,6 +3566,7 @@ function renderHwList() {
         <div class="hw-rate-bar"><div class="hw-rate-fill" style="width:${rate}%"></div></div>
         <div class="hw-rate-num">${rate}%</div>
       </div>
+      <button class="btn btn-sm" onclick="event.stopPropagation();syncHwToFeishu('${hw.id}')" title="本地数据有修改或未同步成功时，点击更新飞书对应记录">☁️ 同步</button>
       <button class="btn btn-sm" onclick="event.stopPropagation();hwConfirmDelete('${hw.id}')" style="color:var(--rose)">删除</button>
     </div>`;
   }).join('');
@@ -3132,15 +3599,27 @@ function saveHw() {
   hwState.mode = 'mark';
   switchPage('homework');
   showToast('作业已创建，点击学生姓名登记提交情况', 'success');
+  syncHwToFeishu(hw.id);  // 自动同步一次到飞书
 }
 
-function hwConfirmDelete(hwId) {
-  if (!confirm('确认删除该作业及其登记记录？')) return;
+async function hwConfirmDelete(hwId) {
+  if (!await uiConfirm('确认删除该作业及其登记记录？\n将同步删除飞书「作业汇总」表中的对应行。', { danger: true, confirmText: '确认删除' })) return;
   const cid = getHwClassId();
+  const cls = appData.classes.find(c => c.id === cid);
+  const hw = getHwList(cid).find(h => h.id === hwId);
   appData.homework[cid] = getHwList(cid).filter(h => h.id !== hwId);
   saveData(appData);
   renderHomework();
   showToast('已删除', 'success');
+  // 同步删除飞书作业汇总行（失败仅提示）
+  if (cls && hw) {
+    fetch('/hw-delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ className: cls.name, title: hw.title, date: hw.date }) })
+      .then(r => r.json()).then(d => {
+        if (d.ok && d.found) showToast('飞书对应行已删除', 'success');
+        else if (d.ok) showToast('本地已删除（飞书中未找到对应行）', 'success');
+        else showToast('飞书行删除失败：' + (d.error || '未知错误'), 'error');
+      }).catch(() => showToast('本地已删除；云同步服务未连接，飞书行未删除', 'error'));
+  }
 }
 
 function renderHwMark() {
@@ -3154,7 +3633,7 @@ function renderHwMark() {
   const students = getStudentList(cls);
   const total = students.length;
   const ok = students.filter(n => hw.records[n] === 'submitted').length;
-  const missing = students.filter(n => hw.records[n] === 'missing');
+  const missing = students.filter(n => hw.records[n] !== 'submitted');
   const rate = total > 0 ? Math.round(ok / total * 100) : 0;
 
   body.innerHTML = `
@@ -3173,13 +3652,20 @@ function renderHwMark() {
     <div class="hw-actions-bar">
       <button class="mark-btn submitted-btn ${hwState.markMode === 'submitted' ? 'active' : ''}" onclick="hwState.markMode='submitted';renderHwMark()">✓ 标记已交</button>
       <button class="mark-btn missing-btn ${hwState.markMode === 'missing' ? 'active' : ''}" onclick="hwState.markMode='missing';renderHwMark()">✗ 标记未交</button>
-      <span style="width:1px;height:22px;background:var(--border)"></span>
+      <span style="flex:1"></span>
+      <button class="btn btn-sm" onclick="copyHwMissing('${hw.id}')">📋 复制未交名单</button>
+      <button class="btn btn-sm" onclick="openHwImport('${hw.id}')">📂 补交导入</button>
+    </div>
+    ${missing.length > 0 ? `<div class="hw-missing-list" onclick="hwState.missingOpen = !hwState.missingOpen; renderHwMark()">
+      <b>未交 ${missing.length} 人</b><span class="hw-missing-toggle">${hwState.missingOpen ? '▲ 收起名单' : '▼ 展开名单'}</span>
+      <span class="hw-missing-names${hwState.missingOpen ? '' : ' hidden'}" style="display:block">${missing.join('、')}</span>
+    </div>` : ''}
+    <div class="hw-actions-bar" style="justify-content:flex-end;margin-bottom:10px">
+      <span style="font-size:12px;color:var(--text-muted);align-self:center">批量：</span>
       <button class="btn btn-sm" onclick="hwMarkAll('${hw.id}',true)">✓ 全部已交</button>
       <button class="btn btn-sm" onclick="hwMarkAll('${hw.id}',false)">✗ 全部未交</button>
-      <span style="flex:1"></span>
-      ${missing.length > 0 ? `<button class="btn btn-sm" onclick="copyHwMissing('${hw.id}')">📋 复制未交名单</button>` : ''}
     </div>
-    ${missing.length > 0 ? `<div class="hw-missing-list"><b>未交名单：</b>${missing.join('、')}</div>` : ''}
+    ${hw.cloudFiles && Object.keys(hw.cloudFiles).length ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:2">☁️ 云盘文件：${Object.entries(hw.cloudFiles).map(([n, arr]) => n + '：' + arr.map(f => `<a href="${f.url}" target="_blank" style="color:var(--azure)">${f.name}</a>`).join('、')).join('；')}</div>` : ''}
     <div class="card">
       <div class="card-header"><span class="card-title">学生名单（${total}人）</span></div>
       <div class="card-body"><div class="student-grid" id="hwGrid">${students.map(n => {
@@ -3207,12 +3693,12 @@ function hwHandleCardClick(name) {
   renderHwMark();
 }
 
-function hwMarkAll(hwId, submitted) {
+async function hwMarkAll(hwId, submitted) {
   const cid = getHwClassId();
   const hw = getHwList(cid).find(h => h.id === hwId);
   if (!hw) return;
   const cls = appData.classes.find(c => c.id === cid);
-  if (!confirm(submitted ? '确认将全部学生标记为已交？' : '确认清空为全部未交？')) return;
+  if (!await uiConfirm(submitted ? '确认将全部学生标记为已交？' : '确认清空为全部未交？')) return;
   hw.records = {};
   if (submitted) getStudentList(cls).forEach(n => hw.records[n] = 'submitted');
   saveData(appData);
@@ -3224,7 +3710,7 @@ function copyHwMissing(hwId) {
   const hw = getHwList(cid).find(h => h.id === hwId);
   const cls = appData.classes.find(c => c.id === cid);
   if (!hw || !cls) return;
-  const missing = getStudentList(cls).filter(n => (hw.records || {})[n] === 'missing');
+  const missing = getStudentList(cls).filter(n => (hw.records || {})[n] !== 'submitted');
   if (missing.length === 0) { showToast('没有未交的学生', 'info'); return; }
   const text = `《${hw.title}》未交名单（${cls.name} · ${hw.date} · 第${hw.week}周，共${missing.length}人）：\n${missing.join('、')}`;
   copyText(text, '未交名单已复制');
@@ -3306,19 +3792,212 @@ function copyHwSummary() {
   copyText(`【${cls.name} 平时作业汇总】共${list.length}次\n` + [header, ...rows].join('\n'), '汇总表已复制，可粘贴到 Excel/飞书表格');
 }
 
+// ==================== 从文件导入作业 ====================
+let hwImpFiles = [];  // { name, matched: bool, student: name|null }
+
+let hwImpAppendId = null;  // 非 null 时为向已有作业追加导入
+
+function openHwImport(appendHwId) {
+  const cid = getHwClassId();
+  if (!cid) { showToast('请先添加班级', 'error'); return; }
+  hwImpAppendId = appendHwId || null;
+  const appending = !!hwImpAppendId;
+  const hw = appending ? getHwList(cid).find(h => h.id === hwImpAppendId) : null;
+  if (appending && !hw) { showToast('作业不存在', 'error'); return; }
+  document.getElementById('hwimp-title-label').textContent = appending ? '📂 追加导入到「' + hw.title + '」' : '📂 从文件导入作业';
+  document.getElementById('hwimp-class').innerHTML = appData.classes.map(c =>
+    `<option value="${c.id}" ${c.id === cid ? 'selected' : ''}>${c.name}</option>`).join('');
+  document.getElementById('hwimp-title').value = appending ? hw.title : '';
+  document.getElementById('hwimp-title').readOnly = appending;
+  document.getElementById('hwimp-date').value = appending ? hw.date : new Date().toISOString().split('T')[0];
+  hwImpFiles = [];
+  renderHwImportPreview();
+  openModal('hwImportModal');
+}
+
+// 文件名 → 学生匹配：学号优先（连续6位以上数字，支持截断），姓名最长匹配兜底
+function matchStudentByName(base, cls) {
+  const students = getStudentList(cls);
+  const idMap = {};
+  (cls.students || []).forEach(s => {
+    const o = getStudentObj(s);
+    if (o.studentId) idMap[o.studentId] = getStudentName(o);
+  });
+  // 1) 学号匹配
+  const digitGroups = base.match(/\d{6,}/g) || [];
+  for (const g of digitGroups) {
+    if (idMap[g]) return idMap[g];
+    const partial = Object.keys(idMap).find(sid => sid.endsWith(g) || g.endsWith(sid));
+    if (partial) return idMap[partial];
+  }
+  // 2) 姓名匹配：文件名中包含的班级学生姓名，长名优先（王芳欢 完整出现时优先于其中的 王芳）。
+  //    名字以学生实际填写为准，学号后两位前缀仅作参考不参与判定。
+  const cands = students.filter(n => n.length >= 2 && base.includes(n)).sort((a, b) => b.length - a.length);
+  return cands.length ? cands[0] : null;
+}
+
+function handleHwFileSelect(input) {
+  const cls = appData.classes.find(c => c.id === document.getElementById('hwimp-class').value);
+  if (!cls) return;
+  const files = Array.from(input.files || []).filter(f => !f.name.startsWith('.'));
+  hwImpFiles = files.map(f => {
+    const base = f.name.replace(/\.[^.]+$/, '');
+    const student = matchStudentByName(base, cls);
+    return { name: f.name, file: f, student };
+  });
+  renderHwImportPreview();
+  // 允许重复选择同一输入框
+  input.value = '';
+}
+
+// 手动指派未匹配的文件
+function assignHwImpFile(idx, studentName) {
+  if (!hwImpFiles[idx]) return;
+  hwImpFiles[idx].student = studentName || null;
+  renderHwImportPreview();
+}
+
+function renderHwImportPreview() {
+  const classId = document.getElementById('hwimp-class').value;
+  const cls = appData.classes.find(c => c.id === classId);
+  const preview = document.getElementById('hwimp-preview');
+  const saveBtn = document.getElementById('hwimp-save');
+  const countEl = document.getElementById('hwimp-count');
+  if (!cls) { preview.innerHTML = ''; saveBtn.disabled = true; return; }
+  const students = getStudentList(cls);
+  countEl.textContent = hwImpFiles.length ? `已选 ${hwImpFiles.length} 个文件` : '';
+  if (hwImpFiles.length === 0) { preview.innerHTML = ''; saveBtn.disabled = true; return; }
+
+  const matched = {};
+  hwImpFiles.forEach(f => { if (f.student) matched[f.student] = (matched[f.student] || 0) + 1; });
+  const unmatchedIdx = hwImpFiles.map((f, i) => ({ f, i })).filter(x => !x.f.student);
+  const missing = students.filter(n => !matched[n]);
+
+  preview.innerHTML = `
+    <div class="hw-import-summary">
+      <span class="badge badge-green">✓ 匹配到 ${Object.keys(matched).length} 人</span>
+      ${unmatchedIdx.length ? `<span class="badge badge-red">✗ 未匹配文件 ${unmatchedIdx.length} 个</span>` : ''}
+      <span class="badge badge-gray">未交 ${missing.length} 人</span>
+    </div>
+    ${Object.keys(matched).length ? `<div style="font-size:12px;color:var(--text-muted);margin:8px 0 4px">已交（${Object.entries(matched).map(([n, c]) => n + (c > 1 ? '×' + c : '')).join('、')}）</div>` : ''}
+    ${unmatchedIdx.length ? `<div style="font-size:12px;color:var(--rose);margin:4px 0">未匹配（可下拉手动指派学生，不指派则忽略）：<br>${unmatchedIdx.slice(0, 10).map(x =>
+      `<div style="display:flex;align-items:center;gap:6px;margin:3px 0"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.f.name}</span><select class="form-control" style="width:130px;padding:3px 6px;font-size:12px" onchange="assignHwImpFile(${x.i}, this.value)"><option value="">忽略</option>${students.map(n => `<option>${n}</option>`).join('')}</select></div>`).join('')}${unmatchedIdx.length > 10 ? '…' : ''}</div>` : ''}`;
+  saveBtn.disabled = false;
+}
+
+async function fileToBase64(file) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+async function confirmHwImport() {
+  const classId = document.getElementById('hwimp-class').value;
+  const title = document.getElementById('hwimp-title').value.trim();
+  const date = document.getElementById('hwimp-date').value || new Date().toISOString().split('T')[0];
+  const cloud = document.getElementById('hwimp-cloud').checked;
+  if (!title) { showToast('请填写作业名称', 'error'); return; }
+  if (hwImpFiles.length === 0) { showToast('请先选择文件', 'error'); return; }
+  const cls = appData.classes.find(c => c.id === classId);
+  if (!cls) return;
+
+  let hw;
+  if (hwImpAppendId) {
+    // 追加导入：合并进已有作业
+    hw = getHwList(classId).find(h => h.id === hwImpAppendId);
+    if (!hw) { showToast('作业不存在', 'error'); return; }
+    if (!hw.records) hw.records = {};
+    if (!hw.fileNames) hw.fileNames = {};
+    hwImpFiles.forEach(f => {
+      if (!f.student) return;
+      hw.records[f.student] = 'submitted';
+      (hw.fileNames[f.student] = hw.fileNames[f.student] || []).push(f.name);
+    });
+    saveData(appData);
+  } else {
+    const records = {};
+    const fileNames = {};
+    hwImpFiles.forEach(f => {
+      if (!f.student) return;
+      records[f.student] = 'submitted';
+      (fileNames[f.student] = fileNames[f.student] || []).push(f.name);
+    });
+    hw = { id: genId(), title, date, week: getCurrentWeek(), createdAt: Date.now(), records, fileNames, imported: true };
+    if (!appData.homework[classId]) appData.homework[classId] = [];
+    appData.homework[classId].unshift(hw);
+    saveData(appData);
+  }
+
+  // 云盘上传：先建作业（数据不丢），再逐个转传，失败仅提示
+  const btn = document.getElementById('hwimp-save');
+  const preview = document.getElementById('hwimp-preview');
+  const cloudFiles = {};
+  const errs = [];
+  if (cloud) {
+    const toUpload = hwImpFiles.filter(f => f.file && f.student);
+    btn.disabled = true;
+    let okN = 0;
+    for (let i = 0; i < toUpload.length; i++) {
+      preview.innerHTML = `<div class="hw-import-summary"><span class="badge badge-blue">☁️ 正在上传 ${i + 1}/${toUpload.length}：${toUpload[i].name}</span></div>`;
+      try {
+        const b64 = await fileToBase64(toUpload[i].file);
+        const resp = await fetch('/hw-upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ className: cls.name, hwTitle: title, fileName: toUpload[i].name, date: date, data: b64 }) });
+        const d = await resp.json();
+        if (d.ok) {
+          okN++;
+          (cloudFiles[toUpload[i].student] = cloudFiles[toUpload[i].student] || []).push({ name: toUpload[i].name, url: d.url });
+        } else errs.push(toUpload[i].name + '：' + (d.error || '未知错误'));
+      } catch (e) { errs.push(toUpload[i].name + '：' + e.message); }
+    }
+    if (okN > 0) {
+      if (!hw.cloudFiles) hw.cloudFiles = {};
+      Object.entries(cloudFiles).forEach(([n, arr]) => {
+        (hw.cloudFiles[n] = hw.cloudFiles[n] || []).push(...arr);
+      });
+      saveData(appData);
+    }
+    btn.disabled = false;
+  }
+
+  const appended = !!hwImpAppendId;
+  closeModal('hwImportModal');
+  hwImpAppendId = null;
+  hwState.classId = classId;
+  hwState.hwId = hw.id;
+  hwState.mode = 'mark';
+  switchPage('homework');
+  const n = Object.keys(hw.records).length;
+  const miss = getStudentList(cls).length - n;
+  let msg = (appended ? '追加完成：' : '导入完成：') + `${n} 人已交，${miss} 人未交`;
+  syncHwToFeishu(hw.id);  // 自动同步一次到飞书
+  if (cloud) {
+    const upN = Object.values(cloudFiles).reduce((s, a) => s + a.length, 0);
+    msg += `；云盘上传 ${upN} 份`;
+    if (Object.keys(cloudFiles).length) showToast(msg + '（登记页可查看文件链接）', 'success');
+    if (errs.length) showToast(errs.length + ' 个文件上传失败：' + errs[0] + (errs.length > 1 ? ' 等' : ''), 'error');
+  } else {
+    showToast(msg, 'success');
+  }
+}
+
 // ==================== 新学期重置 ====================
 function openNewSemesterDialog() {
   document.getElementById('ns-start').value = appData.semesterStart;
   document.getElementById('ns-keepClasses').checked = true;
   document.getElementById('ns-keepSchedule').checked = false;
+  document.getElementById('ns-password').value = '';
   openModal('newSemesterModal');
 }
-function newSemester() {
+const NEW_SEMESTER_PASSWORD = '668899';
+async function newSemester() {
   const start = document.getElementById('ns-start').value;
   const keepClasses = document.getElementById('ns-keepClasses').checked;
   const keepSchedule = document.getElementById('ns-keepSchedule').checked;
+  const password = document.getElementById('ns-password').value;
   if (!start) { showToast('请选择学期起始日期', 'error'); return; }
-  if (!confirm('确认开始新学期？\n将清空本地点名记录和今日课程；不勾选保留的项目将载入本学期默认班级/课表（2026-2027-1）。')) return;
+  if (password !== NEW_SEMESTER_PASSWORD) { showToast('重置密码错误，无法开始新学期', 'error'); return; }
+  if (!await uiConfirm('确认开始新学期？\n将清空本地点名记录和今日课程；不勾选保留的项目将载入本学期默认班级/课表。', { danger: true, confirmText: '确认重置' })) return;
 
   // 备份到 localStorage（带上学期日期）
   const backupKey = 'courseStackBackup_' + appData.semesterStart;
@@ -3337,9 +4016,39 @@ function newSemester() {
   showToast('新学期已就绪！', 'success');
 }
 
+// ==================== 标记工具栏滚动悬浮条 ====================
+function setupFloatingToolbar() {
+  const ft = document.getElementById('floatingToolbar');
+  const mt = document.getElementById('markToolbar');
+  if (!ft || !mt) return;
+  ft.innerHTML = mt.innerHTML;  // 克隆按钮组（class 分组无重复 id，阶段切换/高亮自动同步）
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      const rollcallActive = document.getElementById('page-rollcall').classList.contains('active');
+      // 原工具栏向上滚出视口顶部且点名页在前台时，显示悬浮条
+      const show = !en.isIntersecting && en.boundingClientRect.top < 60 && rollcallActive;
+      ft.classList.toggle('show', show);
+    });
+  }, { threshold: 0 });
+  io.observe(mt);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  setupFloatingToolbar();
+  const fi = document.getElementById('hwimp-files');
+  const fo = document.getElementById('hwimp-folder');
+  if (fi) fi.addEventListener('change', function() { handleHwFileSelect(this); });
+  if (fo) fo.addEventListener('change', function() { handleHwFileSelect(this); });
+});
+
 // ==================== 模态框关闭 ====================
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('open'); });
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) {
+      overlay.classList.remove('open');
+      if (overlay.id === 'uiDialog') uidCancel();
+    }
+  });
 });
 
 
@@ -3511,15 +4220,15 @@ function quickPerf(clsName, name, type) {
   markPerformance(clsName, name, type, 1);
   openPerformanceStats(); // 刷新
 }
-function resetStudentPerf(clsName, name) {
-  if (!confirm(`重置 ${name} 的课堂表现记录？`)) return;
+async function resetStudentPerf(clsName, name) {
+  if (!await uiConfirm(`重置 ${name} 的课堂表现记录？`, { danger: true })) return;
   if (appData.performances[clsName]) delete appData.performances[clsName][name];
   saveData(appData);
   openPerformanceStats();
 }
-function resetCurrentClassPerf() {
+async function resetCurrentClassPerf() {
   if (!currentCourse) return;
-  if (!confirm(`清空 ${currentCourse.className} 的全部课堂表现记录？`)) return;
+  if (!await uiConfirm(`清空 ${currentCourse.className} 的全部课堂表现记录？`, { danger: true })) return;
   delete appData.performances[currentCourse.className];
   saveData(appData);
   closeModal('performanceModal');
