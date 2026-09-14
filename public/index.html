@@ -1192,9 +1192,15 @@
       <label class="form-label">教师姓名</label>
       <input class="form-control" id="sem-teacher" placeholder="如：贺洋子">
     </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('semesterModal')">取消</button>
-      <button class="btn btn-primary" onclick="saveSemester()">保存</button>
+    <div style="font-size:12px;color:var(--text-muted);background:var(--muted-bg);border-radius:8px;padding:8px 12px;line-height:1.7;margin-bottom:14px">
+      课表有调整（如调课生效）时，点下方按钮把课表刷新为最新版本。当前版本：2026-2027-1（含调课后安排）
+    </div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="btn" onclick="loadLatestSchedule()"><svg class="svg-ico"><use href="#i-refresh"/></svg> 载入最新课表</button>
+      <span style="display:flex;gap:10px">
+        <button class="btn" onclick="closeModal('semesterModal')">取消</button>
+        <button class="btn btn-primary" onclick="saveSemester()">保存</button>
+      </span>
     </div>
   </div>
 </div>
@@ -1718,26 +1724,39 @@ function getDefaultData() {
       ]
       }
     ],
-    // 2026-2027-1 真实课表（教务系统个人课表信息）
+    // 2026-2027-1 真实课表（2026-09-14 从教务系统同步，含已生效的调课安排）
+    // 说明：2531班/2534班「麒麟操作系统」按周次分段调整，2435班适配迁移改至周三下午
     scheduleItems: [
-      {"id": "s1", "name": "麒麟操作系统适配迁移", "classId": "c2435", "className": "软件2435班", "room": "ZYL-308通识公共实训室(二)", "weekday": 1, "session": 0, "weekRanges": "1-8", "multi": true},
-      {"id": "s2", "name": "麒麟操作系统适配迁移", "classId": "c2435", "className": "软件2435班", "room": "ZYL-308通识公共实训室(二)", "weekday": 1, "session": 1, "weekRanges": "1-8", "multi": true},
-      {"id": "s3", "name": "麒麟操作系统", "classId": "c2531", "className": "软件2531班", "room": "ZYL-203信创实训室(一)", "weekday": 1, "session": 3, "weekRanges": "1-16", "multi": false},
+      // —— 周一 ——
+      {"id": "s1", "name": "麒麟操作系统适配迁移", "classId": "c2435", "className": "软件2435班", "room": "ZYL-308通识公共实训室(二)", "weekday": 1, "session": 0, "weekRanges": "1-2", "multi": true},
+      {"id": "s2", "name": "麒麟操作系统适配迁移", "classId": "c2435", "className": "软件2435班", "room": "ZYL-308通识公共实训室(二)", "weekday": 1, "session": 1, "weekRanges": "1-2", "multi": true},
+      {"id": "s3", "name": "麒麟操作系统", "classId": "c2531", "className": "软件2531班", "room": "ZYL-203信创实训室(一)", "weekday": 1, "session": 3, "weekRanges": "1-2", "multi": false},
+      // —— 周二 ——
       {"id": "s4", "name": "网站开发技术", "classId": "c2536", "className": "软件2536班", "room": "砺能楼机房B303", "weekday": 2, "session": 0, "weekRanges": "1-16", "multi": true},
       {"id": "s5", "name": "网站开发技术", "classId": "c2536", "className": "软件2536班", "room": "砺能楼机房B303", "weekday": 2, "session": 1, "weekRanges": "1-16", "multi": true},
-      {"id": "s6", "name": "麒麟操作系统", "classId": "c2534", "className": "软件2534班", "room": "ZYL-305通识公共实训室(一)", "weekday": 4, "session": 0, "weekRanges": "1-16", "multi": false},
-      {"id": "s7", "name": "麒麟操作系统适配迁移", "classId": "c2434", "className": "软件2434班", "room": "砺能楼机房B304", "weekday": 5, "session": 2, "weekRanges": "1-8", "multi": true},
-      {"id": "s8", "name": "麒麟操作系统适配迁移", "classId": "c2434", "className": "软件2434班", "room": "砺能楼机房B304", "weekday": 5, "session": 3, "weekRanges": "1-8", "multi": true},
-      {"id": "s9", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 1, "session": 0, "weekRanges": "17-18", "multi": true},
-      {"id": "s10", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 1, "session": 1, "weekRanges": "17-18", "multi": true},
-      {"id": "s11", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 2, "session": 0, "weekRanges": "17-18", "multi": true},
-      {"id": "s12", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 2, "session": 1, "weekRanges": "17-18", "multi": true},
-      {"id": "s13", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 3, "session": 0, "weekRanges": "17-18", "multi": true},
-      {"id": "s14", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 3, "session": 1, "weekRanges": "17-18", "multi": true},
-      {"id": "s15", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 4, "session": 0, "weekRanges": "17-18", "multi": true},
-      {"id": "s16", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 4, "session": 1, "weekRanges": "17-18", "multi": true},
-      {"id": "s17", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 5, "session": 0, "weekRanges": "17-18", "multi": true},
-      {"id": "s18", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 5, "session": 1, "weekRanges": "17-18", "multi": true}
+      // —— 周三（调课后新增安排）——
+      {"id": "s6", "name": "麒麟操作系统", "classId": "c2531", "className": "软件2531班", "room": "砺能楼机房C304", "weekday": 3, "session": 0, "weekRanges": "3-9", "multi": false},
+      {"id": "s7", "name": "麒麟操作系统", "classId": "c2534", "className": "软件2534班", "room": "ZYL-308通识公共实训室(二)", "weekday": 3, "session": 0, "weekRanges": "10-16", "multi": false},
+      {"id": "s8", "name": "麒麟操作系统", "classId": "c2531", "className": "软件2531班", "room": "ZYL-308通识公共实训室(二)", "weekday": 3, "session": 1, "weekRanges": "10-16", "multi": false},
+      {"id": "s9", "name": "麒麟操作系统适配迁移", "classId": "c2435", "className": "软件2435班", "room": "砺能楼机房B402", "weekday": 3, "session": 2, "weekRanges": "3-8", "multi": true},
+      {"id": "s10", "name": "麒麟操作系统适配迁移", "classId": "c2435", "className": "软件2435班", "room": "砺能楼机房B402", "weekday": 3, "session": 3, "weekRanges": "3-8", "multi": true},
+      // —— 周四（仅第1周）——
+      {"id": "s11", "name": "麒麟操作系统", "classId": "c2534", "className": "软件2534班", "room": "ZYL-305通识公共实训室(一)", "weekday": 4, "session": 0, "weekRanges": "1", "multi": false},
+      // —— 周五 ——
+      {"id": "s12", "name": "麒麟操作系统", "classId": "c2534", "className": "软件2534班", "room": "ZYL-203信创实训室(一)", "weekday": 5, "session": 0, "weekRanges": "2-9", "multi": false},
+      {"id": "s13", "name": "麒麟操作系统适配迁移", "classId": "c2434", "className": "软件2434班", "room": "砺能楼机房B304", "weekday": 5, "session": 2, "weekRanges": "1-8", "multi": true},
+      {"id": "s14", "name": "麒麟操作系统适配迁移", "classId": "c2434", "className": "软件2434班", "room": "砺能楼机房B304", "weekday": 5, "session": 3, "weekRanges": "1-8", "multi": true},
+      // —— 集中实训（二）17-18周 ——
+      {"id": "s15", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 1, "session": 0, "weekRanges": "17-18", "multi": true},
+      {"id": "s16", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 1, "session": 1, "weekRanges": "17-18", "multi": true},
+      {"id": "s17", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 2, "session": 0, "weekRanges": "17-18", "multi": true},
+      {"id": "s18", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 2, "session": 1, "weekRanges": "17-18", "multi": true},
+      {"id": "s19", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 3, "session": 0, "weekRanges": "17-18", "multi": true},
+      {"id": "s20", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 3, "session": 1, "weekRanges": "17-18", "multi": true},
+      {"id": "s21", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 4, "session": 0, "weekRanges": "17-18", "multi": true},
+      {"id": "s22", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 4, "session": 1, "weekRanges": "17-18", "multi": true},
+      {"id": "s23", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 5, "session": 0, "weekRanges": "17-18", "multi": true},
+      {"id": "s24", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 5, "session": 1, "weekRanges": "17-18", "multi": true}
     ],
     todayCourses: [],
     rollCallRecords: [],
@@ -3554,6 +3573,21 @@ function openSemesterConfig() {
   document.getElementById('sem-teacher').value = appData.teacherName;
   openModal('semesterModal');
 }
+// 载入最新课表（教务系统同步后的版本）
+async function loadLatestSchedule() {
+  const fresh = getDefaultData().scheduleItems;
+  if (!fresh || !fresh.length) { showToast('未找到课表数据', 'error'); return; }
+  const cur = (appData.scheduleItems || []).length;
+  if (!await uiConfirm(`将课表替换为最新版本？\n\n当前 ${cur} 条排课 → 最新 ${fresh.length} 条（含调课后安排）。\n点名历史记录不受影响。`, { confirmText: '替换课表' })) return;
+  appData.scheduleItems = JSON.parse(JSON.stringify(fresh));
+  saveData(appData);
+  closeModal('semesterModal');
+  refreshToday();
+  if (document.getElementById('page-schedule').classList.contains('active')) renderFullSchedule();
+  renderDashboardExtras();
+  showToast(`课表已更新：${fresh.length} 条排课（含调课安排）`, 'success');
+}
+
 function saveSemester() {
   appData.semesterStart = document.getElementById('sem-start').value;
   appData.teacherName = document.getElementById('sem-teacher').value.trim() || '贺洋子';
