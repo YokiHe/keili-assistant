@@ -1429,6 +1429,8 @@
 <script>
 // ==================== 数据模型 ====================
 const STORAGE_KEY = 'courseStackDataV2';
+// 课表数据版本：教务系统课表更新后改这里，应用启动时会自动应用新版本
+const SCHEDULE_VERSION = '2026-09-14';
 
 function loadData() {
   try {
@@ -1758,6 +1760,7 @@ function getDefaultData() {
       {"id": "s23", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 5, "session": 0, "weekRanges": "17-18", "multi": true},
       {"id": "s24", "name": "集中实训（二）", "classId": "c2538", "className": "软件2538班", "room": "砺能楼机房B203", "weekday": 5, "session": 1, "weekRanges": "17-18", "multi": true}
     ],
+    scheduleVersion: SCHEDULE_VERSION,
     todayCourses: [],
     rollCallRecords: [],
     performances: {},
@@ -3573,19 +3576,27 @@ function openSemesterConfig() {
   document.getElementById('sem-teacher').value = appData.teacherName;
   openModal('semesterModal');
 }
+// 应用内置课表（写数据 + 刷新界面）
+function applyBuiltinSchedule(skipRefresh) {
+  const fresh = getDefaultData().scheduleItems;
+  appData.scheduleItems = JSON.parse(JSON.stringify(fresh));
+  appData.scheduleVersion = SCHEDULE_VERSION;
+  saveData(appData);
+  if (!skipRefresh && typeof refreshToday === 'function') refreshToday();
+  if (document.getElementById('page-schedule') && document.getElementById('page-schedule').classList.contains('active')) renderFullSchedule();
+  if (document.getElementById('dashSummary')) renderDashboardExtras();
+  return fresh.length;
+}
+
 // 载入最新课表（教务系统同步后的版本）
 async function loadLatestSchedule() {
   const fresh = getDefaultData().scheduleItems;
   if (!fresh || !fresh.length) { showToast('未找到课表数据', 'error'); return; }
   const cur = (appData.scheduleItems || []).length;
   if (!await uiConfirm(`将课表替换为最新版本？\n\n当前 ${cur} 条排课 → 最新 ${fresh.length} 条（含调课后安排）。\n点名历史记录不受影响。`, { confirmText: '替换课表' })) return;
-  appData.scheduleItems = JSON.parse(JSON.stringify(fresh));
-  saveData(appData);
+  const n = applyBuiltinSchedule();
   closeModal('semesterModal');
-  refreshToday();
-  if (document.getElementById('page-schedule').classList.contains('active')) renderFullSchedule();
-  renderDashboardExtras();
-  showToast(`课表已更新：${fresh.length} 条排课（含调课安排）`, 'success');
+  showToast(`课表已更新：${n} 条排课（含调课安排）`, 'success');
 }
 
 function saveSemester() {
@@ -4431,6 +4442,11 @@ if ('serviceWorker' in navigator) {
 
 // ==================== 初始化 ====================
 (function init() {
+  // 课表版本变更（教务系统课表有更新）时，自动应用新版课表
+  let scheduleUpdated = 0;
+  if (appData.scheduleVersion !== SCHEDULE_VERSION) {
+    scheduleUpdated = applyBuiltinSchedule(true);  // 后续统一刷新一次
+  }
   const weekNum = getCurrentWeek();
   document.getElementById('weekBadge').textContent = '第 ' + weekNum + ' 周';
   document.getElementById('teacherNameBadge').textContent = appData.teacherName;
@@ -4438,6 +4454,9 @@ if ('serviceWorker' in navigator) {
   refreshToday();
   renderDashboardExtras();
   checkSyncStatus();
+  if (scheduleUpdated) {
+    showToast(`课表已更新为最新版本（${scheduleUpdated} 条排课，含调课安排）`, 'success');
+  }
 })();
 </script>
 </body>
