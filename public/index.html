@@ -3392,7 +3392,7 @@ async function syncHwToFeishu(hwId) {
     const r = await fetch('/hw-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
       className: cls.name, title: hw.title, date: hw.date, week: hw.week,
       total: students.length, submittedCount: submitted.length,
-      missingNames: missing.join('、'), records: hw.records || {}
+      missingNames: missing.join('、'), submittedNames: submitted.join('、'), records: hw.records || {}
     }) });
     const d = await r.json();
     if (d.ok) showToast('作业已同步到飞书（' + (d.updated ? '已更新原记录' : '新增记录') + '）', 'success');
