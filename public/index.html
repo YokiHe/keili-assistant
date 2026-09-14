@@ -1314,7 +1314,7 @@
       <div class="perf-summary-row" id="perfSummaryRow"></div>
       <div style="max-height:40vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
         <table class="perf-stats-table" id="perfStatsTable">
-          <thead><tr><th>学号后2位 · 姓名</th><th>💬 发言</th><th>⚠️ 违纪</th><th>⭐ 表扬</th><th>操作</th></tr></thead>
+          <thead><tr><th>学号后2位 · 姓名</th><th>本节💬</th><th>本节⚠️</th><th>本节⭐</th><th>学期累计</th><th>操作</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -2236,6 +2236,8 @@ function startRollCallInternal(tc) {
   cls.students.forEach(s => { studentStatuses[getStudentName(s)] = 'present'; });
   document.getElementById('rc-courseName').textContent = `《${tc.name}》`;
   document.getElementById('rc-courseSub').textContent = `${tc.className} · ${tc.room} · ${SESSION_DEFS[tc.session].name} ${SESSION_DEFS[tc.session].time}`;
+  // 表现记录按「每节课」独立：新一次点名先清空本节计数
+  const perfCleared = resetPerfForNewSession(tc);
   setRcPhase('attendance');
   renderStudentGrid(cls.students);
   updateRcStats();
@@ -3511,6 +3513,13 @@ function editRecord(recordId) {
   };
 
   studentStatuses = { ...record.statuses };
+  // 载入该次课的表现快照（否则会拿本节/累计值覆盖旧记录）
+  if (record.performances) {
+    appData.performances[record.className] = JSON.parse(JSON.stringify(record.performances));
+  }
+  if (!appData.perfSessionKey) appData.perfSessionKey = {};
+  appData.perfSessionKey[record.className] = perfSessionKey(record.courseId, record.session, record.date);
+  saveData(appData);
   const cls = appData.classes.find(c => c.id === record.classId);
 
   document.getElementById('rc-courseName').textContent = `《${record.courseName}》[编辑中]`;
@@ -3607,6 +3616,55 @@ function saveSemester() {
   closeModal('semesterModal');
   refreshToday();
   showToast('学期设置已更新，课程已刷新','success');
+}
+
+// ==================== 表现记录：按「每节课」管理 ====================
+// 表现计数是「本次课」的，进入新一次点名时清零；历史累计在各次点名记录的快照里
+function perfSessionKey(courseId, session, date) {
+  return [courseId || '', session, date || ''].join('|');
+}
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+// 进入点名时：若与上次记录的课次不同，则清空本班表现计数（同一次课中途重进不清空）
+function resetPerfForNewSession(cur) {
+  if (!cur || !cur.className) return false;
+  const key = perfSessionKey(cur.scheduleId || cur.id, cur.session, todayStr());
+  if (!appData.perfSessionKey) appData.perfSessionKey = {};
+  if (appData.perfSessionKey[cur.className] === key) return false;
+  appData.performances[cur.className] = {};
+  appData.perfSessionKey[cur.className] = key;
+  saveData(appData);
+  return true;
+}
+
+// 学期累计：把本班各次点名记录里的表现快照逐条累加
+function getSemesterPerf(clsName) {
+  const agg = {};
+  (appData.rollCallRecords || []).forEach(r => {
+    if (r.className !== clsName) return;
+    Object.entries(r.performances || {}).forEach(([n, p]) => {
+      if (!agg[n]) agg[n] = { speak: 0, discipline: 0, praise: 0, nophone: 0 };
+      agg[n].speak += p.speak || 0;
+      agg[n].discipline += p.discipline || 0;
+      agg[n].praise += p.praise || 0;
+      agg[n].nophone += p.nophone || 0;
+    });
+  });
+  return agg;
+}
+
+// 记表现后，同步更新「本次课记录」的快照（保证学期累计与飞书同步拿到最新值）
+function syncPerfToCurrentRecord(clsName) {
+  if (!currentCourse || currentCourse.className !== clsName || !currentCourse.recordId) return;
+  const rec = (appData.rollCallRecords || []).find(r => r.id === currentCourse.recordId);
+  if (!rec) return;
+  const cls = appData.classes.find(c => c.id === currentCourse.classId);
+  const snap = {};
+  (cls ? cls.students : []).forEach(s => {
+    const n = getStudentName(s);
+    snap[n] = { ...getPerf(clsName, n) };
+  });
+  rec.performances = snap;
 }
 
 // ==================== 自定义确认/输入弹窗 ====================
@@ -4366,6 +4424,7 @@ function markPerformance(className, name, type, delta) {
   const d = (typeof delta === 'number') ? delta : 1;
   const perf = getPerf(className, name);
   perf[type] = Math.max(0, (perf[type] || 0) + d);  // 可加可减，不低于 0
+  syncPerfToCurrentRecord(className);
   saveData(appData);
 }
 
@@ -4408,11 +4467,18 @@ function openPerformanceStats() {
     totalSpeak += p.speak; totalDiscipline += p.discipline; totalPraise += p.praise;
   });
   document.getElementById('perfSummaryRow').innerHTML = `
-    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#1d4ed8">${totalSpeak}</div><div class="perf-summary-label">💬 总发言</div></div>
-    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#b91c1c">${totalDiscipline}</div><div class="perf-summary-label">⚠️ 总违纪</div></div>
-    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#047857">${totalPraise}</div><div class="perf-summary-label">⭐ 总表扬</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#1d4ed8">${totalSpeak}</div><div class="perf-summary-label">本节 💬 发言</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#b91c1c">${totalDiscipline}</div><div class="perf-summary-label">本节 ⚠️ 违纪</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#047857">${totalPraise}</div><div class="perf-summary-label">本节 ⭐ 表扬</div></div>
     <div class="perf-summary-card"><div class="perf-summary-num">${students.length}</div><div class="perf-summary-label">👥 学生数</div></div>
   `;
+  // 学期累计（本班各次点名记录累加）
+  const semPerf = getSemesterPerf(clsName);
+  const semRecN = (appData.rollCallRecords || []).filter(r => r.className === clsName).length;
+  let semSpeak = 0, semDisc = 0, semPraise = 0;
+  Object.values(semPerf).forEach(p => { semSpeak += p.speak; semDisc += p.discipline; semPraise += p.praise; });
+  document.getElementById('perfModalClass').textContent =
+    `${clsName} · ${currentCourse.name}　｜　学期累计（${semRecN} 次记录）：💬 ${semSpeak} · ⚠️ ${semDisc} · ⭐ ${semPraise}`;
   // 表格（按发言数降序）
   const sorted = students.map(n => ({ name: n, ...getPerf(clsName, n) })).sort((a, b) => b.speak - a.speak);
   const tbody = document.querySelector('#perfStatsTable tbody');
@@ -4422,6 +4488,14 @@ function openPerformanceStats() {
       <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','speak')">💬 ${s.speak}</button></td>
       <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','discipline')">⚠️ ${s.discipline}</button></td>
       <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','praise')">⭐ ${s.praise}</button></td>
+      <td style="font-size:12px;color:var(--text-muted);white-space:nowrap">${(() => {
+        const sp = semPerf[s.name] || { speak:0, discipline:0, praise:0 };
+        const parts = [];
+        if (sp.speak) parts.push('💬' + sp.speak);
+        if (sp.discipline) parts.push('⚠️' + sp.discipline);
+        if (sp.praise) parts.push('⭐' + sp.praise);
+        return parts.length ? parts.join(' ') : '—';
+      })()}</td>
       <td><button class="btn btn-sm" style="padding:2px 6px;font-size:11px;color:var(--rose)" onclick="resetStudentPerf('${clsName}','${s.name}')">重置</button></td>
     </tr>
   `).join('');
