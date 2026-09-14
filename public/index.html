@@ -456,6 +456,20 @@
   .student-card.leave { border-color: var(--azure); background: var(--azure-bg); }
   .student-card.leave .student-num { color: var(--azure); }
   .student-card.unknown { border-color: var(--muted-border); background: var(--muted-bg); }
+  /* 作业登记：已交/未交用独立强着色（点名的"到场"是弱化样式，两者互不影响） */
+  .student-card.submitted { border-color: var(--emerald); background: #ecfdf5; }
+  .student-card.submitted .student-num { color: var(--emerald); }
+  .student-card.submitted .student-status-icon { color: var(--emerald); opacity: 1; font-weight: 700; }
+  .student-card.missing { border-color: var(--rose); background: var(--rose-bg); }
+  .student-card.missing .student-num { color: var(--rose); }
+  .student-card.missing .student-status-icon { color: var(--rose); opacity: 1; font-weight: 700; }
+  /* 快速定位命中的卡片 */
+  .student-card.qf-hit { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(79,70,229,0.25), 0 8px 20px rgba(79,70,229,0.18); transform: translateY(-2px); }
+  /* 快速定位输入条 */
+  .quick-find { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .quick-find input { max-width: 230px; }
+  .quick-find .qf-hint { font-size: 13px; font-weight: 600; color: var(--indigo); }
+  .quick-find .qf-tip { font-size: 12px; color: var(--text-muted); }
 
   /* Calling — the dramatic moment */
   .student-card.calling {
@@ -1090,7 +1104,16 @@
               <button class="btn btn-sm" style="color:var(--rose)" onclick="stopAutoCall()"><svg class="svg-ico"><use href="#i-stop"/></svg></button>
             </div>
           </div>
-          <div class="card-body"><div class="student-grid" id="studentGrid"></div></div>
+          <div class="card-body">
+            <div class="quick-find">
+              <input class="form-control" id="rcFind" placeholder="输入学号后2位或姓名"
+                     oninput="rcQuickFind(this.value)"
+                     onkeydown="if(event.key==='Enter'){event.preventDefault();rcQuickMark();}">
+              <span class="qf-hint" id="rcFindHint"></span>
+              <span class="qf-tip">回车按当前模式标记</span>
+            </div>
+            <div class="student-grid" id="studentGrid"></div>
+          </div>
         </div>
       </div>
     <div id="reportBox" style="display:none"></div>
@@ -1262,7 +1285,7 @@
       </div>
       <div id="randomQuickActions" style="display:none;gap:8px;align-items:center;justify-content:center;margin-bottom:12px;flex-wrap:wrap">
         <button class="btn btn-sm" onclick="randomQuickMark('speak')" style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none">✓ 发言有效</button>
-        <button class="btn btn-sm" onclick="randomQuickMark('discipline')" style="background:linear-gradient(135deg,#f43f5e,#e11d48);color:white;border:none">− 减分</button>
+        <button class="btn btn-sm" onclick="randomQuickMark('discipline')" style="background:linear-gradient(135deg,#f43f5e,#e11d48);color:white;border:none">⚠ 记扣分 +1</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:12px;flex-wrap:wrap">
         <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
@@ -1285,13 +1308,12 @@
       <div class="perf-summary-row" id="perfSummaryRow"></div>
       <div style="max-height:40vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
         <table class="perf-stats-table" id="perfStatsTable">
-          <thead><tr><th>姓名</th><th>💬 发言</th><th>⚠️ 违纪</th><th>⭐ 表扬</th><th>操作</th></tr></thead>
+          <thead><tr><th>学号后2位 · 姓名</th><th>💬 发言</th><th>⚠️ 违纪</th><th>⭐ 表扬</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
       <div class="modal-footer">
         <button class="btn" onclick="closeModal('performanceModal')">关闭</button>
-        <button class="btn" style="color:var(--rose)" onclick="resetCurrentClassPerf()">清空本班记录</button>
       </div>
     </div>
   </div>
@@ -1301,8 +1323,6 @@
     <div class="ctx-menu-item" onclick="ctxMarkPerf('speak')">💬 发言 +1</div>
     <div class="ctx-menu-item" onclick="ctxMarkPerf('discipline')">⚠️ 违纪 +1</div>
     <div class="ctx-menu-item" onclick="ctxMarkPerf('praise')">⭐ 表扬 +1</div>
-    <div class="ctx-menu-sep"></div>
-    <div class="ctx-menu-item" onclick="ctxMarkPerf('speak',-1)">← 撤销发言</div>
   </div>
 
   <!-- ====== 布置作业弹窗 ====== -->
@@ -2729,6 +2749,23 @@ function updateCard(name, idx) {
   card.querySelector('.student-status-icon').textContent = icons[status] || '';
 }
 
+// 学号后 2 位（课堂快速定位标识）
+function getSidShort(s) {
+  const o = getStudentObj(s);
+  return (o.studentId || '').slice(-2);
+}
+// 快速定位：纯数字按学号后两位精确匹配，其他按姓名模糊匹配；返回学生下标
+function findStudentIndex(q, cls) {
+  const query = String(q || '').trim();
+  if (!query || !cls || !cls.students) return -1;
+  if (/^\d{1,2}$/.test(query)) {
+    const two = query.padStart(2, '0');
+    const byId = cls.students.findIndex(s => getSidShort(s) === two);
+    if (byId >= 0) return byId;
+  }
+  return cls.students.findIndex(s => getStudentName(s).includes(query));
+}
+
 function renderStudentGrid(students) {
   const icons = { present:'✓', absent:'❌', late:'▲', leave:'〇', unknown:'' };
   const clsName = currentCourse ? currentCourse.className : '';
@@ -2742,8 +2779,9 @@ function renderStudentGrid(students) {
     if (perf.discipline > 0) badges.push('<span class="perf-badge discipline">⚠️'+perf.discipline+'</span>');
     if (perf.praise > 0) badges.push('<span class="perf-badge praise">⭐'+perf.praise+'</span>');
     if (perf.nophone > 0) badges.push('<span class="perf-badge nophone">📱'+perf.nophone+'</span>');
+    const sid = getSidShort(s);
     return `<div class="student-card ${status}" data-name="${esc}" data-idx="${i}" oncontextmenu="showStudentCtx(event,'${esc}');return false;">
-      <div class="student-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="student-num">${sid || String(i+1).padStart(2,'0')}</div>
       <div class="student-name">${sname}</div>
       <div class="student-status-icon">${icons[status]||''}</div>
       ${badges.length ? '<div class="perf-badges">'+badges.join('')+'</div>' : ''}
@@ -2763,6 +2801,33 @@ function renderStudentGrid(students) {
       card.addEventListener('touchmove', () => clearTimeout(timer));
     });
   }
+}
+
+// 点名页：输入学号后2位/姓名 → 高亮定位，回车按当前模式标记
+function rcQuickFind(q) {
+  const cls = appData.classes.find(c => c.id === (currentCourse && currentCourse.classId));
+  const grid = document.getElementById('studentGrid');
+  const hint = document.getElementById('rcFindHint');
+  if (!grid || !cls) return;
+  grid.querySelectorAll('.student-card.qf-hit').forEach(el => el.classList.remove('qf-hit'));
+  const idx = findStudentIndex(q, cls);
+  if (idx < 0) { if (hint) hint.textContent = q ? '未找到' : ''; return; }
+  const card = grid.querySelector('.student-card[data-idx="' + idx + '"]');
+  if (card) {
+    card.classList.add('qf-hit');
+    card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+  if (hint) hint.textContent = getStudentName(cls.students[idx]);
+}
+function rcQuickMark() {
+  const cls = appData.classes.find(c => c.id === (currentCourse && currentCourse.classId));
+  const el = document.getElementById('rcFind');
+  const idx = findStudentIndex(el ? el.value : '', cls);
+  if (idx < 0) { showToast('未找到该学生', 'error'); return; }
+  handleCardClick(getStudentName(cls.students[idx]), idx);
+  if (el) el.value = '';
+  const hint = document.getElementById('rcFindHint');
+  if (hint) hint.textContent = '';
 }
 
 // 统一卡片点击处理
@@ -3544,7 +3609,7 @@ document.addEventListener('keydown', e => {
 });
 
 // ==================== 平时作业统计 ====================
-let hwState = { classId: null, hwId: null, mode: 'list', markMode: 'submitted' };
+let hwState = { classId: null, hwId: null, mode: 'list', markMode: 'submitted', findQuery: '', missingOpen: false };
 
 function getHwList(classId) { return appData.homework[classId] || []; }
 function getHwClassId() {
@@ -3698,17 +3763,60 @@ function renderHwMark() {
     ${hw.cloudFiles && Object.keys(hw.cloudFiles).length ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:2">☁️ 云盘文件：${Object.entries(hw.cloudFiles).map(([n, arr]) => n + '：' + arr.map(f => `<a href="${f.url}" target="_blank" style="color:var(--azure)">${f.name}</a>`).join('、')).join('；')}</div>` : ''}
     <div class="card">
       <div class="card-header"><span class="card-title">学生名单（${total}人）</span></div>
-      <div class="card-body"><div class="student-grid" id="hwGrid">${students.map(n => {
+      <div class="card-body">
+        <div class="quick-find">
+          <input class="form-control" id="hwFind" placeholder="输入学号后2位或姓名" value="${hwState.findQuery || ''}"
+                 oninput="hwQuickFind(this.value)"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();hwQuickMark();}">
+          <span class="qf-hint" id="hwFindHint"></span>
+          <span class="qf-tip">回车直接标记为${hwState.markMode === 'submitted' ? '已交' : '未交'}</span>
+        </div>
+        <div class="student-grid" id="hwGrid">${students.map((n, i) => {
         const st = hw.records[n];
-        const stCls = st === 'submitted' ? 'present' : st === 'missing' ? 'absent' : '';
+        const stCls = st === 'submitted' ? 'submitted' : st === 'missing' ? 'missing' : '';
         const icon = st === 'submitted' ? '✓' : st === 'missing' ? '✗' : '';
-        return `<div class="student-card ${stCls}" onclick="hwHandleCardClick('${n}')">
-          <div class="student-num">${st === 'submitted' ? '已交' : st === 'missing' ? '未交' : '·'}</div>
+        const sid = getSidShort((cls.students || [])[i] || {});
+        return `<div class="student-card ${stCls}" data-idx="${i}" data-name="${n}" onclick="hwHandleCardClick('${n}')">
+          <div class="student-num">${sid || String(i + 1).padStart(2, '0')}</div>
           <div class="student-name">${n}</div>
           <div class="student-status-icon">${icon}</div>
         </div>`;
       }).join('')}</div></div>
     </div>`;
+}
+
+// 作业登记：输入学号后2位/姓名 → 高亮定位，回车直接标记
+function hwQuickFind(q) {
+  hwState.findQuery = q;
+  const cid = getHwClassId();
+  const cls = appData.classes.find(c => c.id === cid);
+  const grid = document.getElementById('hwGrid');
+  const hint = document.getElementById('hwFindHint');
+  if (!grid || !cls) return;
+  grid.querySelectorAll('.student-card.qf-hit').forEach(el => el.classList.remove('qf-hit'));
+  const idx = findStudentIndex(q, cls);
+  if (idx < 0) { if (hint) hint.textContent = q ? '未找到' : ''; return; }
+  const card = grid.querySelector('.student-card[data-idx="' + idx + '"]');
+  if (card) {
+    card.classList.add('qf-hit');
+    card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+  if (hint) hint.textContent = getStudentName(cls.students[idx]);
+}
+function hwQuickMark() {
+  const cid = getHwClassId();
+  const cls = appData.classes.find(c => c.id === cid);
+  const el = document.getElementById('hwFind');
+  const idx = findStudentIndex(el ? el.value : '', cls);
+  if (idx < 0) { showToast('未找到该学生', 'error'); return; }
+  const name = getStudentName(cls.students[idx]);
+  const mode = hwState.markMode;
+  hwHandleCardClick(name);
+  hwState.findQuery = '';
+  renderHwMark();
+  const box = document.getElementById('hwFind');
+  if (box) { box.value = ''; box.focus(); }
+  showToast(`${getSidShort(cls.students[idx]) || ''} ${name} → ${mode === 'submitted' ? '已交' : '未交'}`, 'success');
 }
 
 function hwHandleCardClick(name) {
@@ -4172,7 +4280,7 @@ function randomQuickMark(type) {
     showToast(name + ' 发言有效 +1', 'success');
   } else if (type === 'discipline') {
     markPerformance(currentCourse.className, name, 'discipline', 1);
-    showToast(name + ' 减分 +1', 'warning');
+    showToast(name + ' 扣分 +1', 'warning');
   }
   if (typeof renderStudentGrid === 'function') { const ss = getCurrentStudents(); if (ss.length) renderStudentGrid(ss); }
 }
@@ -4186,8 +4294,11 @@ function getPerf(className, name) {
 }
 
 function markPerformance(className, name, type, delta) {
+  // 表现记录只增不减：负向/取消操作直接忽略（不产生任何变化）
+  const d = (typeof delta === 'number') ? delta : 1;
+  if (d <= 0) return;
   const perf = getPerf(className, name);
-  perf[type] = Math.max(0, (perf[type] || 0) + delta);
+  perf[type] = (perf[type] || 0) + d;
   saveData(appData);
 }
 
@@ -4204,12 +4315,11 @@ document.addEventListener('click', (e) => {
   if (!e.target.closest('.ctx-menu') && !e.target.closest('.student-card')) hideStudentCtx();
 });
 
-function ctxMarkPerf(type, delta) {
+function ctxMarkPerf(type) {
   if (!ctxStudentName || !currentCourse) return;
-  const d = delta || 1;
-  markPerformance(currentCourse.className, ctxStudentName, type, d);
+  markPerformance(currentCourse.className, ctxStudentName, type, 1);
   const labels = { speak: '发言', discipline: '违纪', praise: '表扬' };
-  showToast(`${ctxStudentName} ${labels[type]} ${d > 0 ? '+' : ''}${d}`, d > 0 ? 'success' : 'info');
+  showToast(`${ctxStudentName} ${labels[type]} +1`, 'success');
   hideStudentCtx();
   const ss = getCurrentStudents(); if (ss.length) renderStudentGrid(ss);
 }
@@ -4218,7 +4328,10 @@ function openPerformanceStats() {
   if (!currentCourse) { showToast('请先进入点名页', 'error'); return; }
   const clsName = currentCourse.className;
   document.getElementById('perfModalClass').textContent = clsName + ' · ' + currentCourse.name;
-  const students = getCurrentStudents().map(getStudentName);
+  const studentObjs = getCurrentStudents();
+  const students = studentObjs.map(getStudentName);
+  const sidMap = {};
+  studentObjs.forEach(s => { sidMap[getStudentName(s)] = getSidShort(s); });
   // 汇总
   let totalSpeak = 0, totalDiscipline = 0, totalPraise = 0;
   students.forEach(n => {
@@ -4236,11 +4349,10 @@ function openPerformanceStats() {
   const tbody = document.querySelector('#perfStatsTable tbody');
   tbody.innerHTML = sorted.map(s => `
     <tr>
-      <td>${s.name}</td>
+      <td>${sidMap[s.name] ? sidMap[s.name] + ' · ' : ''}${s.name}</td>
       <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','speak')">💬 ${s.speak}</button></td>
       <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','discipline')">⚠️ ${s.discipline}</button></td>
       <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','praise')">⭐ ${s.praise}</button></td>
-      <td><button class="btn btn-sm" style="padding:2px 6px;font-size:11px;color:var(--rose)" onclick="resetStudentPerf('${clsName}','${s.name}')">重置</button></td>
     </tr>
   `).join('');
   openModal('performanceModal');
@@ -4249,21 +4361,6 @@ function openPerformanceStats() {
 function quickPerf(clsName, name, type) {
   markPerformance(clsName, name, type, 1);
   openPerformanceStats(); // 刷新
-}
-async function resetStudentPerf(clsName, name) {
-  if (!await uiConfirm(`重置 ${name} 的课堂表现记录？`, { danger: true })) return;
-  if (appData.performances[clsName]) delete appData.performances[clsName][name];
-  saveData(appData);
-  openPerformanceStats();
-}
-async function resetCurrentClassPerf() {
-  if (!currentCourse) return;
-  if (!await uiConfirm(`清空 ${currentCourse.className} 的全部课堂表现记录？`, { danger: true })) return;
-  delete appData.performances[currentCourse.className];
-  saveData(appData);
-  closeModal('performanceModal');
-  const ss = getCurrentStudents(); if (ss.length) renderStudentGrid(ss);
-  showToast('已清空本班课堂表现', 'success');
 }
 
 // ==================== PWA Service Worker 注册 ====================
