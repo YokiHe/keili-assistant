@@ -3330,7 +3330,7 @@ function renderClasses() {
         </div>
       </div>
       <div style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:6px">
-        ${cls.students.map((s,si)=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);font-size:13px;color:var(--text)"><span style="color:var(--text-muted);font-size:11px">${si+1}</span>${getStudentName(s)}<span style="cursor:pointer;color:var(--rose);font-size:12px;margin-left:2px" onclick="event.stopPropagation();removeStudent(${ci},${si})" title="删除">×</span></span>`).join('')}
+        ${cls.students.map((s,si)=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);font-size:13px;color:var(--text)"><span style="color:var(--text-muted);font-size:11px;font-weight:600">${getSidShort(s) || (si+1)}</span>${getStudentName(s)}<span style="cursor:pointer;color:var(--rose);font-size:12px;margin-left:2px" onclick="event.stopPropagation();removeStudent(${ci},${si})" title="删除">×</span></span>`).join('')}
       </div>
     </div>`
   ).join('');
