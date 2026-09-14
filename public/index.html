@@ -3475,7 +3475,7 @@ async function syncRecordToFeishu(id) {
 }
 
 // 同步单条作业到飞书：作业汇总表一行 + 班级子表一列
-async function syncHwToFeishu(hwId) {
+async function syncHwToFeishu(hwId, silent) {
   const cid = getHwClassId();
   const cls = appData.classes.find(c => c.id === cid);
   const hw = getHwList(cid).find(h => h.id === hwId);
@@ -3483,7 +3483,7 @@ async function syncHwToFeishu(hwId) {
   const students = getStudentList(cls);
   const submitted = students.filter(n => (hw.records || {})[n] === 'submitted');
   const missing = students.filter(n => (hw.records || {})[n] !== 'submitted');
-  showToast('正在同步作业到飞书…');
+  if (!silent) showToast('正在同步作业到飞书…');
   try {
     const r = await fetch('/hw-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
       className: cls.name, title: hw.title, date: hw.date, week: hw.week,
@@ -3491,9 +3491,31 @@ async function syncHwToFeishu(hwId) {
       missingNames: missing.join('、'), submittedNames: submitted.join('、'), records: hw.records || {}
     }) });
     const d = await r.json();
-    if (d.ok) showToast('作业已同步到飞书（' + (d.updated ? '已更新原记录' : '新增记录') + '）', 'success');
-    else showToast('作业同步失败：' + (d.error || '未知错误'), 'error');
-  } catch (e) { showToast('同步失败：云同步服务未连接', 'error'); }
+    if (d.ok) {
+      if (!silent) showToast('作业已同步到飞书（' + (d.updated ? '已更新原记录' : '新增记录') + '）', 'success');
+    } else if (silent) {
+      showToast('作业自动同步失败：' + (d.error || '未知错误') + '，可点「☁️ 同步」重试', 'error');
+    } else {
+      showToast('作业同步失败：' + (d.error || '未知错误'), 'error');
+    }
+  } catch (e) {
+    if (silent) showToast('作业自动同步失败（云同步服务未连接），可点「☁️ 同步」重试', 'error');
+    else showToast('同步失败：云同步服务未连接', 'error');
+  }
+}
+
+// 标记改动后自动同步（防抖 3 秒，避免连续点选时频繁写表）
+let _hwSyncTimer = null;
+function scheduleHwAutoSync() {
+  if (_hwSyncTimer) clearTimeout(_hwSyncTimer);
+  _hwSyncTimer = setTimeout(() => {
+    _hwSyncTimer = null;
+    const hwId = hwState.hwId;
+    if (!hwId) return;
+    if (!appData.homework[getHwClassId()]) return;
+    if (!appData.homework[getHwClassId()].some(h => h.id === hwId)) return;
+    syncHwToFeishu(hwId, true);
+  }, 3000);
 }
 
 // 编辑历史记录：重新打开点名页，预填之前的状态
@@ -3940,7 +3962,7 @@ function hwQuickMark() {
   if (idx < 0) { showToast('未找到该学生', 'error'); return; }
   const name = getStudentName(cls.students[idx]);
   const mode = hwState.markMode;
-  hwHandleCardClick(name);
+  hwHandleCardClick(name);   // 内部已触发自动同步
   hwState.findQuery = '';
   renderHwMark();
   const box = document.getElementById('hwFind');
@@ -3958,6 +3980,7 @@ function hwHandleCardClick(name) {
   if (!hw.records[name]) delete hw.records[name];
   saveData(appData);
   renderHwMark();
+  scheduleHwAutoSync();   // 改动后自动同步飞书
 }
 
 async function hwMarkAll(hwId, submitted) {
@@ -3970,6 +3993,7 @@ async function hwMarkAll(hwId, submitted) {
   if (submitted) getStudentList(cls).forEach(n => hw.records[n] = 'submitted');
   saveData(appData);
   renderHwMark();
+  scheduleHwAutoSync();   // 改动后自动同步飞书
 }
 
 function copyHwMissing(hwId) {
