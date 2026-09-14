@@ -1308,12 +1308,13 @@
       <div class="perf-summary-row" id="perfSummaryRow"></div>
       <div style="max-height:40vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
         <table class="perf-stats-table" id="perfStatsTable">
-          <thead><tr><th>学号后2位 · 姓名</th><th>💬 发言</th><th>⚠️ 违纪</th><th>⭐ 表扬</th></tr></thead>
+          <thead><tr><th>学号后2位 · 姓名</th><th>💬 发言</th><th>⚠️ 违纪</th><th>⭐ 表扬</th><th>操作</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
       <div class="modal-footer">
         <button class="btn" onclick="closeModal('performanceModal')">关闭</button>
+        <button class="btn" style="color:var(--rose)" onclick="resetCurrentClassPerf()">清空本班记录</button>
       </div>
     </div>
   </div>
@@ -1323,6 +1324,10 @@
     <div class="ctx-menu-item" onclick="ctxMarkPerf('speak')">💬 发言 +1</div>
     <div class="ctx-menu-item" onclick="ctxMarkPerf('discipline')">⚠️ 违纪 +1</div>
     <div class="ctx-menu-item" onclick="ctxMarkPerf('praise')">⭐ 表扬 +1</div>
+    <div class="ctx-menu-sep"></div>
+    <div class="ctx-menu-item" onclick="ctxMarkPerf('speak',-1)">💬 发言 −1</div>
+    <div class="ctx-menu-item" onclick="ctxMarkPerf('discipline',-1)">⚠️ 违纪 −1</div>
+    <div class="ctx-menu-item" onclick="ctxMarkPerf('praise',-1)">⭐ 表扬 −1</div>
   </div>
 
   <!-- ====== 布置作业弹窗 ====== -->
@@ -3608,6 +3613,25 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { e.preventDefault(); uidCancel(); }
 });
 
+// 重置单个学生的表现记录
+async function resetStudentPerf(clsName, name) {
+  if (!await uiConfirm(`重置 ${name} 的课堂表现记录？`, { danger: true })) return;
+  if (appData.performances[clsName]) delete appData.performances[clsName][name];
+  saveData(appData);
+  openPerformanceStats();
+  showToast(`${name} 的表现记录已重置`, 'success');
+}
+// 清空本班全部表现记录
+async function resetCurrentClassPerf() {
+  if (!currentCourse) return;
+  if (!await uiConfirm(`清空 ${currentCourse.className} 的全部课堂表现记录？`, { danger: true, confirmText: '确认清空' })) return;
+  delete appData.performances[currentCourse.className];
+  saveData(appData);
+  openPerformanceStats();
+  renderStudentGrid(getCurrentStudents());
+  showToast('本班表现记录已清空', 'success');
+}
+
 // ==================== 平时作业统计 ====================
 let hwState = { classId: null, hwId: null, mode: 'list', markMode: 'submitted', findQuery: '', missingOpen: false };
 
@@ -4294,11 +4318,9 @@ function getPerf(className, name) {
 }
 
 function markPerformance(className, name, type, delta) {
-  // 表现记录只增不减：负向/取消操作直接忽略（不产生任何变化）
   const d = (typeof delta === 'number') ? delta : 1;
-  if (d <= 0) return;
   const perf = getPerf(className, name);
-  perf[type] = (perf[type] || 0) + d;
+  perf[type] = Math.max(0, (perf[type] || 0) + d);  // 可加可减，不低于 0
   saveData(appData);
 }
 
@@ -4315,11 +4337,13 @@ document.addEventListener('click', (e) => {
   if (!e.target.closest('.ctx-menu') && !e.target.closest('.student-card')) hideStudentCtx();
 });
 
-function ctxMarkPerf(type) {
+function ctxMarkPerf(type, delta) {
   if (!ctxStudentName || !currentCourse) return;
-  markPerformance(currentCourse.className, ctxStudentName, type, 1);
+  const d = (typeof delta === 'number' && delta !== 0) ? delta : 1;
+  markPerformance(currentCourse.className, ctxStudentName, type, d);
   const labels = { speak: '发言', discipline: '违纪', praise: '表扬' };
-  showToast(`${ctxStudentName} ${labels[type]} +1`, 'success');
+  const now = getPerf(currentCourse.className, ctxStudentName)[type] || 0;
+  showToast(`${ctxStudentName} ${labels[type]} ${d > 0 ? '+' : ''}${d} → ${now}`, d > 0 ? 'success' : 'info');
   hideStudentCtx();
   const ss = getCurrentStudents(); if (ss.length) renderStudentGrid(ss);
 }
@@ -4353,6 +4377,7 @@ function openPerformanceStats() {
       <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','speak')">💬 ${s.speak}</button></td>
       <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','discipline')">⚠️ ${s.discipline}</button></td>
       <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','praise')">⭐ ${s.praise}</button></td>
+      <td><button class="btn btn-sm" style="padding:2px 6px;font-size:11px;color:var(--rose)" onclick="resetStudentPerf('${clsName}','${s.name}')">重置</button></td>
     </tr>
   `).join('');
   openModal('performanceModal');
