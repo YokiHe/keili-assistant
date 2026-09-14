@@ -1006,7 +1006,7 @@
     <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importFromFile(event)">
     <div class="sidebar-footer-item danger" onclick="openNewSemesterDialog()" data-tip="新学期"><span class="nav-ico"><svg class="svg-ico"><use href="#i-refresh"/></svg></span><span class="nav-label">新学期</span></div>
     <div class="sidebar-footer-item sidebar-collapse-btn" id="collapseBtn" onclick="toggleSidebarCollapse()" data-tip="展开菜单"><span class="nav-ico" id="collapseIcon">«</span><span class="nav-label">收起菜单</span></div>
-    <div class="sidebar-version">课粒 · 教师工作台 v2</div>
+    <div class="sidebar-version">课粒 · 教师工作台 v2<br><span id="appVersion" style="opacity:0.75">加载中…</span></div>
   </div>
 </aside>
 
@@ -1431,6 +1431,8 @@
 const STORAGE_KEY = 'courseStackDataV2';
 // 课表数据版本：教务系统课表更新后改这里，应用启动时会自动应用新版本
 const SCHEDULE_VERSION = '2026-09-14';
+// 前端构建标识：用于一眼确认浏览器加载的是不是最新版本
+const APP_BUILD = '2026-09-14.4';
 
 function loadData() {
   try {
@@ -4516,6 +4518,8 @@ if ('serviceWorker' in navigator) {
 
 // ==================== 初始化 ====================
 (function init() {
+  const verEl = document.getElementById('appVersion');
+  if (verEl) verEl.textContent = `课表 ${SCHEDULE_VERSION} · 构建 ${APP_BUILD}`;
   // 课表版本变更（教务系统课表有更新）时，自动应用新版课表
   let scheduleUpdated = 0;
   if (appData.scheduleVersion !== SCHEDULE_VERSION) {
