@@ -2283,7 +2283,7 @@ function startAutoCall() {
   // 启动轮询，每 500ms 检查一次状态
   prefetchVoice(0);  // 先预取前两位的语音，第一名学生不再现场等待
   prefetchVoice(1);
-  autoCallState.interval = setInterval(autoCallTick, 500);
+  autoCallState.interval = setInterval(autoCallTick, 250);
   autoCallTick();
 }
 
@@ -2309,7 +2309,7 @@ function autoCallTick() {
     // 等待 3 秒响应 → 更新倒计时
     const elapsed = Date.now() - autoCallState.startTime;
     const speaking = autoCallState.speaking;
-    const remaining = Math.max(0, Math.ceil((2000 - elapsed) / 1000));
+    const remaining = Math.max(0, Math.ceil((1500 - elapsed) / 1000));
     const card = document.querySelector(`.student-card[data-idx="${autoCallState.index}"]`);
     if (card && card.classList.contains('calling')) {
       const iconEl = card.querySelector('.student-status-icon');
@@ -2320,8 +2320,8 @@ function autoCallTick() {
 
     if (status === 'absent' || status === 'leave' || status === 'present') {
       nextStudent();
-    } else if (!autoCallState.speaking && elapsed > 2000) {
-      // 语音读完才开始计 2 秒应答窗口；网络慢时 speaking 阻止提前跳过
+    } else if (!autoCallState.speaking && elapsed > 1500) {
+      // 总停留 ≈1.5 秒（含念名）；语音播放中 speaking 阻止提前跳过
       studentStatuses[sname] = 'present';
       nextStudent();
     }
@@ -2364,11 +2364,8 @@ function skipStudent() {
 
 function speakCurStudent() {
   const sname = getStudentName(autoCallState.students[autoCallState.index]);
-  const idx = autoCallState.index;
-  return speakName(sname).then(() => {
-    // 语音读完后才开始计 2 秒应答窗口（期间 autoCallState.speaking 阻止自动跳过）
-    if (autoCallState && autoCallState.index === idx) autoCallState.startTime = Date.now();
-  });
+  autoCallState.startTime = Date.now();  // 从叫名开始计时：总停留 ≈ 1.5 秒
+  return speakName(sname);
 }
 
 function highlightCurStudent() {
@@ -2555,7 +2552,7 @@ async function speakName(name) {
         audio.onended = finish;
         audio.onerror = finish;
         audio.src = url;
-        audio.playbackRate = 0.9;
+        audio.playbackRate = 1.05;
         const guard = setTimeout(finish, 5000);
         audio.play().catch(() => { clearTimeout(guard); finish(); });
       });
@@ -2711,7 +2708,7 @@ function pauseAutoCall() {
 
 function resumeAutoCall() {
   if (!autoCallState) return;
-  autoCallState.interval = setInterval(autoCallTick, 500);
+  autoCallState.interval = setInterval(autoCallTick, 250);
   autoCallState.callCount = 0;
   document.getElementById('btnResume').style.display = 'none';
   document.getElementById('btnPause').style.display = '';
@@ -2933,6 +2930,16 @@ document.addEventListener('DOMContentLoaded', function() {
       if (autoCallState.index < autoCallState.students.length) {
         const sname = getStudentName(autoCallState.students[autoCallState.index]);
         studentStatuses[sname] = 'late';
+        nextStudent();
+      }
+      return;
+    }
+    // 右箭头：当前学生标记到场，点到下一个
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      if (autoCallState.index < autoCallState.students.length) {
+        const sname = getStudentName(autoCallState.students[autoCallState.index]);
+        studentStatuses[sname] = 'present';
         nextStudent();
       }
       return;
