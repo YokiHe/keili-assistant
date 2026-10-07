@@ -347,7 +347,7 @@ async function ensureHwSheet() {
   const sheetId = data?.data?.sheet?.sheet_id;
   if (!sheetId) throw new Error('创建作业汇总表失败');
   _sheetIdCache[HW_SUMMARY] = sheetId;
-  await writeCells(HW_SUMMARY, 'A1:I1', [['周次', '日期', '班级', '作业名称', '应交人数', '已交人数', '未交人数', '已交名单', '未交名单']]);
+  await writeCells(HW_SUMMARY, 'A1:H1', [['周次', '日期', '班级', '作业名称', '应交人数', '已交人数', '未交人数', '已交名单']]);
   console.log('✓ 已创建工作表 [作业汇总]');
   return sheetId;
 }
@@ -368,16 +368,16 @@ async function pushHwToFeishu(payload) {
   const vals = [
     '第' + payload.week + '周', payload.date, payload.className, payload.title,
     payload.total, payload.submittedCount, payload.total - payload.submittedCount,
-    payload.submittedNames || '', payload.missingNames || ''
+    payload.submittedNames || ''
   ];
-  // 兼容旧表：表头第8/9列不是"已交名单/未交名单"时修正
-  const hdr = await readRange(HW_SUMMARY, 'A1:I1');
-  if (!hdr[0] || hdr[0][7] !== '已交名单' || hdr[0][8] !== '未交名单') {
-    await writeCells(HW_SUMMARY, 'A1:I1', [['周次', '日期', '班级', '作业名称', '应交人数', '已交人数', '未交人数', '已交名单', '未交名单']]);
+  // 兼容旧表：表头第8列不是"已交名单"时修正
+  const hdr = await readRange(HW_SUMMARY, 'A1:H1');
+  if (!hdr[0] || hdr[0][7] !== '已交名单') {
+    await writeCells(HW_SUMMARY, 'A1:H1', [['周次', '日期', '班级', '作业名称', '应交人数', '已交人数', '未交人数', '已交名单']]);
   }
   const existingRow = await findHwMatchingRow(payload);
   const rowNum = existingRow || (await getNextRow(HW_SUMMARY));
-  await writeCells(HW_SUMMARY, 'A' + rowNum + ':I' + rowNum, [vals]);
+  await writeCells(HW_SUMMARY, 'A' + rowNum + ':H' + rowNum, [vals]);
   return { updated: !!existingRow };
 }
 

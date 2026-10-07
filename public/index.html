@@ -820,6 +820,12 @@
   }
   .ctx-menu-item:hover { background: var(--indigo-bg); color: var(--indigo); }
   .ctx-menu-sep { height: 1px; background: var(--border); margin: 4px 0; }
+  .ctx-menu-row { display: flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 6px; }
+  .ctx-menu-row:hover { background: var(--indigo-bg); }
+  .ctx-menu-row .ctx-label { font-size: 13px; flex: 1; white-space: nowrap; }
+  .ctx-btn { width: 36px; height: 24px; border-radius: 6px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-size: 12px; line-height: 1; font-family: inherit; }
+  .ctx-btn.plus:hover { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-bg); }
+  .ctx-btn.minus:hover { border-color: var(--rose); color: var(--rose); background: var(--rose-bg); }
 
   /* ===== 课堂表现徽章 ===== */
   .perf-badges { display: flex; gap: 3px; justify-content: center; margin-top: 4px; flex-wrap: wrap; }
@@ -837,6 +843,10 @@
   .perf-summary-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
   .perf-summary-card { flex: 1; min-width: 80px; text-align: center; padding: 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
   .perf-summary-num { font-size: 24px; font-weight: 700; }
+  .pctl { display: inline-flex; align-items: center; gap: 5px; }
+  .pctl button { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-size: 13px; line-height: 1; padding: 0; font-family: inherit; color: var(--text-secondary); }
+  .pctl button:hover { border-color: var(--indigo); color: var(--indigo); background: var(--indigo-bg); }
+  .pctl b { min-width: 14px; font-size: 13px; text-align: center; }
   .perf-summary-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
   /* ===== 作业统计模块 ===== */
@@ -1314,7 +1324,7 @@
       <div class="perf-summary-row" id="perfSummaryRow"></div>
       <div style="max-height:40vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
         <table class="perf-stats-table" id="perfStatsTable">
-          <thead><tr><th>学号后2位 · 姓名</th><th>本节💬</th><th>本节⚠️</th><th>本节⭐</th><th>学期累计</th><th>操作</th></tr></thead>
+          <thead><tr><th>学号后2位 · 姓名</th><th>本节💬 发言</th><th>本节⚠️ 违纪</th><th>本节⭐ 表扬</th><th>本节📱 未交手机</th><th>学期累计</th><th>操作</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -1326,14 +1336,12 @@
   </div>
 
   <!-- ====== 学生卡片右键菜单 ====== -->
-  <div class="ctx-menu" id="studentCtxMenu">
-    <div class="ctx-menu-item" onclick="ctxMarkPerf('speak')">💬 发言 +1</div>
-    <div class="ctx-menu-item" onclick="ctxMarkPerf('discipline')">⚠️ 违纪 +1</div>
-    <div class="ctx-menu-item" onclick="ctxMarkPerf('praise')">⭐ 表扬 +1</div>
-    <div class="ctx-menu-sep"></div>
-    <div class="ctx-menu-item" onclick="ctxMarkPerf('speak',-1)">💬 发言 −1</div>
-    <div class="ctx-menu-item" onclick="ctxMarkPerf('discipline',-1)">⚠️ 违纪 −1</div>
-    <div class="ctx-menu-item" onclick="ctxMarkPerf('praise',-1)">⭐ 表扬 −1</div>
+  <div class="ctx-menu" id="studentCtxMenu" style="min-width:180px">
+    <div style="font-size:11px;color:var(--text-muted);padding:2px 8px 4px">课堂表现（点击加减）</div>
+    <div class="ctx-menu-row"><span class="ctx-label">💬 发言</span><button class="ctx-btn plus" onclick="ctxMarkPerf('speak',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('speak',-1)">−1</button></div>
+    <div class="ctx-menu-row"><span class="ctx-label">⚠️ 违纪</span><button class="ctx-btn plus" onclick="ctxMarkPerf('discipline',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('discipline',-1)">−1</button></div>
+    <div class="ctx-menu-row"><span class="ctx-label">⭐ 表扬</span><button class="ctx-btn plus" onclick="ctxMarkPerf('praise',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('praise',-1)">−1</button></div>
+    <div class="ctx-menu-row"><span class="ctx-label">📱 未交手机</span><button class="ctx-btn plus" onclick="ctxMarkPerf('nophone',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('nophone',-1)">−1</button></div>
   </div>
 
   <!-- ====== 布置作业弹窗 ====== -->
@@ -2801,7 +2809,7 @@ function renderStudentGrid(students) {
     const sname = getStudentName(s);
     const status = studentStatuses[sname] || 'unknown';
     const esc = sname.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    const perf = getPerf(clsName, sname);
+    const perf = getPerfRead(clsName, sname);
     const badges = [];
     if (perf.speak > 0) badges.push('<span class="perf-badge speak">💬'+perf.speak+'</span>');
     if (perf.discipline > 0) badges.push('<span class="perf-badge discipline">⚠️'+perf.discipline+'</span>');
@@ -3022,7 +3030,7 @@ function updateRcStats() {
     const clsName = currentCourse ? currentCourse.className : '';
     const perfStats = { speak: 0, praise: 0, discipline: 0, nophone: 0 };
     students.forEach(s => {
-      const perf = getPerf(clsName, getStudentName(s));
+      const perf = getPerfRead(clsName, getStudentName(s));
       perfStats.speak += perf.speak || 0;
       perfStats.praise += perf.praise || 0;
       perfStats.discipline += perf.discipline || 0;
@@ -3127,7 +3135,7 @@ function saveAttendanceRecord() {
   const perfSnapshot = {};
   students.forEach(s => {
     const name = getStudentName(s);
-    perfSnapshot[name] = { ...getPerf(clsName, name) };
+    perfSnapshot[name] = { ...getPerfRead(clsName, name) };
   });
   const record = {
     id: genId(),
@@ -3463,15 +3471,8 @@ async function deleteRecord(id){
 async function syncRecordToFeishu(id) {
   const rec = appData.rollCallRecords.find(r => r.id === id);
   if (!rec) return;
-  const cls = appData.classes.find(c => c.id === rec.classId);
-  // 完成点名后可能又记了课堂表现，同步前刷新表现快照
-  const perf = {};
-  (cls ? cls.students : []).forEach(s => {
-    const n = getStudentName(s);
-    const p = (appData.performances[rec.className] || {})[n] || {};
-    perf[n] = { speak: p.speak || 0, discipline: p.discipline || 0, praise: p.praise || 0, nophone: p.nophone || 0 };
-  });
-  const payload = { ...rec, performances: perf };
+  // 用记录自带的表现快照（表现按每节课独立，当前计数是本节课的，不能拿来同步旧记录）
+  const payload = { ...rec, performances: rec.performances || {} };
   showToast('正在同步考勤到飞书…');
   try {
     const r = await fetch('/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -3693,7 +3694,7 @@ function syncPerfToCurrentRecord(clsName) {
   const snap = {};
   (cls ? cls.students : []).forEach(s => {
     const n = getStudentName(s);
-    snap[n] = { ...getPerf(clsName, n) };
+    snap[n] = { ...getPerfRead(clsName, n) };
   });
   rec.performances = snap;
 }
@@ -4452,6 +4453,11 @@ function getPerf(className, name) {
   if (!appData.performances[className][name]) appData.performances[className][name] = { speak: 0, discipline: 0, praise: 0, nophone: 0 };
   return appData.performances[className][name];
 }
+// 只读读取（渲染/统计场景用，避免为全班凭空创建空数据项）
+function getPerfRead(className, name) {
+  const p = ((appData.performances || {})[className] || {})[name] || {};
+  return { speak: p.speak || 0, discipline: p.discipline || 0, praise: p.praise || 0, nophone: p.nophone || 0 };
+}
 
 function markPerformance(className, name, type, delta) {
   const d = (typeof delta === 'number') ? delta : 1;
@@ -4479,7 +4485,7 @@ function ctxMarkPerf(type, delta) {
   const d = (typeof delta === 'number' && delta !== 0) ? delta : 1;
   markPerformance(currentCourse.className, ctxStudentName, type, d);
   const labels = { speak: '发言', discipline: '违纪', praise: '表扬' };
-  const now = getPerf(currentCourse.className, ctxStudentName)[type] || 0;
+  const now = getPerfRead(currentCourse.className, ctxStudentName)[type] || 0;
   showToast(`${ctxStudentName} ${labels[type]} ${d > 0 ? '+' : ''}${d} → ${now}`, d > 0 ? 'success' : 'info');
   hideStudentCtx();
   const ss = getCurrentStudents(); if (ss.length) renderStudentGrid(ss);
@@ -4494,15 +4500,16 @@ function openPerformanceStats() {
   const sidMap = {};
   studentObjs.forEach(s => { sidMap[getStudentName(s)] = getSidShort(s); });
   // 汇总
-  let totalSpeak = 0, totalDiscipline = 0, totalPraise = 0;
+  let totalSpeak = 0, totalDiscipline = 0, totalPraise = 0, totalNophone = 0;
   students.forEach(n => {
-    const p = getPerf(clsName, n);
-    totalSpeak += p.speak; totalDiscipline += p.discipline; totalPraise += p.praise;
+    const p = getPerfRead(clsName, n);
+    totalSpeak += p.speak; totalDiscipline += p.discipline; totalPraise += p.praise; totalNophone += p.nophone;
   });
   document.getElementById('perfSummaryRow').innerHTML = `
     <div class="perf-summary-card"><div class="perf-summary-num" style="color:#1d4ed8">${totalSpeak}</div><div class="perf-summary-label">本节 💬 发言</div></div>
     <div class="perf-summary-card"><div class="perf-summary-num" style="color:#b91c1c">${totalDiscipline}</div><div class="perf-summary-label">本节 ⚠️ 违纪</div></div>
     <div class="perf-summary-card"><div class="perf-summary-num" style="color:#047857">${totalPraise}</div><div class="perf-summary-label">本节 ⭐ 表扬</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#b45309">${totalNophone}</div><div class="perf-summary-label">本节 📱 未交手机</div></div>
     <div class="perf-summary-card"><div class="perf-summary-num">${students.length}</div><div class="perf-summary-label">👥 学生数</div></div>
   `;
   // 学期累计（本班各次点名记录累加）
@@ -4513,20 +4520,22 @@ function openPerformanceStats() {
   document.getElementById('perfModalClass').textContent =
     `${clsName} · ${currentCourse.name}　｜　学期累计（${semRecN} 次记录）：💬 ${semSpeak} · ⚠️ ${semDisc} · ⭐ ${semPraise}`;
   // 表格（按发言数降序）
-  const sorted = students.map(n => ({ name: n, ...getPerf(clsName, n) })).sort((a, b) => b.speak - a.speak);
+  const sorted = students.map(n => ({ name: n, ...getPerfRead(clsName, n) })).sort((a, b) => b.speak - a.speak);
   const tbody = document.querySelector('#perfStatsTable tbody');
   tbody.innerHTML = sorted.map(s => `
     <tr>
       <td>${sidMap[s.name] ? sidMap[s.name] + ' · ' : ''}${s.name}</td>
-      <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','speak')">💬 ${s.speak}</button></td>
-      <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','discipline')">⚠️ ${s.discipline}</button></td>
-      <td><button class="btn btn-sm" style="padding:2px 8px;font-size:12px" onclick="quickPerf('${clsName}','${s.name}','praise')">⭐ ${s.praise}</button></td>
+      <td><span class="pctl"><button onclick="quickPerf('${clsName}','${s.name}','speak',-1)">−</button><b>${s.speak}</b><button onclick="quickPerf('${clsName}','${s.name}','speak',1)">＋</button></span></td>
+      <td><span class="pctl"><button onclick="quickPerf('${clsName}','${s.name}','discipline',-1)">−</button><b>${s.discipline}</b><button onclick="quickPerf('${clsName}','${s.name}','discipline',1)">＋</button></span></td>
+      <td><span class="pctl"><button onclick="quickPerf('${clsName}','${s.name}','praise',-1)">−</button><b>${s.praise}</b><button onclick="quickPerf('${clsName}','${s.name}','praise',1)">＋</button></span></td>
+      <td><span class="pctl"><button onclick="quickPerf('${clsName}','${s.name}','nophone',-1)">−</button><b>${s.nophone}</b><button onclick="quickPerf('${clsName}','${s.name}','nophone',1)">＋</button></span></td>
       <td style="font-size:12px;color:var(--text-muted);white-space:nowrap">${(() => {
-        const sp = semPerf[s.name] || { speak:0, discipline:0, praise:0 };
+        const sp = semPerf[s.name] || { speak:0, discipline:0, praise:0, nophone:0 };
         const parts = [];
         if (sp.speak) parts.push('💬' + sp.speak);
         if (sp.discipline) parts.push('⚠️' + sp.discipline);
         if (sp.praise) parts.push('⭐' + sp.praise);
+        if (sp.nophone) parts.push('📱' + sp.nophone);
         return parts.length ? parts.join(' ') : '—';
       })()}</td>
       <td><button class="btn btn-sm" style="padding:2px 6px;font-size:11px;color:var(--rose)" onclick="resetStudentPerf('${clsName}','${s.name}')">重置</button></td>
@@ -4535,8 +4544,9 @@ function openPerformanceStats() {
   openModal('performanceModal');
 }
 
-function quickPerf(clsName, name, type) {
-  markPerformance(clsName, name, type, 1);
+function quickPerf(clsName, name, type, delta) {
+  const d = (typeof delta === 'number' && delta !== 0) ? delta : 1;
+  markPerformance(clsName, name, type, d);
   openPerformanceStats(); // 刷新
 }
 
