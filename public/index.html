@@ -1010,6 +1010,7 @@
   </nav>
   <div class="sidebar-footer">
     <div class="sidebar-footer-item" onclick="retryPendingSync()" data-tip="云同步（点击重试未同步记录）" title="云同步状态（点击重试未同步记录）"><span class="nav-ico" id="syncPending" style="font-size:14px"><svg class="svg-ico"><use href="#i-cloud"/></svg></span><span class="nav-label">云同步</span></div>
+    <div class="sidebar-footer-item" onclick="resyncAllToFeishu()" data-tip="全部重推飞书" title="把本地全部考勤与作业记录重新推送到飞书（更换表格或补推失败时用）"><span class="nav-ico"><svg class="svg-ico"><use href="#i-refresh"/></svg></span><span class="nav-label">全部重推</span></div>
     <div class="sidebar-footer-item" onclick="openSemesterConfig()" data-tip="学期设置"><span class="nav-ico"><svg class="svg-ico"><use href="#i-sliders"/></svg></span><span class="nav-label">学期设置</span></div>
     <div class="sidebar-footer-item" onclick="exportToFile()" data-tip="备份数据" title="导出全部数据（班级/课表/考勤/作业）为 JSON 文件"><span class="nav-ico"><svg class="svg-ico"><use href="#i-download"/></svg></span><span class="nav-label">备份数据</span></div>
     <div class="sidebar-footer-item" onclick="document.getElementById('importFileInput').click()" data-tip="恢复备份" title="从本地备份 JSON 恢复数据"><span class="nav-ico"><svg class="svg-ico"><use href="#i-upload"/></svg></span><span class="nav-label">恢复备份</span></div>
@@ -3778,6 +3779,47 @@ function autoCloudBackup() {
   if (now - _lastAutoBackup < 120000) return;
   _lastAutoBackup = now;
   doCloudBackup(false);
+}
+
+// ==================== 全部重推飞书（迁移/补推用）====================
+async function resyncAllToFeishu() {
+  const recs = appData.rollCallRecords || [];
+  const hwList = [];
+  Object.entries(appData.homework || {}).forEach(([cid, list]) => {
+    const cls = appData.classes.find(c => c.id === cid);
+    if (!cls) return;
+    (list || []).forEach(hw => hwList.push({ cls, hw }));
+  });
+  if (recs.length === 0 && hwList.length === 0) { showToast('本地暂无可同步的记录', 'info'); return; }
+  if (!await uiConfirm(`将把本地全部数据重新推送到飞书：\n\n· 考勤记录 ${recs.length} 条\n· 作业记录 ${hwList.length} 条\n\n重复推送会更新飞书里对应的旧记录，不会产生重复行。`, { confirmText: '开始同步' })) return;
+  let ok = 0, fail = 0, hwOk = 0, hwFail = 0;
+  showToast(`开始同步：考勤 0/${recs.length}`, 'info');
+  for (let i = 0; i < recs.length; i++) {
+    try {
+      const r = await fetch('/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(recs[i]) });
+      const d = await r.json();
+      if (d.ok && d.synced) ok++; else fail++;
+    } catch (e) { fail++; }
+    if ((i + 1) % 3 === 0) showToast(`同步中… 考勤 ${i + 1}/${recs.length}`, 'info');
+    await new Promise(r => setTimeout(r, 250));  // 轻微间隔，避免请求过密
+  }
+  for (let i = 0; i < hwList.length; i++) {
+    const { cls, hw } = hwList[i];
+    const students = getStudentList(cls);
+    const submitted = students.filter(n => (hw.records || {})[n] === 'submitted');
+    const missing = students.filter(n => (hw.records || {})[n] !== 'submitted');
+    try {
+      const r = await fetch('/hw-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ className: cls.name, title: hw.title, date: hw.date, week: hw.week,
+          total: students.length, submittedCount: submitted.length,
+          missingNames: missing.join('、'), submittedNames: submitted.join('、') }) });
+      const d = await r.json();
+      if (d.ok) hwOk++; else hwFail++;
+    } catch (e) { hwFail++; }
+    await new Promise(r => setTimeout(r, 250));
+  }
+  const totalFail = fail + hwFail;
+  showToast(`同步完成：考勤 ${ok} 成功${fail ? ' / ' + fail + ' 失败' : ''}，作业 ${hwOk} 成功${hwFail ? ' / ' + hwFail + ' 失败' : ''}`, totalFail > 0 ? 'error' : 'success');
 }
 
 // ==================== 自定义确认/输入弹窗 ====================
