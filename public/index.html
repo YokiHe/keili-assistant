@@ -1497,7 +1497,7 @@ const STORAGE_KEY = 'courseStackDataV2';
 // 课表数据版本：教务系统课表更新后改这里，应用启动时会自动应用新版本
 const SCHEDULE_VERSION = '2026-09-14';
 // 前端构建标识：用于一眼确认浏览器加载的是不是最新版本
-const APP_BUILD = '2026-10-16.1';
+const APP_BUILD = '2026-10-16.2';
 // 云同步使用的飞书表格（企业版应用 cli_aa588db12078dc00 可写）
 const FEISHU_SHEET_URL = 'https://icnu5u48hrte.feishu.cn/sheets/HhT8sRAn5hHYWtto4bycUvXQnGd';
 
@@ -3119,9 +3119,18 @@ function updateRcStats() {
   document.getElementById('rcStats').innerHTML = items.map(s => `<div class="stat-card"><div class="stat-num" style="color:${s.color}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
 }
 
+// 当前点名/编辑所对应的日期：编辑历史记录时用原记录日期，否则用今天
+function getRcEffectiveDate() {
+  if (currentCourse && currentCourse.recordId) {
+    const rec = (appData.rollCallRecords || []).find(r => r.id === currentCourse.recordId);
+    if (rec && rec.date) return new Date(rec.date + 'T00:00:00');
+  }
+  return new Date();
+}
+
 function generateReport() {
   // 报备信息只含考勤内容（课堂表现在完成点名之后记录，属于表现统计页的职责）
-  const today = new Date();
+  const today = getRcEffectiveDate();
   const students = getCurrentStudents();
   const counts = { present:0, absent:0, late:0, leave:0 };
   const absentNames = [], lateNames = [], leaveNames = [];
@@ -3209,6 +3218,12 @@ function saveAttendanceRecord() {
     const name = getStudentName(s);
     perfSnapshot[name] = { ...getPerfRead(clsName, name) };
   });
+  // 编辑历史记录时沿用原记录的日期/星期/周次，否则会把旧记录改成今天（飞书里会多出一条错行）
+  const editRec = currentCourse.recordId
+    ? (appData.rollCallRecords || []).find(r => r.id === currentCourse.recordId) : null;
+  const recDate = (editRec && editRec.date) ? editRec.date : new Date().toISOString().split('T')[0];
+  const recWeekday = (editRec && editRec.weekday) ? editRec.weekday : (new Date().getDay() || 7);
+  const recWeekNum = (editRec && editRec.weekNum) ? editRec.weekNum : getCurrentWeek();
   const record = {
     id: genId(),
     courseId: currentCourse.scheduleId || currentCourse.id,
@@ -3218,9 +3233,9 @@ function saveAttendanceRecord() {
     room: currentCourse.room,
     session: currentCourse.session,
     teacher: currentCourse.teacher || appData.teacherName,
-    date: new Date().toISOString().split('T')[0],
-    weekday: new Date().getDay()||7,
-    weekNum: getCurrentWeek(),
+    date: recDate,
+    weekday: recWeekday,
+    weekNum: recWeekNum,
     statuses: { ...studentStatuses },
     performances: perfSnapshot,
     totalCount: students.length,
