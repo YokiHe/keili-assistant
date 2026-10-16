@@ -1012,7 +1012,8 @@
     <div class="sidebar-footer-item" onclick="retryPendingSync()" data-tip="云同步（点击重试未同步记录）" title="云同步状态（点击重试未同步记录）"><span class="nav-ico" id="syncPending" style="font-size:14px"><svg class="svg-ico"><use href="#i-cloud"/></svg></span><span class="nav-label">云同步</span></div>
     <div class="sidebar-footer-item" onclick="openSemesterConfig()" data-tip="学期设置"><span class="nav-ico"><svg class="svg-ico"><use href="#i-sliders"/></svg></span><span class="nav-label">学期设置</span></div>
     <div class="sidebar-footer-item" onclick="exportToFile()" data-tip="备份数据" title="导出全部数据（班级/课表/考勤/作业）为 JSON 文件"><span class="nav-ico"><svg class="svg-ico"><use href="#i-download"/></svg></span><span class="nav-label">备份数据</span></div>
-    <div class="sidebar-footer-item" onclick="document.getElementById('importFileInput').click()" data-tip="恢复备份" title="从备份 JSON 恢复数据"><span class="nav-ico"><svg class="svg-ico"><use href="#i-upload"/></svg></span><span class="nav-label">恢复备份</span></div>
+    <div class="sidebar-footer-item" onclick="document.getElementById('importFileInput').click()" data-tip="恢复备份" title="从本地备份 JSON 恢复数据"><span class="nav-ico"><svg class="svg-ico"><use href="#i-upload"/></svg></span><span class="nav-label">恢复备份</span></div>
+    <div class="sidebar-footer-item" onclick="openCloudBackup()" data-tip="云备份" title="坚果云云端备份与恢复"><span class="nav-ico"><svg class="svg-ico"><use href="#i-cloud"/></svg></span><span class="nav-label">云备份</span></div>
     <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importFromFile(event)">
     <div class="sidebar-footer-item danger" onclick="openNewSemesterDialog()" data-tip="新学期"><span class="nav-ico"><svg class="svg-ico"><use href="#i-refresh"/></svg></span><span class="nav-label">新学期</span></div>
     <div class="sidebar-footer-item sidebar-collapse-btn" id="collapseBtn" onclick="toggleSidebarCollapse()" data-tip="展开菜单"><span class="nav-ico" id="collapseIcon">«</span><span class="nav-label">收起菜单</span></div>
@@ -1409,6 +1410,21 @@
 
   <!-- ====== 标记工具栏滚动悬浮条 ====== -->
   <div id="floatingToolbar" class="floating-toolbar"></div>
+
+  <!-- ====== 云备份弹窗 ====== -->
+  <div class="modal-overlay" id="cloudBackupModal">
+    <div class="modal" style="max-width:520px">
+      <div class="modal-title"><svg class="svg-ico" style="vertical-align:-3px"><use href="#i-cloud"/></svg> 云备份（坚果云）</div>
+      <div style="font-size:12px;color:var(--text-muted);background:var(--muted-bg);border-radius:8px;padding:8px 12px;margin-bottom:14px;line-height:1.7">
+        每次完成点名 / 保存作业后<b>自动备份</b>全部数据到坚果云，云端保留最近 10 份。换电脑、清缓存、误操作都能一键恢复。
+      </div>
+      <div id="cloudBackupList"></div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('cloudBackupModal')">关闭</button>
+        <button class="btn btn-primary" onclick="doCloudBackup(true)">立即备份</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ====== 通用确认/输入弹窗 ====== -->
   <div class="modal-overlay" id="uiDialog">
@@ -3172,6 +3188,7 @@ function saveAttendanceRecord() {
   const tc = appData.todayCourses.find(c => c.scheduleId === currentCourse.scheduleId);
   if (tc) tc.recordId = record.id;
   saveData(appData);
+  autoCloudBackup();   // 每次完成点名后自动云备份（2分钟节流）
   showToast(updating ? '考勤记录已更新，可继续记录课堂表现' : '考勤已保存，可继续记录课堂表现','success');
   // 同步到飞书文档
   syncToCloud(record);
@@ -3699,6 +3716,70 @@ function syncPerfToCurrentRecord(clsName) {
   rec.performances = snap;
 }
 
+// ==================== 云备份（坚果云）====================
+async function openCloudBackup() {
+  openModal('cloudBackupModal');
+  await refreshCloudBackupList();
+}
+async function refreshCloudBackupList() {
+  const box = document.getElementById('cloudBackupList');
+  box.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">加载中…</div>';
+  try {
+    const r = await fetch('/backups');
+    const d = await r.json();
+    if (!d.ok) { box.innerHTML = '<div style="padding:16px;font-size:13px;color:var(--rose)">' + (d.error || '云备份不可用') + '</div>'; return; }
+    if (!d.items || !d.items.length) { box.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">暂无云端备份，点「立即备份」创建第一份</div>'; return; }
+    box.innerHTML = d.items.map((it, i) => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600">${it.name.replace('课粒备份_','').replace('.json','').replace('T',' ')}${i === 0 ? ' <span class="badge badge-green" style="font-size:10px">最新</span>' : ''}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${(it.size/1024).toFixed(1)} KB</div>
+        </div>
+        <button class="btn btn-sm" onclick="restoreCloudBackup('${it.name}')">恢复</button>
+      </div>`).join('');
+  } catch (e) {
+    box.innerHTML = '<div style="padding:16px;font-size:13px;color:var(--rose)">云备份服务未连接（需运行 serve.js 后端）</div>';
+  }
+}
+async function doCloudBackup(manual) {
+  try {
+    const r = await fetch('/backup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(appData) });
+    const d = await r.json();
+    if (d.ok) {
+      if (manual) { showToast('已备份到云端：' + d.name, 'success'); refreshCloudBackupList(); }
+    } else if (manual) showToast('备份失败：' + (d.error || '未知错误'), 'error');
+  } catch (e) { if (manual) showToast('备份失败：云备份服务未连接', 'error'); }
+}
+async function restoreCloudBackup(name) {
+  if (!await uiConfirm('从云端备份恢复？\n\n' + name + '\n\n将覆盖本地班级/课表/作业数据，考勤记录按 id 合并去重。', { danger: true, confirmText: '确认恢复' })) return;
+  try {
+    const r = await fetch('/backup-file?name=' + encodeURIComponent(name));
+    const d = await r.json();
+    if (!d.ok) { showToast('读取备份失败：' + (d.error || ''), 'error'); return; }
+    const data = d.data;
+    if (!data || !data.classes) { showToast('备份数据无效', 'error'); return; }
+    const existingIds = new Set(appData.rollCallRecords.map(x => x.id));
+    const newRecords = (data.rollCallRecords || []).filter(x => !existingIds.has(x.id));
+    appData.rollCallRecords = [...appData.rollCallRecords, ...newRecords];
+    ['classes', 'scheduleItems', 'performances', 'homework'].forEach(k => { if (data[k]) appData[k] = data[k]; });
+    if (data.semesterStart) appData.semesterStart = data.semesterStart;
+    if (data.teacherName) appData.teacherName = data.teacherName;
+    if (data.scheduleVersion) appData.scheduleVersion = data.scheduleVersion;
+    saveData(appData);
+    closeModal('cloudBackupModal');
+    showToast('已从云端恢复，刷新页面…', 'success');
+    setTimeout(() => location.reload(), 1000);
+  } catch (e) { showToast('恢复失败：云备份服务未连接', 'error'); }
+}
+// 自动云备份（节流：2 分钟内最多一次，静默失败）
+let _lastAutoBackup = 0;
+function autoCloudBackup() {
+  const now = Date.now();
+  if (now - _lastAutoBackup < 120000) return;
+  _lastAutoBackup = now;
+  doCloudBackup(false);
+}
+
 // ==================== 自定义确认/输入弹窗 ====================
 let _uiDialogResolve = null;
 function openUiDialog(opts) {
@@ -3854,6 +3935,7 @@ function saveHw() {
   switchPage('homework');
   showToast('作业已创建，点击学生姓名登记提交情况', 'success');
   syncHwToFeishu(hw.id);  // 自动同步一次到飞书
+  autoCloudBackup();
 }
 
 async function hwConfirmDelete(hwId) {
@@ -4270,6 +4352,7 @@ async function confirmHwImport() {
   const miss = getStudentList(cls).length - n;
   let msg = (appended ? '追加完成：' : '导入完成：') + `${n} 人已交，${miss} 人未交`;
   syncHwToFeishu(hw.id);  // 自动同步一次到飞书
+  autoCloudBackup();
   if (cloud) {
     const upN = Object.values(cloudFiles).reduce((s, a) => s + a.length, 0);
     msg += `；云盘上传 ${upN} 份`;

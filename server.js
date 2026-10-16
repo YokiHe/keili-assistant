@@ -182,6 +182,68 @@ function runSyncExclusive(fn) { const p = syncMutex.then(fn); syncMutex = p.catc
 // 内存同步队列（Render 文件系统只读，不用文件）
 let syncQueue = [];
 
+// ============ 坚果云 WebDAV 云备份（Render 版用环境变量配置）============
+const JG = (() => {
+  const user = process.env.JG_USER || '';
+  const pass = process.env.JG_PASS || '';
+  const base = process.env.JG_BASE || 'https://dav.jianguoyun.com/dav/';
+  return { user, pass, base, enabled: !!(user && pass) };
+})();
+const JG_DIR = '课粒备份/';
+
+function jgHeaders(extra) {
+  const h = { 'Authorization': 'Basic ' + Buffer.from(JG.user + ':' + JG.pass).toString('base64') };
+  return Object.assign(h, extra || {});
+}
+async function jgEnsureDir() {
+  try {
+    const res = await fetch(JG.base + encodeURI(JG_DIR), { method: 'MKCOL', headers: jgHeaders() });
+    return res.status === 201 || res.status === 405 || res.ok;
+  } catch (e) { return false; }
+}
+async function jgUploadBackup(name, content) {
+  await jgEnsureDir();
+  const res = await fetch(JG.base + encodeURI(JG_DIR + name), {
+    method: 'PUT',
+    headers: jgHeaders({ 'Content-Type': 'application/json; charset=utf-8' }),
+    body: content
+  });
+  if (!res.ok) throw new Error('上传失败 HTTP ' + res.status);
+}
+async function jgListBackups() {
+  const body = '<?xml version="1.0"?><d:propfind xmlns:d="DAV:"><d:prop><d:getcontentlength/><d:getlastmodified/></d:prop></d:propfind>';
+  const res = await fetch(JG.base + encodeURI(JG_DIR), {
+    method: 'PROPFIND',
+    headers: jgHeaders({ 'Depth': '1', 'Content-Type': 'application/xml; charset=utf-8' }),
+    body
+  });
+  if (res.status === 404) return [];
+  const xml = await res.text();
+  const items = [];
+  const re = /<d:response>([\s\S]*?)<\/d:response>/g;
+  let m;
+  while ((m = re.exec(xml)) !== null) {
+    const seg = m[1];
+    const href = (seg.match(/<d:href>([^<]+)<\/d:href>/) || [])[1] || '';
+    const name = decodeURIComponent(href.split('/').pop() || '');
+    if (!name.endsWith('.json')) continue;
+    const size = +((seg.match(/<d:getcontentlength>([^<]*)<\/d:getcontentlength>/) || [])[1] || 0);
+    const modified = (seg.match(/<d:getlastmodified>([^<]*)<\/d:getlastmodified>/) || [])[1] || '';
+    items.push({ name, size, modified });
+  }
+  items.sort((a, b) => b.name.localeCompare(a.name));
+  return items;
+}
+async function jgDownloadBackup(name) {
+  const res = await fetch(JG.base + encodeURI(JG_DIR + name), { headers: jgHeaders() });
+  if (!res.ok) throw new Error('下载失败 HTTP ' + res.status);
+  return await res.text();
+}
+async function jgDeleteBackup(name) {
+  const res = await fetch(JG.base + encodeURI(JG_DIR + name), { method: 'DELETE', headers: jgHeaders() });
+  return res.ok || res.status === 404;
+}
+
 // ============ 中间件 ============
 // 允许跨域（前端可能用其他静态服务打开，后端仅本机/自有服务）
 app.use((req, res, next) => {
@@ -408,6 +470,39 @@ app.post('/delete-record', async (req, res) => {
     console.error('✗ 删除飞书记录失败:', e.message);
     res.status(500).json({ ok: false, error: e.message });
   }
+});
+
+// 云备份
+app.post('/backup', async (req, res) => {
+  if (!JG.enabled) return res.status(500).json({ ok: false, error: '未配置坚果云（JG_USER/JG_PASS）' });
+  try {
+    const data = req.body;
+    if (!data || !data.classes) return res.status(400).json({ error: '无效数据' });
+    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);  // 精确到秒，避免同分钟覆盖
+    const name = '课粒备份_' + ts + '.json';
+    await runSyncExclusive(async () => {
+      await jgUploadBackup(name, JSON.stringify(data));
+      const list = await jgListBackups();
+      for (const old of list.slice(10)) await jgDeleteBackup(old.name);
+    });
+    console.log('✓ 云备份完成:', name);
+    res.json({ ok: true, name });
+  } catch (e) {
+    console.error('✗ 云备份失败:', e.message);
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+app.get('/backups', async (req, res) => {
+  if (!JG.enabled) return res.json({ ok: false, error: '未配置坚果云', items: [] });
+  try { res.json({ ok: true, items: await jgListBackups() }); }
+  catch (e) { res.status(500).json({ ok: false, error: e.message, items: [] }); }
+});
+app.get('/backup-file', async (req, res) => {
+  if (!JG.enabled) return res.status(500).json({ error: '未配置坚果云' });
+  const name = String(req.query.name || '');
+  if (!/^[\w\u4e00-\u9fa5\-.]+\.json$/.test(name)) return res.status(400).json({ error: '文件名不合法' });
+  try { res.json({ ok: true, name, data: JSON.parse(await jgDownloadBackup(name)) }); }
+  catch (e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
 // ============ Edge TTS 语音合成 ============
