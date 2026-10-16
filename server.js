@@ -457,6 +457,65 @@ app.post('/hw-sync', async (req, res) => {
   }
 });
 
+// ============ 期末汇总（整表覆盖写入） ============
+const FINAL_SHEET = '期末汇总';
+
+async function ensureSheet(title, index) {
+  await loadSheetIds();
+  if (_sheetIdCache[title]) return _sheetIdCache[title];
+  const token = await getTenantToken();
+  const data = await feishuHttp('POST', '/open-apis/sheets/v3/spreadsheets/' + SPREADSHEET_TOKEN + '/sheets', { title, index }, token);
+  const sheetId = data?.data?.sheet?.sheet_id;
+  if (!sheetId) throw new Error('创建「' + title + '」工作表失败');
+  _sheetIdCache[title] = sheetId;
+  console.log('✓ 已创建工作表 [' + title + ']');
+  return sheetId;
+}
+
+async function writeWholeSheet(title, values) {
+  await ensureSheet(title, 2);
+  const cols = Math.max(1, ...values.map(r => (r || []).length));
+  const lastCol = colToLetter(cols - 1);
+  const norm = values.map(r => {
+    const row = (r || []).slice(0, cols).map(c => (c === null || c === undefined) ? '' : c);
+    while (row.length < cols) row.push('');
+    return row;
+  });
+  // 飞书没有 values_batch_clear 接口（实测 404），用空白覆盖旧数据：
+  // 必须按「旧数据的行列范围」清，否则上次多出来的列会残留
+  const CLEAR_COLS = 20;
+  const clearCol = colToLetter(CLEAR_COLS - 1);
+  let used = norm.length;
+  try {
+    const cur = await readRange(title, 'A1:' + clearCol + '400');
+    let last = 0;
+    cur.forEach((row, i) => { if (row.some(c => c !== '')) last = i + 1; });
+    used = Math.max(used, last);
+  } catch (e) {}
+  for (let start = 1; start <= used; start += 200) {
+    const end = Math.min(start + 199, used);
+    const blanks = [];
+    for (let i = start; i <= end; i++) blanks.push(new Array(CLEAR_COLS).fill(''));
+    await writeCells(title, 'A' + start + ':' + clearCol + end, blanks);
+  }
+  await writeCells(title, 'A1:' + lastCol + norm.length, norm);
+  return { rows: norm.length, cols };
+}
+
+app.post('/final-summary', async (req, res) => {
+  const p = req.body || {};
+  if (!Array.isArray(p.rows) || !p.rows.length) return res.status(400).json({ error: '无汇总数据' });
+  if (!FEISHU_ENABLED) return res.status(500).json({ ok: false, error: '未配置飞书同步' });
+  try {
+    const r = await runSyncExclusive(() => writeWholeSheet(p.title || FINAL_SHEET, p.rows));
+    console.log('✓ 期末汇总已写入飞书:', p.scope || '', r.rows, '行 ×', r.cols, '列');
+    res.json({ ok: true, ...r });
+  } catch (e) {
+    console.error('✗ 期末汇总写入失败:', e.message);
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 app.post('/delete-record', async (req, res) => {
   const record = req.body;
   if (!record?.weekNum || !record?.date || !record?.className) return res.status(400).json({ error: '无效数据' });

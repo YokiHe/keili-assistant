@@ -829,7 +829,10 @@
 
   /* ===== 课堂表现徽章 ===== */
   .perf-badges { display: flex; gap: 3px; justify-content: center; margin-top: 4px; flex-wrap: wrap; }
-  .perf-badge { font-size: 9px; padding: 1px 5px; border-radius: 8px; font-weight: 600; }
+  .perf-badge { font-size: 9px; padding: 1px 5px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 2px; }
+  .perf-badge .svg-ico { width: 10px; height: 10px; stroke-width: 2.4; }
+  .history-icon .svg-ico { width: 20px; height: 20px; }
+  .stat-label .svg-ico, .perf-summary-label .svg-ico { width: 13px; height: 13px; vertical-align: -2px; }
   .perf-badge.speak { background: #dbeafe; color: #1d4ed8; }
   .perf-badge.discipline { background: #fee2e2; color: #b91c1c; }
   .perf-badge.praise { background: #d1fae5; color: #047857; }
@@ -881,6 +884,18 @@
   .hw-cell-yes { color: var(--emerald); font-weight: 600; }
   .hw-cell-no { color: var(--rose); font-weight: 600; }
   .hw-cell-na { color: var(--text-muted); }
+
+  /* ===== 期末汇总 ===== */
+  .fin-stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .fin-stat { flex: 1 1 120px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 14px 16px; text-align: center; }
+  .fin-stat-num { font-size: 22px; font-weight: 700; color: var(--indigo); letter-spacing: -0.02em; }
+  .fin-stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .fin-hint { font-size: 12px; color: var(--text-muted); background: var(--muted-bg); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 8px 14px; margin-bottom: 12px; line-height: 1.7; }
+  .fin-table td:first-child { position: sticky; left: 0; background: var(--surface); z-index: 2; }
+  .fin-table thead th { position: sticky; top: 0; z-index: 3; }
+  .fin-table thead th:first-child { z-index: 4; left: 0; }
+  .fin-sid { display: inline-block; margin-left: 6px; font-size: 11px; color: var(--text-muted); font-weight: 500; }
+  .fin-cls { color: var(--text-secondary); font-size: 12px; }
   .hw-missing-list { background: #fdf7f7; border: 1px solid #f3e1e1; border-radius: var(--radius); padding: 8px 14px; margin-bottom: 14px; font-size: 12px; color: #9b7b7b; line-height: 1.8; cursor: pointer; user-select: none; }
   .hw-missing-list b { color: var(--rose); font-weight: 600; margin-right: 8px; }
   .hw-missing-list .hw-missing-toggle { color: var(--text-muted); font-size: 12px; }
@@ -986,6 +1001,13 @@
   <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12l2.5 2.5 4.5-5"/></symbol>
   <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-8"/><path d="M14 7h6v6"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="i-speech" viewBox="0 0 24 24"><path d="M21 11.5a8 8 0 0 1-11.6 7.2L4 20.4l1.4-4.1A8 8 0 1 1 21 11.5z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.9l-5.3 2.8 1.1-5.9L3.5 9.7l5.9-.8z"/></symbol>
+  <symbol id="i-phone-off" viewBox="0 0 24 24"><path d="M6.6 3h6.9a4.9 4.9 0 0 1 2.1 9.3M12 12l-5.4 5.4M3 3l18 18"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10.5c0 5.5-8 11.5-8 11.5s-8-6-8-11.5a8 8 0 0 1 16 0z"/><circle cx="12" cy="10.3" r="2.8"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21c0-4.1 3.4-6.5 7.5-6.5s7.5 2.4 7.5 6.5"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6.5 9H3v6h3.5L11 19z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
 </svg>
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
 
@@ -1006,6 +1028,7 @@
     <div class="sidebar-nav-item" data-page="homework" data-tip="作业统计" onclick="switchPage('homework')"><span class="nav-ico"><svg class="svg-ico"><use href="#i-file"/></svg></span><span class="nav-label">作业统计</span></div>
     <div class="sidebar-nav-item" data-page="schedule" data-tip="完整课表" onclick="switchPage('schedule')"><span class="nav-ico"><svg class="svg-ico"><use href="#i-calendar"/></svg></span><span class="nav-label">完整课表</span></div>
     <div class="sidebar-nav-item" data-page="history" data-tip="点名历史" onclick="switchPage('history')"><span class="nav-ico"><svg class="svg-ico"><use href="#i-clock"/></svg></span><span class="nav-label">点名历史</span></div>
+    <div class="sidebar-nav-item" data-page="final" data-tip="期末汇总" onclick="switchPage('final')"><span class="nav-ico"><svg class="svg-ico"><use href="#i-trend"/></svg></span><span class="nav-label">期末汇总</span></div>
     <div class="sidebar-nav-item" data-page="classes" data-tip="班级管理" onclick="switchPage('classes')"><span class="nav-ico"><svg class="svg-ico"><use href="#i-users"/></svg></span><span class="nav-label">班级管理</span></div>
   </nav>
   <div class="sidebar-footer">
@@ -1098,14 +1121,14 @@
               <div style="display:flex;gap:4px" class="att-grp">
                 <button class="mark-btn present-btn active" onclick="setMarkMode('present')">✓ 到场</button>
                 <button class="mark-btn late-btn" onclick="setMarkMode('late')">▲ 迟到</button>
-                <button class="mark-btn absent-btn" onclick="setMarkMode('absent')">❌ 缺勤</button>
+                <button class="mark-btn absent-btn" onclick="setMarkMode('absent')">✕ 缺勤</button>
                 <button class="mark-btn leave-btn" onclick="setMarkMode('leave')">〇 请假</button>
               </div>
               <div style="display:flex;gap:4px" class="perf-grp" hidden>
-                <button class="mark-btn speak-btn" onclick="setMarkMode('speak')">💬 发言</button>
-                <button class="mark-btn praise-btn" onclick="setMarkMode('praise')">⭐ 加分</button>
-                <button class="mark-btn discipline-btn" onclick="setMarkMode('discipline')">⚠️ 扣分</button>
-                <button class="mark-btn nophone-btn" onclick="setMarkMode('nophone')">📱 未交手机</button>
+                <button class="mark-btn speak-btn" onclick="setMarkMode('speak')"><svg class="svg-ico"><use href="#i-speech"/></svg> 发言</button>
+                <button class="mark-btn praise-btn" onclick="setMarkMode('praise')"><svg class="svg-ico"><use href="#i-star"/></svg> 加分</button>
+                <button class="mark-btn discipline-btn" onclick="setMarkMode('discipline')"><svg class="svg-ico"><use href="#i-alert"/></svg> 扣分</button>
+                <button class="mark-btn nophone-btn" onclick="setMarkMode('nophone')"><svg class="svg-ico"><use href="#i-phone-off"/></svg> 未交手机</button>
               </div>
             </div>
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="autoCallStatus" hidden>
@@ -1183,9 +1206,26 @@
         <h2 style="font-size:20px;font-weight:700;color:var(--text)">点名历史</h2>
         <div style="font-size:13px;color:var(--text-muted);margin-top:4px">历次课堂点名记录</div>
       </div>
-      <a class="btn btn-primary" href="https://my.feishu.cn/sheets/ID0ssj0Lrh2xvmtdqtpcOGQnnnh" target="_blank" style="text-decoration:none"><svg class="svg-ico"><use href="#i-cloud"/></svg> 打开飞书文档</a>
+      <a class="btn btn-primary" href="https://icnu5u48hrte.feishu.cn/sheets/HhT8sRAn5hHYWtto4bycUvXQnGd" id="historySheetLink" target="_blank" rel="noopener" style="text-decoration:none"><svg class="svg-ico"><use href="#i-cloud"/></svg> 打开飞书文档</a>
     </div>
     <div id="historyList"></div>
+  </div>
+
+  <!-- ====== 期末汇总 ====== -->
+  <div id="page-final" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:16px;flex-wrap:wrap">
+      <div>
+        <h2 style="font-size:20px;font-weight:700;color:var(--text)">期末汇总</h2>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">按学生汇总本学期出勤、作业与课堂表现，可作为平时成绩依据</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="copyFinalSummary()"><svg class="svg-ico"><use href="#i-clipboard"/></svg> 复制表格</button>
+        <button class="btn" onclick="exportFinalCsv()"><svg class="svg-ico"><use href="#i-download"/></svg> 导出 CSV</button>
+        <button class="btn btn-primary" onclick="syncFinalToFeishu()"><svg class="svg-ico"><use href="#i-cloud"/></svg> 写入飞书</button>
+      </div>
+    </div>
+    <div class="inner-tabs" id="finalClassTabs"></div>
+    <div id="finalBody"></div>
   </div>
 </div><!-- /main -->
 
@@ -1303,7 +1343,7 @@
       </div>
       <div id="randomQuickActions" style="display:none;gap:8px;align-items:center;justify-content:center;margin-bottom:12px;flex-wrap:wrap">
         <button class="btn btn-sm" onclick="randomQuickMark('speak')" style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none">✓ 发言有效</button>
-        <button class="btn btn-sm" onclick="randomQuickMark('discipline')" style="background:linear-gradient(135deg,#f43f5e,#e11d48);color:white;border:none">⚠ 记扣分 +1</button>
+        <button class="btn btn-sm" onclick="randomQuickMark('discipline')" style="background:linear-gradient(135deg,#f43f5e,#e11d48);color:white;border:none"><svg class="svg-ico"><use href="#i-alert"/></svg> 记扣分 +1</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:12px;flex-wrap:wrap">
         <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
@@ -1326,7 +1366,7 @@
       <div class="perf-summary-row" id="perfSummaryRow"></div>
       <div style="max-height:40vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
         <table class="perf-stats-table" id="perfStatsTable">
-          <thead><tr><th>学号后2位 · 姓名</th><th>本节💬 发言</th><th>本节⚠️ 违纪</th><th>本节⭐ 表扬</th><th>本节📱 未交手机</th><th>学期累计</th><th>操作</th></tr></thead>
+          <thead><tr><th>学号后2位 · 姓名</th><th>本节 发言</th><th>本节 违纪</th><th>本节 表扬</th><th>本节 未交手机</th><th>学期累计</th><th>操作</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -1340,10 +1380,10 @@
   <!-- ====== 学生卡片右键菜单 ====== -->
   <div class="ctx-menu" id="studentCtxMenu" style="min-width:180px">
     <div style="font-size:11px;color:var(--text-muted);padding:2px 8px 4px">课堂表现（点击加减）</div>
-    <div class="ctx-menu-row"><span class="ctx-label">💬 发言</span><button class="ctx-btn plus" onclick="ctxMarkPerf('speak',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('speak',-1)">−1</button></div>
-    <div class="ctx-menu-row"><span class="ctx-label">⚠️ 违纪</span><button class="ctx-btn plus" onclick="ctxMarkPerf('discipline',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('discipline',-1)">−1</button></div>
-    <div class="ctx-menu-row"><span class="ctx-label">⭐ 表扬</span><button class="ctx-btn plus" onclick="ctxMarkPerf('praise',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('praise',-1)">−1</button></div>
-    <div class="ctx-menu-row"><span class="ctx-label">📱 未交手机</span><button class="ctx-btn plus" onclick="ctxMarkPerf('nophone',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('nophone',-1)">−1</button></div>
+    <div class="ctx-menu-row"><span class="ctx-label"><svg class="svg-ico"><use href="#i-speech"/></svg> 发言</span><button class="ctx-btn plus" onclick="ctxMarkPerf('speak',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('speak',-1)">−1</button></div>
+    <div class="ctx-menu-row"><span class="ctx-label"><svg class="svg-ico"><use href="#i-alert"/></svg> 违纪</span><button class="ctx-btn plus" onclick="ctxMarkPerf('discipline',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('discipline',-1)">−1</button></div>
+    <div class="ctx-menu-row"><span class="ctx-label"><svg class="svg-ico"><use href="#i-star"/></svg> 表扬</span><button class="ctx-btn plus" onclick="ctxMarkPerf('praise',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('praise',-1)">−1</button></div>
+    <div class="ctx-menu-row"><span class="ctx-label"><svg class="svg-ico"><use href="#i-phone-off"/></svg> 未交手机</span><button class="ctx-btn plus" onclick="ctxMarkPerf('nophone',1)">＋1</button><button class="ctx-btn minus" onclick="ctxMarkPerf('nophone',-1)">−1</button></div>
   </div>
 
   <!-- ====== 布置作业弹窗 ====== -->
@@ -1457,7 +1497,9 @@ const STORAGE_KEY = 'courseStackDataV2';
 // 课表数据版本：教务系统课表更新后改这里，应用启动时会自动应用新版本
 const SCHEDULE_VERSION = '2026-09-14';
 // 前端构建标识：用于一眼确认浏览器加载的是不是最新版本
-const APP_BUILD = '2026-10-07.1';
+const APP_BUILD = '2026-10-16.1';
+// 云同步使用的飞书表格（企业版应用 cli_aa588db12078dc00 可写）
+const FEISHU_SHEET_URL = 'https://icnu5u48hrte.feishu.cn/sheets/HhT8sRAn5hHYWtto4bycUvXQnGd';
 
 function loadData() {
   try {
@@ -1871,7 +1913,7 @@ function formatDate(d) {
 }
 
 // ==================== 页面切换 ====================
-const PAGE_TITLES = { dashboard:'工作台', homework:'作业统计', schedule:'完整课表', history:'点名历史', classes:'班级管理', rollcall:'点名考勤' };
+const PAGE_TITLES = { dashboard:'工作台', homework:'作业统计', schedule:'完整课表', history:'点名历史', final:'期末汇总', classes:'班级管理', rollcall:'点名考勤' };
 function switchPage(name) {
   if (name === 'today') name = 'dashboard';
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1894,6 +1936,7 @@ function switchPage(name) {
   if (name === 'classes') renderClasses();
   if (name === 'history') renderHistory();
   if (name === 'homework') renderHomework();
+  if (name === 'final') renderFinalSummary();
 }
 
 // ==================== 侧边栏（移动端抽屉 + 桌面端收起） ====================
@@ -2094,8 +2137,8 @@ function renderTodayCourses() {
         <div class="course-name">《${c.name}》</div>
         <div class="course-meta">
           <span class="course-meta-item"><svg class="svg-ico" style="width:13px;height:13px"><use href="#i-users"/></svg> ${c.className}</span>
-          <span class="course-meta-item">🏫 ${c.room}</span>
-          <span class="course-meta-item">👨‍🏫 ${appData.teacherName}</span>
+          <span class="course-meta-item"><svg class="svg-ico"><use href="#i-pin"/></svg> ${c.room}</span>
+          <span class="course-meta-item"><svg class="svg-ico"><use href="#i-user"/></svg> ${appData.teacherName}</span>
           ${weeksDisplay ? `<span class="badge badge-blue">${weeksDisplay}</span>` : ''}
           ${isDone ? `<span class="badge badge-green">已点名 · 实到${record ? record.presentCount : 0}人</span>` : `<span class="badge badge-gray">应到 ${cls.students.length} 人</span>`}
         </div>
@@ -2285,6 +2328,18 @@ function backToToday() {
 // ==================== 自动点名 ====================
 let autoCallState = null; // { students, index, callCount, interval, startTime }
 
+// 按钮文案带图标（用 innerHTML，保持和其他按钮一致的线性图标风格）
+function setAutoCallLabel(running) {
+  const b = document.getElementById('btnAutoCall');
+  if (!b) return;
+  b.innerHTML = '<svg class="svg-ico"><use href="#i-mic"/></svg> ' + (running ? '点名中...' : '自动点名');
+}
+function setRandomLabel(text) {
+  const b = document.getElementById('btnRandomStart');
+  if (!b) return;
+  b.innerHTML = '<svg class="svg-ico"><use href="#i-dice"/></svg> ' + text;
+}
+
 function startAutoCall() {
   if (autoCallState) { clearInterval(autoCallState.interval); autoCallState = null; }
   const cls = appData.classes.find(c => c.id === currentCourse.classId);
@@ -2301,7 +2356,7 @@ function startAutoCall() {
   };
   document.getElementById('autoCallStatus').hidden = false;
   document.getElementById('btnAutoCall').disabled = true;
-  document.getElementById('btnAutoCall').textContent = '🎙 点名中...';
+  setAutoCallLabel(true);
   document.getElementById('btnPause').style.display = '';
   document.getElementById('btnResume').style.display = 'none';
 
@@ -2338,7 +2393,7 @@ function autoCallTick() {
     const card = document.querySelector(`.student-card[data-idx="${autoCallState.index}"]`);
     if (card && card.classList.contains('calling')) {
       const iconEl = card.querySelector('.student-status-icon');
-      if (iconEl) iconEl.textContent = speaking ? '🔊' : remaining;
+      if (iconEl) iconEl.innerHTML = speaking ? '<svg class="svg-ico"><use href="#i-volume"/></svg>' : remaining;
     }
     const sname = getStudentName(autoCallState.students[autoCallState.index]);
     const status = studentStatuses[sname];
@@ -2637,7 +2692,7 @@ async function warmUpVoice() {
   } catch(e) {
     showToast('语音未就绪', 'warning');
   }
-  btn.textContent = '🔊';
+  btn.innerHTML = '<svg class="svg-ico"><use href="#i-volume"/></svg>';
   btn.disabled = false;
 }
 
@@ -2714,7 +2769,7 @@ function stopAutoCall() {
   autoCallState = null;
   document.getElementById('autoCallStatus').hidden = true;
   document.getElementById('btnAutoCall').disabled = false;
-  document.getElementById('btnAutoCall').textContent = '🎙 自动点名';
+  setAutoCallLabel(false);
   document.getElementById('btnPause').style.display = 'none';
   document.getElementById('btnResume').style.display = 'none';
   document.querySelectorAll('.student-card.calling').forEach(c => c.classList.remove('calling'));
@@ -2737,7 +2792,7 @@ function resumeAutoCall() {
   autoCallState.callCount = 0;
   document.getElementById('btnResume').style.display = 'none';
   document.getElementById('btnPause').style.display = '';
-  document.getElementById('btnAutoCall').textContent = '🎙 点名中...';
+  setAutoCallLabel(true);
 }
 
 function finishAutoCall() {
@@ -2749,7 +2804,7 @@ function finishAutoCall() {
   if (students) renderStudentGrid(students);
   document.getElementById('autoCallStatus').hidden = true;
   document.getElementById('btnAutoCall').disabled = false;
-  document.getElementById('btnAutoCall').textContent = '🎙 自动点名';
+  setAutoCallLabel(false);
   document.getElementById('btnPause').style.display = 'none';
   document.getElementById('btnResume').style.display = 'none';
   document.querySelectorAll('.student-card.calling').forEach(c => c.classList.remove('calling'));
@@ -2795,7 +2850,7 @@ function updateCard(name, idx) {
   const grid = document.getElementById('studentGrid');
   const card = grid && grid.querySelector('.student-card[data-idx="' + idx + '"]');
   if (!card || card.dataset.name !== name) { renderStudentGrid(getCurrentStudents()); return; }
-  const icons = { present:'✓', absent:'❌', late:'▲', leave:'〇', unknown:'' };
+  const icons = { present:'✓', absent:'✕', late:'▲', leave:'〇', unknown:'' };
   const status = studentStatuses[name] || 'unknown';
   const calling = card.classList.contains('calling');
   card.className = 'student-card ' + status + (calling ? ' calling' : '');
@@ -2820,7 +2875,7 @@ function findStudentIndex(q, cls) {
 }
 
 function renderStudentGrid(students) {
-  const icons = { present:'✓', absent:'❌', late:'▲', leave:'〇', unknown:'' };
+  const icons = { present:'✓', absent:'✕', late:'▲', leave:'〇', unknown:'' };
   const clsName = currentCourse ? currentCourse.className : '';
   document.getElementById('studentGrid').innerHTML = students.map((s,i) => {
     const sname = getStudentName(s);
@@ -2828,10 +2883,10 @@ function renderStudentGrid(students) {
     const esc = sname.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     const perf = getPerfRead(clsName, sname);
     const badges = [];
-    if (perf.speak > 0) badges.push('<span class="perf-badge speak">💬'+perf.speak+'</span>');
-    if (perf.discipline > 0) badges.push('<span class="perf-badge discipline">⚠️'+perf.discipline+'</span>');
-    if (perf.praise > 0) badges.push('<span class="perf-badge praise">⭐'+perf.praise+'</span>');
-    if (perf.nophone > 0) badges.push('<span class="perf-badge nophone">📱'+perf.nophone+'</span>');
+    if (perf.speak > 0) badges.push('<span class="perf-badge speak"><svg class="svg-ico"><use href="#i-speech"/></svg> '+perf.speak+'</span>');
+    if (perf.discipline > 0) badges.push('<span class="perf-badge discipline"><svg class="svg-ico"><use href="#i-alert"/></svg> '+perf.discipline+'</span>');
+    if (perf.praise > 0) badges.push('<span class="perf-badge praise"><svg class="svg-ico"><use href="#i-star"/></svg> '+perf.praise+'</span>');
+    if (perf.nophone > 0) badges.push('<span class="perf-badge nophone"><svg class="svg-ico"><use href="#i-phone-off"/></svg> '+perf.nophone+'</span>');
     const sid = getSidShort(s);
     return `<div class="student-card ${status}" data-name="${esc}" data-idx="${i}" oncontextmenu="showStudentCtx(event,'${esc}');return false;">
       <div class="student-num">${sid || String(i+1).padStart(2,'0')}</div>
@@ -2989,7 +3044,7 @@ function toggleStudent(name, idx, cardEl) {
   const prev = studentStatuses[name];
   const next = (prev === markMode && markMode !== 'present') ? 'present' : markMode;
   studentStatuses[name] = next;
-  const icons = { present:'✓', absent:'❌', late:'▲', leave:'〇', unknown:'?' };
+  const icons = { present:'✓', absent:'✕', late:'▲', leave:'〇', unknown:'?' };
   if (!cardEl) cardEl = document.querySelector(`.student-card[data-idx="${idx}"]`);
   if (cardEl) {
     cardEl.className = 'student-card ' + next;
@@ -3055,10 +3110,10 @@ function updateRcStats() {
     });
     items = [
       { label:'总人数', num:students.length, color:'#94a3b8' },
-      { label:'💬 发言', num:perfStats.speak, color:'#6366f1' },
-      { label:'⭐ 加分', num:perfStats.praise, color:'#10b981' },
-      { label:'⚠️ 扣分', num:perfStats.discipline, color:'#ef4444' },
-      { label:'📱 未交手机', num:perfStats.nophone, color:'#f59e0b' }
+      { label:'<svg class="svg-ico"><use href="#i-speech"/></svg> 发言', num:perfStats.speak, color:'#6366f1' },
+      { label:'<svg class="svg-ico"><use href="#i-star"/></svg> 加分', num:perfStats.praise, color:'#10b981' },
+      { label:'<svg class="svg-ico"><use href="#i-alert"/></svg> 扣分', num:perfStats.discipline, color:'#ef4444' },
+      { label:'<svg class="svg-ico"><use href="#i-phone-off"/></svg> 未交手机', num:perfStats.nophone, color:'#f59e0b' }
     ];
   }
   document.getElementById('rcStats').innerHTML = items.map(s => `<div class="stat-card"><div class="stat-num" style="color:${s.color}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
@@ -3082,7 +3137,7 @@ function generateReport() {
   const weekNames = ['日','一','二','三','四','五','六'];
   const dateStr = `${today.getMonth()+1}月${today.getDate()}日星期${weekNames[today.getDay()]} ${SESSION_DEFS[currentCourse.session].name}`;
   let r = `时间：${dateStr}\n教室：${currentCourse.room}\n班级：${currentCourse.className}\n教师：${currentCourse.teacher || appData.teacherName}\n课程名称：《${currentCourse.name}》\n应到人数：${students.length}\n实到人数：${arrived}`;
-  if (counts.absent > 0) r += `\n❌ 缺勤（${counts.absent}人）：${absentNames.join('、')}`;
+  if (counts.absent > 0) r += `\n✕ 缺勤（${counts.absent}人）：${absentNames.join('、')}`;
   if (counts.late > 0) r += `\n▲ 迟到（${counts.late}人）：${lateNames.join('、')}`;
   if (counts.leave > 0) r += `\n〇 请假（${counts.leave}人）：${leaveNames.join('、')}`;
   return r;
@@ -3259,7 +3314,7 @@ async function checkSyncStatus() {
   } catch(e) {}
 }
 
-// 点击右上角☁图标：手动重试所有未同步记录
+// 点击右上角云图标：手动重试所有未同步记录
 async function retryPendingSync() {
   const el = document.getElementById('syncPending');
   if (el) { el.style.color = '#3b82f6'; el.title = '重试中...'; }
@@ -3445,7 +3500,7 @@ function renderHistory() {
   const container=document.getElementById('historyList');
   if(appData.rollCallRecords.length===0){container.innerHTML='<div class="empty-state"><div class="empty-icon"><svg class="svg-ico"><use href="#i-clock"/></svg></div><div class="empty-text">暂无点名记录</div><div class="empty-sub">完成点名后记录将显示在这里</div></div>';return;}
   container.innerHTML=appData.rollCallRecords.map(r=>
-    `<div class="history-item"><div class="history-icon">📋</div>
+    `<div class="history-item"><div class="history-icon"><svg class="svg-ico"><use href="#i-clipboard"/></svg></div>
       <div class="history-info">
         <div class="history-course">《${r.courseName}》· ${r.className}</div>
         <div class="history-meta">${r.date} · ${SESSION_DEFS[r.session].name} · ${r.room||''} · 教师：${r.teacher}</div>
@@ -3458,7 +3513,7 @@ function renderHistory() {
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-shrink:0">
-        <button class="btn btn-sm" onclick="syncRecordToFeishu('${r.id}')" title="本地数据有修改或未同步成功时，点击更新飞书对应记录">☁️ 同步</button>
+        <button class="btn btn-sm" onclick="syncRecordToFeishu('${r.id}')" title="本地数据有修改或未同步成功时，点击更新飞书对应记录"><svg class="svg-ico"><use href="#i-cloud"/></svg> 同步</button>
         <button class="btn btn-sm" onclick="viewRecord('${r.id}')">查看</button>
         <button class="btn btn-sm" style="color:var(--warning)" onclick="editRecord('${r.id}')">编辑</button>
         <button class="btn btn-sm" style="color:var(--rose)" onclick="deleteRecord('${r.id}')">删除</button>
@@ -3520,12 +3575,12 @@ async function syncHwToFeishu(hwId, silent) {
     if (d.ok) {
       if (!silent) showToast('作业已同步到飞书（' + (d.updated ? '已更新原记录' : '新增记录') + '）', 'success');
     } else if (silent) {
-      showToast('作业自动同步失败：' + (d.error || '未知错误') + '，可点「☁️ 同步」重试', 'error');
+      showToast('作业自动同步失败：' + (d.error || '未知错误') + '，可点「同步」重试', 'error');
     } else {
       showToast('作业同步失败：' + (d.error || '未知错误'), 'error');
     }
   } catch (e) {
-    if (silent) showToast('作业自动同步失败（云同步服务未连接），可点「☁️ 同步」重试', 'error');
+    if (silent) showToast('作业自动同步失败（云同步服务未连接），可点「同步」重试', 'error');
     else showToast('同步失败：云同步服务未连接', 'error');
   }
 }
@@ -3937,13 +3992,13 @@ function renderHwList() {
       <div class="hw-item-icon" style="color:var(--gold)"><svg class="svg-ico" style="width:20px;height:20px"><use href="#i-file"/></svg></div>
       <div class="hw-item-info">
         <div class="hw-item-title">${hw.title}</div>
-        <div class="hw-item-meta"><span>📅 ${hw.date}</span><span>第${hw.week}周</span><span>已交 ${ok}/${total}</span>${missing > 0 ? `<span style="color:var(--rose)">未交 ${missing} 人</span>` : '<span style="color:var(--emerald)">全部提交</span>'}</div>
+        <div class="hw-item-meta"><span><svg class="svg-ico"><use href="#i-calendar"/></svg> ${hw.date}</span><span>第${hw.week}周</span><span>已交 ${ok}/${total}</span>${missing > 0 ? `<span style="color:var(--rose)">未交 ${missing} 人</span>` : '<span style="color:var(--emerald)">全部提交</span>'}</div>
       </div>
       <div class="hw-rate-wrap">
         <div class="hw-rate-bar"><div class="hw-rate-fill" style="width:${rate}%"></div></div>
         <div class="hw-rate-num">${rate}%</div>
       </div>
-      <button class="btn btn-sm" onclick="event.stopPropagation();syncHwToFeishu('${hw.id}')" title="本地数据有修改或未同步成功时，点击更新飞书对应记录">☁️ 同步</button>
+      <button class="btn btn-sm" onclick="event.stopPropagation();syncHwToFeishu('${hw.id}')" title="本地数据有修改或未同步成功时，点击更新飞书对应记录"><svg class="svg-ico"><use href="#i-cloud"/></svg> 同步</button>
       <button class="btn btn-sm" onclick="event.stopPropagation();hwConfirmDelete('${hw.id}')" style="color:var(--rose)">删除</button>
     </div>`;
   }).join('');
@@ -4017,7 +4072,7 @@ function renderHwMark() {
   body.innerHTML = `
     <div class="hw-header" style="margin-bottom:12px">
       <div>
-        <div class="hw-page-title" style="font-size:17px">📝 ${hw.title}</div>
+        <div class="hw-page-title" style="font-size:17px"><svg class="svg-ico"><use href="#i-file"/></svg> ${hw.title}</div>
         <div class="hw-page-sub">${cls.name} · ${hw.date} · 第${hw.week}周 · 点击学生卡片标记（再次点击可取消）</div>
       </div>
       <button class="btn" onclick="hwState.mode='list';renderHomework()">← 返回列表</button>
@@ -4032,7 +4087,7 @@ function renderHwMark() {
       <button class="mark-btn missing-btn ${hwState.markMode === 'missing' ? 'active' : ''}" onclick="hwState.markMode='missing';renderHwMark()">✗ 标记未交</button>
       <span style="flex:1"></span>
       <button class="btn btn-sm" onclick="copyHwMissing('${hw.id}')"><svg class="svg-ico"><use href="#i-clipboard"/></svg> 复制未交名单</button>
-      <button class="btn btn-sm" onclick="openHwImport('${hw.id}')">📂 补交导入</button>
+      <button class="btn btn-sm" onclick="openHwImport('${hw.id}')"><svg class="svg-ico"><use href="#i-folder"/></svg> 补交导入</button>
     </div>
     ${missing.length > 0 ? `<div class="hw-missing-list" onclick="hwState.missingOpen = !hwState.missingOpen; renderHwMark()">
       <b>未交 ${missing.length} 人</b><span class="hw-missing-toggle">${hwState.missingOpen ? '▲ 收起名单' : '▼ 展开名单'}</span>
@@ -4043,7 +4098,7 @@ function renderHwMark() {
       <button class="btn btn-sm" onclick="hwMarkAll('${hw.id}',true)">✓ 全部已交</button>
       <button class="btn btn-sm" onclick="hwMarkAll('${hw.id}',false)">✗ 全部未交</button>
     </div>
-    ${hw.cloudFiles && Object.keys(hw.cloudFiles).length ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:2">☁️ 云盘文件：${Object.entries(hw.cloudFiles).map(([n, arr]) => n + '：' + arr.map(f => `<a href="${f.url}" target="_blank" style="color:var(--azure)">${f.name}</a>`).join('、')).join('；')}</div>` : ''}
+    ${hw.cloudFiles && Object.keys(hw.cloudFiles).length ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:2"><svg class="svg-ico"><use href="#i-cloud"/></svg> 云盘文件：${Object.entries(hw.cloudFiles).map(([n, arr]) => n + '：' + arr.map(f => `<a href="${f.url}" target="_blank" style="color:var(--azure)">${f.name}</a>`).join('、')).join('；')}</div>` : ''}
     <div class="card">
       <div class="card-header"><span class="card-title">学生名单（${total}人）</span></div>
       <div class="card-body">
@@ -4182,7 +4237,7 @@ function renderHwSummary() {
   body.innerHTML = `
     <div class="hw-header" style="margin-bottom:12px">
       <div>
-        <div class="hw-page-title" style="font-size:17px">📊 作业提交汇总 · ${cls.name}</div>
+        <div class="hw-page-title" style="font-size:17px"><svg class="svg-ico"><use href="#i-chart"/></svg> 作业提交汇总 · ${cls.name}</div>
         <div class="hw-page-sub">共 ${list.length} 次作业 · ✓ 已交 · ✗ 未交 · — 未登记 · 末列为未交总次数</div>
       </div>
       <div style="display:flex;gap:8px">
@@ -4213,6 +4268,188 @@ function copyHwSummary() {
     return [n, ...cells, miss].join('\t');
   });
   copyText(`【${cls.name} 平时作业汇总】共${list.length}次\n` + [header, ...rows].join('\n'), '汇总表已复制，可粘贴到 Excel/飞书表格');
+}
+
+// ==================== 期末汇总（按学生） ====================
+const finalState = { classId: 'all' };
+
+// 参考平时分权重（可按学校评分习惯调整）
+const FINAL_WEIGHTS = { attendance: 40, homework: 40, performance: 20 };
+const PERF_POINTS = { speak: 0.5, praise: 2, discipline: -2, nophone: -1 };
+
+function getFinalClassId() {
+  if (finalState.classId !== 'all' && (appData.classes || []).some(c => c.id === finalState.classId)) return finalState.classId;
+  finalState.classId = 'all';
+  return 'all';
+}
+
+// 出勤率×40% + 作业完成率×40% + 表现分（发言0.5/加分2/扣分-2/未交手机-1，封顶20）
+function calcFinalScore(attRate, hwRate, p) {
+  if (attRate === null && hwRate === null) return null;
+  const attPart = (attRate === null ? 1 : attRate / 100) * FINAL_WEIGHTS.attendance;
+  const hwPart = (hwRate === null ? 1 : hwRate / 100) * FINAL_WEIGHTS.homework;
+  const rawPerf = (p.speak || 0) * PERF_POINTS.speak + (p.praise || 0) * PERF_POINTS.praise
+    + (p.discipline || 0) * PERF_POINTS.discipline + (p.nophone || 0) * PERF_POINTS.nophone;
+  const perfPart = Math.max(0, Math.min(FINAL_WEIGHTS.performance, rawPerf));
+  return Math.round((attPart + hwPart + perfPart) * 10) / 10;
+}
+
+function buildFinalSummary(classId) {
+  const classes = classId === 'all' ? (appData.classes || []) : (appData.classes || []).filter(c => c.id === classId);
+  const showClass = classes.length > 1;
+  const headers = ['班级', '姓名', '学号', '到场', '迟到', '缺勤', '请假', '出勤率', '作业已交', '作业未交', '作业完成率', '发言', '加分', '扣分', '未交手机', '参考平时分'];
+  const rows = [];
+  const stat = { students: 0, rollCalls: 0, homeworks: 0, attSum: 0, attN: 0, hwSum: 0, hwN: 0 };
+  classes.forEach(cls => {
+    const students = cls.students || [];
+    if (!students.length) return;
+    const recs = (appData.rollCallRecords || []).filter(r => r.classId === cls.id || r.className === cls.name);
+    const hwList = ((appData.homework || {})[cls.id] || []);
+    const perf = getSemesterPerf(cls.name);
+    stat.rollCalls += recs.length;
+    stat.homeworks += hwList.length;
+    students.forEach(s => {
+      const o = getStudentObj(s);
+      const name = o.name;
+      const st = { present: 0, late: 0, absent: 0, leave: 0 };
+      recs.forEach(r => {
+        const v = (r.statuses || {})[name];
+        if (st[v] !== undefined) st[v]++;
+      });
+      const rcTotal = st.present + st.late + st.absent + st.leave;
+      const attRate = rcTotal ? Math.round((st.present + st.late) / rcTotal * 100) : null;
+      let sub = 0, miss = 0, hwTotal = 0;
+      hwList.forEach(hw => {
+        const v = (hw.records || {})[name];
+        if (v === 'submitted') { sub++; hwTotal++; }
+        else if (v === 'missing') { miss++; hwTotal++; }
+      });
+      const hwRate = hwTotal ? Math.round(sub / hwTotal * 100) : null;
+      const p = perf[name] || { speak: 0, praise: 0, discipline: 0, nophone: 0 };
+      const score = calcFinalScore(attRate, hwRate, p);
+      stat.students++;
+      if (attRate !== null) { stat.attSum += attRate; stat.attN++; }
+      if (hwRate !== null) { stat.hwSum += hwRate; stat.hwN++; }
+      rows.push([
+        cls.name, name, o.studentId || '',
+        st.present, st.late, st.absent, st.leave,
+        attRate === null ? '—' : attRate + '%',
+        sub, miss,
+        hwRate === null ? '—' : hwRate + '%',
+        p.speak, p.praise, p.discipline, p.nophone,
+        score === null ? '—' : score
+      ]);
+    });
+  });
+  return { headers, rows, showClass, stat, className: classes.length === 1 ? classes[0].name : '全部班级' };
+}
+
+function renderFinalSummary() {
+  const cid = getFinalClassId();
+  const tabs = document.getElementById('finalClassTabs');
+  if (tabs) {
+    tabs.innerHTML = `<button class="inner-tab ${cid === 'all' ? 'active' : ''}" onclick="finalState.classId='all';renderFinalSummary()">全部班级</button>` +
+      (appData.classes || []).map(c => `<button class="inner-tab ${c.id === cid ? 'active' : ''}" onclick="finalState.classId='${c.id}';renderFinalSummary()">${c.name}</button>`).join('');
+  }
+  const body = document.getElementById('finalBody');
+  if (!body) return;
+  const data = buildFinalSummary(cid);
+  if (!data.rows.length) {
+    body.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg class="svg-ico"><use href="#i-trend"/></svg></div><div class="empty-text">暂无可汇总的数据</div><div class="empty-sub">完成点名或登记作业后，这里会生成按学生的学期汇总</div></div>`;
+    return;
+  }
+  const num = v => `<td>${v}</td>`;
+  const rows = data.rows.map(r => {
+    const [clsName, name, sid, present, late, absent, leave, attRate, sub, miss, hwRate, speak, praise, disc, nophone, score] = r;
+    return `<tr>
+      ${data.showClass ? `<td class="fin-cls">${clsName}</td>` : ''}
+      <td style="text-align:left">${name}<span class="fin-sid">${String(sid).slice(-2)}</span></td>
+      <td>${sid || '—'}</td>
+      ${num(present)}<td class="${late ? 'hw-cell-na' : ''}">${late}</td>
+      <td class="${absent ? 'hw-cell-no' : ''}">${absent}</td>
+      <td class="${leave ? 'hw-cell-na' : ''}">${leave}</td>
+      <td class="${attRate === '—' ? 'hw-cell-na' : ''}">${attRate}</td>
+      <td class="hw-cell-yes">${sub}</td>
+      <td class="${miss ? 'hw-cell-no' : ''}">${miss}</td>
+      <td class="${hwRate === '—' ? 'hw-cell-na' : ''}">${hwRate}</td>
+      ${num(speak)}<td class="hw-cell-yes">${praise}</td>
+      <td class="${disc ? 'hw-cell-no' : ''}">${disc}</td>
+      <td class="${nophone ? 'hw-cell-no' : ''}">${nophone}</td>
+      <td><b>${score}</b></td>
+    </tr>`;
+  }).join('');
+  const s = data.stat;
+  const attAvg = s.attN ? Math.round(s.attSum / s.attN) + '%' : '—';
+  const hwAvg = s.hwN ? Math.round(s.hwSum / s.hwN) + '%' : '—';
+  body.innerHTML = `
+    <div class="fin-stats">
+      <div class="fin-stat"><div class="fin-stat-num">${s.students}</div><div class="fin-stat-label">学生数</div></div>
+      <div class="fin-stat"><div class="fin-stat-num">${s.rollCalls}</div><div class="fin-stat-label">点名次数</div></div>
+      <div class="fin-stat"><div class="fin-stat-num">${attAvg}</div><div class="fin-stat-label">平均出勤率</div></div>
+      <div class="fin-stat"><div class="fin-stat-num">${s.homeworks}</div><div class="fin-stat-label">作业次数</div></div>
+      <div class="fin-stat"><div class="fin-stat-num">${hwAvg}</div><div class="fin-stat-label">平均作业完成率</div></div>
+    </div>
+    <div class="fin-hint">参考平时分 = 出勤率×${FINAL_WEIGHTS.attendance}% + 作业完成率×${FINAL_WEIGHTS.homework}% + 表现分（发言0.5 / 加分2 / 扣分−2 / 未交手机−1，封顶 ${FINAL_WEIGHTS.performance}）。仅作参考，最终成绩以您的判断为准。</div>
+    <div class="card" style="overflow:auto;max-height:calc(100vh - 300px)">
+      <table class="hw-summary-table fin-table">
+        <thead><tr>${data.headers.map((h, i) => `<th${i < (data.showClass ? 3 : 2) ? ' style="text-align:left"' : ''}>${h}</th>`).join('')}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function copyFinalSummary() {
+  const data = buildFinalSummary(getFinalClassId());
+  if (!data.rows.length) { showToast('暂无可汇总的数据', 'error'); return; }
+  const header = data.headers.join('\t');
+  const rows = data.rows.map(r => (data.showClass ? r : r.slice(1)).join('\t'));
+  copyText(`【${data.className} 期末汇总】学生 ${data.stat.students} 人\n` + [header, ...rows].join('\n'), '期末汇总已复制，可直接粘贴到 Excel/飞书表格');
+}
+
+function exportFinalCsv() {
+  const data = buildFinalSummary(getFinalClassId());
+  if (!data.rows.length) { showToast('暂无可汇总的数据', 'error'); return; }
+  const esc = v => `"${String(v).replace(/"/g, '""')}"`;
+  const header = data.headers.map(esc).join(',');
+  const rows = data.rows.map(r => (data.showClass ? r : r.slice(1)).map(esc).join(','));
+  const csv = '\ufeff' + [header, ...rows].join('\r\n');
+  const date = new Date().toISOString().slice(0, 10);
+  const safeName = data.className.replace(/[\\/:*?"<>|]/g, '');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `期末汇总_${safeName}_${date}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  showToast('CSV 已导出', 'success');
+}
+
+// 把汇总表写入飞书「期末汇总」工作表（整表覆盖）
+async function syncFinalToFeishu() {
+  const data = buildFinalSummary(getFinalClassId());
+  if (!data.rows.length) { showToast('暂无可汇总的数据', 'error'); return; }
+  const rows = data.rows.map(r => (data.showClass ? r : r.slice(1)));
+  const headers = data.showClass ? data.headers : data.headers.slice(1);
+  const btnTip = '正在写入飞书…';
+  showToast(btnTip);
+  try {
+    const res = await fetch('/final-summary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: '期末汇总',
+        scope: data.className,
+        headers,
+        rows: [['期末汇总 · ' + data.className, '', '生成时间：' + new Date().toLocaleString('zh-CN')], headers, ...rows]
+      })
+    });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok || !j.ok) throw new Error(j.error || ('HTTP ' + res.status));
+    showToast('已写入飞书工作表「期末汇总」', 'success');
+  } catch (e) {
+    showToast('写入失败：' + (e.message || '网络错误'), 'error');
+  }
 }
 
 // ==================== 从文件导入作业 ====================
@@ -4362,7 +4599,7 @@ async function confirmHwImport() {
     btn.disabled = true;
     let okN = 0;
     for (let i = 0; i < toUpload.length; i++) {
-      preview.innerHTML = `<div class="hw-import-summary"><span class="badge badge-blue">☁️ 正在上传 ${i + 1}/${toUpload.length}：${toUpload[i].name}</span></div>`;
+      preview.innerHTML = `<div class="hw-import-summary"><span class="badge badge-blue"><svg class="svg-ico"><use href="#i-cloud"/></svg> 正在上传 ${i + 1}/${toUpload.length}：${toUpload[i].name}</span></div>`;
       try {
         const b64 = await fileToBase64(toUpload[i].file);
         const resp = await fetch('/hw-upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ className: cls.name, hwTitle: title, fileName: toUpload[i].name, date: date, data: b64 }) });
@@ -4495,7 +4732,7 @@ function openRandomCall() {
   document.getElementById('randomNameText').textContent = '?';
   document.getElementById('randomNameDisplay').className = 'random-name-display';
   document.getElementById('randomQuickActions').style.display = 'none';
-  document.getElementById('btnRandomStart').textContent = '🎲 开始抽取';
+  setRandomLabel('开始抽取');
   updateRandomCallInfo();
   openModal('randomCallModal');
 }
@@ -4543,7 +4780,7 @@ function stopRandomRoll() {
   const display = document.getElementById('randomNameDisplay');
   const name = document.getElementById('randomNameText').textContent;
   display.className = 'random-name-display stopped';
-  document.getElementById('btnRandomStart').textContent = '🎲 再来一次';
+  setRandomLabel('再来一次');
   document.getElementById('btnRandomStart').onclick = startRandomRoll;
   // 记录发言 +1
   if (currentCourse && name && name !== '?') {
@@ -4631,11 +4868,11 @@ function openPerformanceStats() {
     totalSpeak += p.speak; totalDiscipline += p.discipline; totalPraise += p.praise; totalNophone += p.nophone;
   });
   document.getElementById('perfSummaryRow').innerHTML = `
-    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#1d4ed8">${totalSpeak}</div><div class="perf-summary-label">本节 💬 发言</div></div>
-    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#b91c1c">${totalDiscipline}</div><div class="perf-summary-label">本节 ⚠️ 违纪</div></div>
-    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#047857">${totalPraise}</div><div class="perf-summary-label">本节 ⭐ 表扬</div></div>
-    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#b45309">${totalNophone}</div><div class="perf-summary-label">本节 📱 未交手机</div></div>
-    <div class="perf-summary-card"><div class="perf-summary-num">${students.length}</div><div class="perf-summary-label">👥 学生数</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#1d4ed8">${totalSpeak}</div><div class="perf-summary-label"><svg class="svg-ico"><use href="#i-speech"/></svg> 本节 发言</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#b91c1c">${totalDiscipline}</div><div class="perf-summary-label"><svg class="svg-ico"><use href="#i-alert"/></svg> 本节 违纪</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#047857">${totalPraise}</div><div class="perf-summary-label"><svg class="svg-ico"><use href="#i-star"/></svg> 本节 表扬</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num" style="color:#b45309">${totalNophone}</div><div class="perf-summary-label"><svg class="svg-ico"><use href="#i-phone-off"/></svg> 本节 未交手机</div></div>
+    <div class="perf-summary-card"><div class="perf-summary-num">${students.length}</div><div class="perf-summary-label"><svg class="svg-ico"><use href="#i-users"/></svg> 学生数</div></div>
   `;
   // 学期累计（本班各次点名记录累加）
   const semPerf = getSemesterPerf(clsName);
@@ -4643,7 +4880,7 @@ function openPerformanceStats() {
   let semSpeak = 0, semDisc = 0, semPraise = 0;
   Object.values(semPerf).forEach(p => { semSpeak += p.speak; semDisc += p.discipline; semPraise += p.praise; });
   document.getElementById('perfModalClass').textContent =
-    `${clsName} · ${currentCourse.name}　｜　学期累计（${semRecN} 次记录）：💬 ${semSpeak} · ⚠️ ${semDisc} · ⭐ ${semPraise}`;
+    `${clsName} · ${currentCourse.name}　｜　学期累计（${semRecN} 次记录）：发言 ${semSpeak} · 违纪 ${semDisc} · 表扬 ${semPraise}`;
   // 表格（按发言数降序）
   const sorted = students.map(n => ({ name: n, ...getPerfRead(clsName, n) })).sort((a, b) => b.speak - a.speak);
   const tbody = document.querySelector('#perfStatsTable tbody');
@@ -4657,10 +4894,10 @@ function openPerformanceStats() {
       <td style="font-size:12px;color:var(--text-muted);white-space:nowrap">${(() => {
         const sp = semPerf[s.name] || { speak:0, discipline:0, praise:0, nophone:0 };
         const parts = [];
-        if (sp.speak) parts.push('💬' + sp.speak);
-        if (sp.discipline) parts.push('⚠️' + sp.discipline);
-        if (sp.praise) parts.push('⭐' + sp.praise);
-        if (sp.nophone) parts.push('📱' + sp.nophone);
+        if (sp.speak) parts.push('发言' + sp.speak);
+        if (sp.discipline) parts.push('违纪' + sp.discipline);
+        if (sp.praise) parts.push('表扬' + sp.praise);
+        if (sp.nophone) parts.push('手机' + sp.nophone);
         return parts.length ? parts.join(' ') : '—';
       })()}</td>
       <td><button class="btn btn-sm" style="padding:2px 6px;font-size:11px;color:var(--rose)" onclick="resetStudentPerf('${clsName}','${s.name}')">重置</button></td>

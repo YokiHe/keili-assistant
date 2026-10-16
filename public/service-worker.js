@@ -1,5 +1,5 @@
 // 课栈助手 Service Worker - 离线缓存
-const CACHE_NAME = 'kstack-v3';
+const CACHE_NAME = 'kstack-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -35,7 +35,7 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
 
   // API 请求：网络优先（不缓存）
-  const apiPrefixes = ['/sync', '/tts', '/retry', '/sync-status', '/hw-sync', '/hw-upload', '/hw-delete', '/delete-record', '/health'];
+  const apiPrefixes = ['/sync', '/tts', '/retry', '/sync-status', '/hw-sync', '/hw-upload', '/hw-delete', '/delete-record', '/final-summary', '/health'];
   if (apiPrefixes.some(p => url.pathname.startsWith(p))) {
     e.respondWith(fetch(e.request).catch(() => new Response(JSON.stringify({ ok: false, error: '离线状态' }), { headers: { 'Content-Type': 'application/json' } })));
     return;
